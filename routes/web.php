@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatSupportController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,5 +69,7 @@ Route::group(['middleware' => 'auth'], function () {
         }
         return app(\App\Http\Controllers\PageController::class)->index($page);
     })->name('page.index');
+	
+	Route::get('/customer/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
 });
 
