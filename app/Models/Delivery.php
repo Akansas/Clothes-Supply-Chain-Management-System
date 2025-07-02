@@ -32,4 +32,9 @@ class Delivery extends Model
     {
         return $this->belongsTo(Warehouse::class);
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(DeliveryFeedback::class);
+    }
 }
