@@ -113,15 +113,15 @@
                             <i class="fas fa-arrow-right fa-2x text-muted"></i>
                         </div>
                         <div class="col-md-2">
-                            <div class="supply-chain-step bg-info text-white p-3 rounded mb-2">
-                                <i class="fas fa-warehouse fa-2x mb-2"></i>
-                                <h6>Warehouse</h6>
-                                <small>{{ $supplyChainFlow['warehouses']['count'] }} Users</small>
+                            <div class="supply-chain-step bg-secondary text-white p-3 rounded mb-2">
+                                <i class="fas fa-store fa-2x mb-2"></i>
+                                <h6>Retailer</h6>
+                                <small>{{ $supplyChainFlow['retailers']['count'] }} Users</small>
                                 <div class="mt-2">
-                                    <span class="badge badge-light">{{ $supplyChainFlow['warehouses']['active_orders'] }} Items in Stock</span>
+                                    <span class="badge badge-light">{{ $supplyChainFlow['retailers']['active_orders'] }} Orders</span>
                                 </div>
                             </div>
-                            <a href="/warehouse/dashboard" class="btn btn-sm btn-outline-info w-100">Access Dashboard</a>
+                            <a href="/retailer/dashboard" class="btn btn-sm btn-outline-secondary w-100">Access Dashboard</a>
                         </div>
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
                             <i class="fas fa-arrow-right fa-2x text-muted"></i>

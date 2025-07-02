@@ -64,68 +64,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['pending_quality_checks'] }}</h4>
-                            <small>Pending QC</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clipboard-check fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="row">
-        <!-- Recent Production Orders -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Production Orders</h5>
-                </div>
-                <div class="card-body">
-                    @if($recentOrders->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Status</th>
-                                        <th>Due Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($recentOrders as $order)
-                                    <tr>
-                                        <td>{{ $order->product->name ?? 'N/A' }}</td>
-                                        <td>{{ $order->quantity }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'in_progress' ? 'warning' : 'info') }}">
-                                                {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $order->expected_completion ? $order->expected_completion->format('M d, Y') : 'N/A' }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-muted">No recent production orders</p>
-                    @endif
-                    <a href="{{ route('manufacturer.production-orders') }}" class="btn btn-outline-primary btn-sm">View All Orders</a>
-                </div>
-            </div>
-        </div>
-
         <!-- Finished Products Table -->
-        <div class="col-md-6 mb-4">
+        <div class="col-12 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Finished Products (Clothes)</h5>
@@ -182,56 +125,6 @@
         </div>
     </div>
 
-    <!-- Active Production Stages -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Active Production Stages</h5>
-                </div>
-                <div class="card-body">
-                    @if($activeStages->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Stage Name</th>
-                                        <th>Product</th>
-                                        <th>Order</th>
-                                        <th>Duration</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($activeStages as $stage)
-                                    <tr>
-                                        <td>{{ $stage->name }}</td>
-                                        <td>{{ $stage->productionOrder->product->name ?? 'N/A' }}</td>
-                                        <td>#{{ $stage->productionOrder->id ?? 'N/A' }}</td>
-                                        <td>{{ $stage->duration }} days</td>
-                                        <td>
-                                            <span class="badge bg-{{ $stage->status === 'completed' ? 'success' : ($stage->status === 'in_progress' ? 'warning' : 'info') }}">
-                                                {{ ucfirst(str_replace('_', ' ', $stage->status)) }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('manufacturer.production-orders.show', $stage->productionOrder->id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-muted">No active production stages</p>
-                    @endif
-                    <a href="{{ route('manufacturer.production-stages') }}" class="btn btn-outline-primary">View All Stages</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Quick Actions -->
     <div class="row">
         <div class="col-12">
@@ -242,13 +135,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('manufacturer.production-orders.create') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-plus me-2"></i>New Production Order
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('manufacturer.production-stages') }}" class="btn btn-success w-100">
-                                <i class="fas fa-tasks me-2"></i>Manage Stages
+                            <a href="{{ route('manufacturer.purchase-orders') }}" class="btn btn-warning w-100">
+                                <i class="fas fa-shopping-basket me-2"></i>My Purchase Orders
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">

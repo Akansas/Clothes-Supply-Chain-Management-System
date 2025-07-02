@@ -16,7 +16,15 @@ class ProfileController extends Controller
      */
     public function edit()
     {
-        return view('profile.edit');
+        $user = auth()->user();
+        $supplierProfile = null;
+        if ($user->role && in_array($user->role->name, ['supplier', 'raw_material_supplier'])) {
+            $supplierProfile = \App\Models\RawMaterialSupplier::where('user_id', $user->id)->first();
+        }
+        return view('profile.edit', [
+            'user' => $user,
+            'supplierProfile' => $supplierProfile,
+        ]);
     }
 
     /**

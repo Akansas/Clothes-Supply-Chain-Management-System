@@ -15,8 +15,32 @@
         </div>
     @endif
 
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-body">
+            <form method="GET" class="mb-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="status" class="col-form-label">Filter by Status:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select name="status" id="status" class="form-select" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing</option>
+                            <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                            <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -36,11 +60,21 @@
                             <td>{{ $order->manufacturer->name ?? 'N/A' }}</td>
                             <td>${{ number_format($order->total_amount, 2) }}</td>
                             <td>
-                                <span class="badge {{ $order->getStatusBadgeClass() }}">{{ $order->getStatusText() }}</span>
+                                <span class="badge order-status-badge {{ $order->getStatusBadgeClass() }}">{{ $order->getStatusText() }}</span>
                             </td>
                             <td>{{ $order->created_at->format('M d, Y') }}</td>
                             <td class="text-end">
-                                <a href="{{ route('supplier.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                <a href="{{ route('supplier.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                @if($order->status === 'pending')
+                                    <a href="{{ route('supplier.orders.assignDelivery', $order) }}" class="btn btn-sm btn-warning ms-1">Approve & Ship</a>
+                                @elseif($order->status === 'confirmed')
+                                    @php $hasDeliveryPersonnel = \App\Models\User::whereHas('role', function($q){ $q->where('name', 'delivery_personnel'); })->exists(); @endphp
+                                    @if($hasDeliveryPersonnel)
+                                        <a href="{{ route('supplier.orders.assignDelivery', $order) }}" class="btn btn-sm btn-success ms-1">Ship</a>
+                                    @else
+                                        <button class="btn btn-sm btn-secondary ms-1" disabled>Ship (No Personnel)</button>
+                                    @endif
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -57,4 +91,22 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('styles')
+<style>
+    .order-status-badge {
+        font-weight: bold;
+        font-size: 1rem;
+        padding: 0.4em 0.8em;
+        border: 1.5px solid #222;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        opacity: 0.95;
+        color: #111 !important;
+        background: #fff !important;
+    }
+</style>
+@endpush
+
+@stack('styles') 

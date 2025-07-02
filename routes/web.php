@@ -150,36 +150,12 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
     Route::get('/products/{id}/edit', [App\Http\Controllers\Manufacturer\ProductController::class, 'edit'])->name('manufacturer.products.edit');
     Route::put('/products/{id}', [App\Http\Controllers\Manufacturer\ProductController::class, 'update'])->name('manufacturer.products.update');
     Route::delete('/products/{id}', [App\Http\Controllers\Manufacturer\ProductController::class, 'destroy'])->name('manufacturer.products.destroy');
-});
 
-// Warehouse Routes
-Route::middleware(['auth', 'role:warehouse,warehouse_manager'])->prefix('warehouse')->name('warehouse.')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Warehouse\DashboardController::class, 'index'])->name('dashboard');
-    
-    // Inventory Management
-    Route::get('/inventory', [App\Http\Controllers\Warehouse\DashboardController::class, 'inventory'])->name('inventory');
-    Route::put('/inventory/{id}', [App\Http\Controllers\Warehouse\DashboardController::class, 'updateInventory'])->name('inventory.update');
-    Route::post('/inventory/add', [App\Http\Controllers\Warehouse\DashboardController::class, 'addToInventory'])->name('inventory.add');
-    
-    // Order Fulfillments
-    Route::get('/fulfillments', [App\Http\Controllers\Warehouse\DashboardController::class, 'fulfillments'])->name('fulfillments');
-    Route::get('/fulfillments/{id}', [App\Http\Controllers\Warehouse\DashboardController::class, 'showFulfillment'])->name('fulfillments.show');
-    Route::post('/fulfillments/{id}/process', [App\Http\Controllers\Warehouse\DashboardController::class, 'processFulfillment'])->name('fulfillments.process');
-    
-    // Deliveries
-    Route::get('/deliveries', [App\Http\Controllers\Warehouse\DashboardController::class, 'deliveries'])->name('deliveries');
-    Route::get('/deliveries/{id}', [App\Http\Controllers\Warehouse\DashboardController::class, 'showDelivery'])->name('deliveries.show');
-    Route::put('/deliveries/{id}/status', [App\Http\Controllers\Warehouse\DashboardController::class, 'updateDeliveryStatus'])->name('deliveries.update-status');
-    
-    // Analytics
-    Route::get('/analytics', [App\Http\Controllers\Warehouse\DashboardController::class, 'analytics'])->name('analytics');
-    
-    // Profile Management
-    Route::get('/profile', [App\Http\Controllers\Warehouse\DashboardController::class, 'profile'])->name('profile');
-    Route::put('/profile', [App\Http\Controllers\Warehouse\DashboardController::class, 'updateProfile'])->name('profile.update');
-
-    Route::get('assign-delivery', [\App\Http\Controllers\Warehouse\DashboardController::class, 'assignDelivery'])->name('assign-delivery');
-    Route::get('chat', [\App\Http\Controllers\Warehouse\DashboardController::class, 'chat'])->name('chat');
+    // Purchase Orders
+    Route::get('/purchase-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'purchaseOrders'])->name('manufacturer.purchase-orders');
+    Route::get('/purchase-orders/{order}/edit', [App\Http\Controllers\Manufacturer\DashboardController::class, 'editPurchaseOrder'])->name('manufacturer.purchase-orders.edit');
+    Route::put('/purchase-orders/{order}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updatePurchaseOrder'])->name('manufacturer.purchase-orders.update');
+    Route::delete('/purchase-orders/{order}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'cancelPurchaseOrder'])->name('manufacturer.purchase-orders.cancel');
 });
 
 // Retailer Routes
@@ -350,11 +326,14 @@ Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_suppl
     Route::get('orders', [\App\Http\Controllers\Supplier\OrderController::class, 'index'])->name('supplier.orders.index');
     Route::get('orders/{order}', [\App\Http\Controllers\Supplier\OrderController::class, 'show'])->name('supplier.orders.show');
     Route::post('orders/{order}/status', [\App\Http\Controllers\Supplier\OrderController::class, 'updateStatus'])->name('supplier.orders.updateStatus');
+    Route::get('orders/{order}/assign-delivery', [App\Http\Controllers\Supplier\OrderController::class, 'assignDeliveryPersonnel'])->name('supplier.orders.assignDelivery');
+    Route::post('orders/{order}/ship', [App\Http\Controllers\Supplier\OrderController::class, 'shipOrder'])->name('supplier.orders.ship');
     
     // Deliveries Management
     Route::get('deliveries', [\App\Http\Controllers\Supplier\DeliveryController::class, 'index'])->name('supplier.deliveries.index');
     Route::get('deliveries/{delivery}', [\App\Http\Controllers\Supplier\DeliveryController::class, 'show'])->name('supplier.deliveries.show');
     Route::post('deliveries/{delivery}/status', [\App\Http\Controllers\Supplier\DeliveryController::class, 'updateStatus'])->name('supplier.deliveries.updateStatus');
+    Route::put('supplier/deliveries/{delivery}/cancel', [App\Http\Controllers\Supplier\OrderController::class, 'cancelDelivery'])->name('supplier.deliveries.cancel');
     
     // Manufacturers
     Route::get('/manufacturers', [App\Http\Controllers\Supplier\DashboardController::class, 'manufacturers'])->name('supplier.manufacturers');
@@ -365,24 +344,27 @@ Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_suppl
     // Profile Management
     Route::get('/profile', [App\Http\Controllers\Supplier\DashboardController::class, 'profile'])->name('supplier.profile');
     Route::put('/profile', [App\Http\Controllers\Supplier\DashboardController::class, 'updateProfile'])->name('supplier.profile.update');
-});
-
-// Inspector Routes
-Route::prefix('inspector')->middleware(['auth', 'role:inspector'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Inspector\DashboardController::class, 'index'])->name('inspector.dashboard');
-    Route::get('/quality-checks', [App\Http\Controllers\Inspector\DashboardController::class, 'qualityChecks'])->name('inspector.quality-checks');
-    Route::get('/quality-checks/create', [App\Http\Controllers\Inspector\DashboardController::class, 'createQualityCheck'])->name('inspector.quality-checks.create');
-    Route::post('/quality-checks', [App\Http\Controllers\Inspector\DashboardController::class, 'storeQualityCheck'])->name('inspector.quality-checks.store');
-    Route::get('/quality-checks/{id}', [App\Http\Controllers\Inspector\DashboardController::class, 'showQualityCheck'])->name('inspector.quality-checks.show');
-    Route::get('/quality-checks/{id}/edit', [App\Http\Controllers\Inspector\DashboardController::class, 'editQualityCheck'])->name('inspector.quality-checks.edit');
-    Route::put('/quality-checks/{id}', [App\Http\Controllers\Inspector\DashboardController::class, 'updateQualityCheck'])->name('inspector.quality-checks.update');
-    Route::get('/facility-visits', [App\Http\Controllers\Inspector\DashboardController::class, 'facilityVisits'])->name('inspector.facility-visits');
-    Route::get('/facility-visits/create', [App\Http\Controllers\Inspector\DashboardController::class, 'createFacilityVisit'])->name('inspector.facility-visits.create');
-    Route::post('/facility-visits', [App\Http\Controllers\Inspector\DashboardController::class, 'storeFacilityVisit'])->name('inspector.facility-visits.store');
-    Route::get('/facility-visits/{id}', [App\Http\Controllers\Inspector\DashboardController::class, 'showFacilityVisit'])->name('inspector.facility-visits.show');
-    Route::get('/facility-visits/{id}/edit', [App\Http\Controllers\Inspector\DashboardController::class, 'editFacilityVisit'])->name('inspector.facility-visits.edit');
-    Route::put('/facility-visits/{id}', [App\Http\Controllers\Inspector\DashboardController::class, 'updateFacilityVisit'])->name('inspector.facility-visits.update');
-    Route::get('/reports', [App\Http\Controllers\Inspector\DashboardController::class, 'reports'])->name('inspector.reports');
+    Route::get('/supplier/profile/create', [\App\Http\Controllers\Supplier\ProfileController::class, 'create'])
+        ->name('supplier.profile.create')
+        ->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::post('/supplier/profile/create', [\App\Http\Controllers\Supplier\ProfileController::class, 'store'])
+        ->name('supplier.profile.store')
+        ->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::get('/supplier/profile/edit', [\App\Http\Controllers\Supplier\ProfileController::class, 'edit'])
+        ->name('supplier.profile.edit')
+        ->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::delete('/supplier/profile/destroy', [\App\Http\Controllers\Supplier\ProfileController::class, 'destroy'])
+        ->name('supplier.profile.destroy')
+        ->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::put('/supplier/profile/update', [\App\Http\Controllers\Supplier\ProfileController::class, 'update'])
+        ->name('supplier.profile.update')
+        ->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::get('/supplier/reports', function () {
+        return view('supplier.reports.index');
+    })->name('supplier.reports')->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    Route::get('/supplier/payments', function () {
+        return view('supplier.payments.index');
+    })->name('supplier.payments')->middleware(['auth', 'role:supplier,raw_material_supplier']);
 });
 
 // Real-time and backend routes for all dashboards
@@ -428,4 +410,8 @@ Route::get('/debug-auth', function () {
 
 // Supplier Order Resource Route
 Route::resource('supplier/orders', App\Http\Controllers\Supplier\OrderController::class)->names('supplier.orders');
+
+Route::get('/chat/dashboard', function () {
+    return view('chat.dashboard');
+})->name('chat.dashboard')->middleware(['auth', 'role:admin']);
 

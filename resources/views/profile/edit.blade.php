@@ -52,6 +52,51 @@
                                     @endif
                                 </div>
                             </form>
+                            @if(isset($supplierProfile) && $supplierProfile)
+                                <div class="card mb-4">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0">Supplier Profile Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Company Name:</strong></div>
+                                            <div class="col-md-6">{{ $supplierProfile->company_name }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Contact Person:</strong></div>
+                                            <div class="col-md-6">{{ $supplierProfile->contact_person }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Email:</strong></div>
+                                            <div class="col-md-6">{{ $supplierProfile->email }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Phone:</strong></div>
+                                            <div class="col-md-6">{{ $supplierProfile->phone }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Address:</strong></div>
+                                            <div class="col-md-6">{{ $supplierProfile->address }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6"><strong>Status:</strong></div>
+                                            <div class="col-md-6">{{ ucfirst($supplierProfile->status) }}</div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <a href="{{ route('supplier.profile.edit') }}" class="btn btn-warning btn-block">Edit</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <form method="POST" action="{{ route('supplier.profile.destroy') }}" onsubmit="return confirm('Are you sure you want to delete your supplier profile? This action cannot be undone.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-block">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <hr class="my-4" />
                             @if(!$isReadonly)
                             <form method="post" action="{{ route('profile.password') }}">

@@ -45,7 +45,10 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         // Finished products for the table (use shared manufacturer profile)
-        $products = Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)->with('inventory')->get();
+        $products = Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
+            ->whereNull('supplier_id')
+            ->with('inventory')
+            ->get();
         // Production stages in progress
         $activeStages = ProductionStage::whereHas('productionOrder', function ($query) use ($user) {
             $query->where('manufacturer_id', $user->id);
@@ -633,5 +636,80 @@ class DashboardController extends Controller
             $stage->completeStage();
         }
         return redirect()->back()->with('success', 'Stage completed.');
+    }
+
+    /**
+     * List purchase orders placed by the manufacturer to suppliers.
+     */
+    public function purchaseOrders()
+    {
+        $user = auth()->user();
+        $orders = \App\Models\Order::where('user_id', $user->id)->latest()->paginate(15);
+        return view('manufacturer.purchase-orders.index', compact('orders'));
+    }
+
+    /**
+     * Show the edit form for a purchase order.
+     */
+    public function editPurchaseOrder($orderId)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('user_id', $user->id)->findOrFail($orderId);
+        if (!in_array($order->status, ['pending', 'confirmed'])) {
+            return redirect()->route('manufacturer.purchase-orders')->with('error', 'Only pending or confirmed orders can be edited.');
+        }
+        $order->load(['orderItems.product']);
+        return view('manufacturer.purchase-orders.edit', compact('order'));
+    }
+
+    /**
+     * Update a purchase order.
+     */
+    public function updatePurchaseOrder(Request $request, $orderId)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('user_id', $user->id)->findOrFail($orderId);
+        if (!in_array($order->status, ['pending', 'confirmed'])) {
+            return redirect()->route('manufacturer.purchase-orders')->with('error', 'Only pending or confirmed orders can be updated.');
+        }
+        $request->validate([
+            'shipping_address' => 'required|string',
+            'shipping_city' => 'required|string',
+            'shipping_state' => 'required|string',
+            'shipping_zip' => 'required|string',
+            'shipping_country' => 'required|string',
+            'billing_address' => 'required|string',
+            'order_items' => 'array',
+            'order_items.*.quantity' => 'required|integer|min:1',
+        ]);
+        $order->update($request->only(['shipping_address', 'shipping_city', 'shipping_state', 'shipping_zip', 'shipping_country', 'billing_address']));
+        $total = 0;
+        foreach ($request->order_items as $itemId => $itemData) {
+            $item = $order->orderItems()->find($itemId);
+            if ($item) {
+                $item->quantity = $itemData['quantity'];
+                $item->total_price = $item->unit_price * $item->quantity;
+                $item->save();
+                $total += $item->total_price;
+            }
+        }
+        $order->total_amount = $total;
+        $order->save();
+        return redirect()->route('manufacturer.purchase-orders')->with('success', 'Order updated successfully.');
+    }
+
+    /**
+     * Cancel a purchase order.
+     */
+    public function cancelPurchaseOrder($orderId)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('user_id', $user->id)->findOrFail($orderId);
+        if (!in_array($order->status, ['pending', 'confirmed'])) {
+            return redirect()->route('manufacturer.purchase-orders')->with('error', 'Only pending or confirmed orders can be cancelled.');
+        }
+        $order->status = 'cancelled';
+        $order->save();
+        return redirect()->route('manufacturer.purchase-orders')->with('success', 'Order cancelled successfully.');
     }
 }

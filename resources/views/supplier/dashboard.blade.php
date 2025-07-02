@@ -5,22 +5,30 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient-success text-white">
+            <div class="card bg-success bg-gradient-custom text-white">
+                <style>
+                    .bg-gradient-custom {
+                        background: linear-gradient(135deg, #218838 0%, #28a745 100%) !important;
+                    }
+                    .welcome-title {
+                        text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+                    }
+                </style>
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h2 class="mb-1">Welcome, {{ isset($user) ? $user->name : ($supplier->contact_person ?? 'Supplier') }}</h2>
+                            <h2 class="mb-1 welcome-title">Welcome, {{ isset($user) ? $user->name : ($supplier->contact_person ?? 'Supplier') }}</h2>
                             <p class="mb-0 opacity-75">Raw Material Supplier Dashboard - Supply Chain Management</p>
                         </div>
                         <div class="col-md-4 text-end">
                             <div class="d-flex justify-content-end">
                                 <div class="me-3">
                                     <small class="opacity-75">Active Orders</small>
-                                    <h4 class="mb-0">12</h4>
+                                    <h4 class="mb-0">{{ $stats['active_orders'] ?? 0 }}</h4>
                                 </div>
                                 <div>
                                     <small class="opacity-75">Today's Shipments</small>
-                                    <h4 class="mb-0">5</h4>
+                                    <h4 class="mb-0">{{ $stats['pending_deliveries'] ?? 0 }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -38,7 +46,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Materials</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">24</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['total_materials'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-boxes fa-2x text-gray-300"></i>
@@ -54,7 +62,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Pending Orders</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">8</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['active_orders'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -70,7 +78,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">In Transit</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">5</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['pending_deliveries'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-truck fa-2x text-gray-300"></i>
@@ -86,7 +94,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Monthly Revenue</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$45,230</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ number_format($stats['total_revenue'] ?? 0, 2) }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -102,23 +110,6 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <ul class="nav nav-pills" id="supplierTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link active" href="{{ route('supplier.materials.index') }}">Material Catalog</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link" href="{{ route('supplier.orders.index') }}">Purchase Orders</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link" href="{{ route('supplier.deliveries.index') }}">Deliveries</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link" href="{{ route('chat.index') }}">Messages</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link" href="#">Inventory</a>
-                        </li>
-                    </ul>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">

@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('production_orders', function (Blueprint $table) {
-            $table->dropForeign(['manufacturer_id']);
+            // $table->dropForeign(['manufacturer_id']); // Commented out to avoid error if key does not exist
             $table->dropColumn('manufacturer_id');
         });
     }

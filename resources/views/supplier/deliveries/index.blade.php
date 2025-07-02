@@ -23,7 +23,6 @@
                         <tr>
                             <th>Delivery ID</th>
                             <th>Order ID</th>
-                            <th>Manufacturer</th>
                             <th>Driver</th>
                             <th>Status</th>
                             <th>Last Updated</th>
@@ -32,20 +31,21 @@
                     </thead>
                     <tbody>
                         @forelse($deliveries as $delivery)
-                        <tr>
-                            <td>#{{ $delivery->id }}</td>
-                            <td>#{{ $delivery->order->id ?? 'N/A' }}</td>
-                            <td>{{ $delivery->order->manufacturer->name ?? 'N/A' }}</td>
-                            <td>{{ $delivery->driver->user->name ?? 'Unassigned' }}</td>
-                            <td><span class="badge bg-secondary">{{ ucfirst($delivery->status) }}</span></td>
-                            <td>{{ $delivery->updated_at->format('M d, Y H:i') }}</td>
-                            <td class="text-end">
-                                <a href="{{ route('supplier.deliveries.show', $delivery) }}" class="btn btn-sm btn-outline-primary">View</a>
-                            </td>
-                        </tr>
+                            @if($delivery->order)
+                            <tr>
+                                <td>#{{ $delivery->id }}</td>
+                                <td>#{{ $delivery->order->id }}</td>
+                                <td>{{ $delivery->driver ? $delivery->driver->name : 'Unassigned' }}</td>
+                                <td><span class="badge bg-secondary">{{ ucfirst($delivery->status) }}</span></td>
+                                <td>{{ $delivery->updated_at->format('M d, Y H:i') }}</td>
+                                <td class="text-end">
+                                    <a href="{{ route('supplier.deliveries.show', $delivery) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            @endif
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No deliveries found.</td>
+                            <td colspan="6" class="text-center text-muted">No deliveries found.</td>
                         </tr>
                         @endforelse
                     </tbody>

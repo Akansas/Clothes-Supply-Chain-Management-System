@@ -3,6 +3,8 @@ namespace Database\Seeders;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -93,12 +95,11 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('RetailerPass123'),
             'role_id' => $roles['retailer']->id,
         ]);
-        $delivery = \App\Models\User::firstOrCreate([
-            'email' => 'delivery@genzfashionz.com',
+        $deliveryRole = Role::firstOrCreate([
+            'name' => 'delivery_personnel',
         ], [
-            'name' => 'Delivery Guy',
-            'password' => bcrypt('DeliveryPass123'),
-            'role_id' => $roles['delivery_personnel']->id,
+            'display_name' => 'Delivery Personnel',
+            'description' => 'Handles deliveries',
         ]);
         $customer = \App\Models\User::firstOrCreate([
             'email' => 'customer@genzfashionz.com',
@@ -209,7 +210,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Delivery::firstOrCreate([
             'order_id' => $order->id,
         ], [
-            'driver_id' => $delivery->id,
+            'driver_id' => $deliveryRole->id,
             'status' => 'assigned',
             'tracking_number' => 'TRACK-' . uniqid(),
             'delivery_fee' => 5.00,
@@ -274,5 +275,14 @@ class DatabaseSeeder extends Seeder
 
         // \\App\Models\User::factory(10)->create();
         $this->call(ChatDemoSeeder::class);
+
+        if (!User::where('email', 'delivery@example.com')->exists()) {
+            $user = User::create([
+                'name' => 'Test Delivery',
+                'email' => 'delivery@example.com',
+                'password' => bcrypt('password'),
+                'role_id' => $deliveryRole->id,
+            ]);
+        }
     }
 }

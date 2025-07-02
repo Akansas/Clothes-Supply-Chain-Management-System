@@ -16,10 +16,6 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $manufacturer = \App\Models\Manufacturer::first();
-        if (!$manufacturer) {
-            return redirect()->back()->with('error', 'No manufacturer profile found in the system.');
-        }
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -31,17 +27,12 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
         }
-        // Generate a unique SKU
         $sku = 'SKU-' . strtoupper(uniqid());
-        // Provide a default value for material
         $material = $request->input('material', 'Unknown');
-        // Provide a default value for cost
         $cost = $request->input('cost', 0);
-        // Provide a default value for unit
         $unit = $request->input('unit', 'pcs');
         $quantity = $request->input('quantity', 0);
         $product = Product::create([
-            'manufacturer_id' => $manufacturer->id,
             'name' => $request->name,
             'description' => $request->description,
             'category' => $request->category,
@@ -52,7 +43,6 @@ class ProductController extends Controller
             'cost' => $cost,
             'unit' => $unit,
         ]);
-        // Save quantity in inventory for the first warehouse
         $warehouse = \App\Models\Warehouse::first();
         if ($warehouse) {
             \App\Models\Inventory::create([
@@ -71,22 +61,14 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        $manufacturer = \App\Models\Manufacturer::first();
-        if (!$manufacturer) {
-            return redirect()->back()->with('error', 'No manufacturer profile found in the system.');
-        }
-        $product = Product::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $product = Product::findOrFail($id);
         $categories = ['T-Shirt', 'Shirt', 'Pants', 'Dress', 'Jacket', 'Other'];
         return view('manufacturer.products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, $id)
     {
-        $manufacturer = \App\Models\Manufacturer::first();
-        if (!$manufacturer) {
-            return redirect()->back()->with('error', 'No manufacturer profile found in the system.');
-        }
-        $product = Product::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $product = Product::findOrFail($id);
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -109,11 +91,7 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $manufacturer = \App\Models\Manufacturer::first();
-        if (!$manufacturer) {
-            return redirect()->back()->with('error', 'No manufacturer profile found in the system.');
-        }
-        $product = Product::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $product = Product::findOrFail($id);
         $product->delete();
         return redirect()->route('manufacturer.dashboard')->with('success', 'Product deleted successfully.');
     }
