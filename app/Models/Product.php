@@ -10,10 +10,12 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'product_category_id',
         'name',
-        'sku',
-        'stock',
-        'price'
+        'material',
+        'size',
+        'color',
+        'unit_price'
     ];
 
     public function orders()

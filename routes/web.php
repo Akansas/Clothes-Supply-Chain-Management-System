@@ -6,6 +6,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatSupportController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +65,14 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('/notifications/{notificationId}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
 	Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readall');
 
+	Route::get('/cart', [CartController::class, 'viewCart'])->name('cart.view');
+     Route::get('/cart/add/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+Route::get('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+Route::post('/cart/update/{id}/{action}', [CartController::class, 'updateQuantity'])->name('cart.update');
+Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
+Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('order.confirm');
+Route::get('/customer/track-order', [App\Http\Controllers\CustomerController::class, 'trackOrder'])->name('customer.track-order');
+
 	Route::get('{page}', function ($page) {
         if (in_array($page, ['notifications'])) {
             abort(404);
@@ -71,5 +81,11 @@ Route::group(['middleware' => 'auth'], function () {
     })->name('page.index');
 	
 	Route::get('/customer/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
+	Route::get('/customer/catalog', [CustomerController::class, 'catalog'])->name('customer.catalog');
+	Route::get('/customer/contact-support', [CustomerController::class, 'contactSupport'])->name('customer.contactSupport');
+	Route::post('/customer/send-support', [CustomerController::class, 'sendSupport'])->name('customer.sendSupport');
+	
+ 
 });
+
 

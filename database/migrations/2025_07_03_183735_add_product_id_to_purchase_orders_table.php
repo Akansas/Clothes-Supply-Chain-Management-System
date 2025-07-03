@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone');
-            $table->string('shipping_address');
-            $table->timestamps();
+        Schema::table('purchase_orders', function (Blueprint $table) {
+            $table->unsignedBigInteger('product_id')->nullable()->after('order_id');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
         });
     }
 
@@ -26,7 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::table('purchase_orders', function (Blueprint $table) {
+            //
+        });
     }
 };
-  
