@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('order_number')->unique()->nullable();
             $table->enum('source', ['retailer', 'warehouse', 'customer']);
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
             $table->decimal('total_amount', 10, 2);
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->string('shipping_state');
             $table->string('shipping_zip');
             $table->string('shipping_country');
+            $table->string('billing_address')->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('shipped_at')->nullable();

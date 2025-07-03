@@ -72,7 +72,6 @@ class DatabaseSeeder extends Seeder
         // --- DEMO DATA FOR ALL ROLES ---
         // 1. Create roles if not exist
         $roles = [
-            'warehouse_manager' => \App\Models\Role::firstOrCreate(['name' => 'warehouse_manager'], ['display_name' => 'Warehouse Manager']),
             'retailer' => \App\Models\Role::firstOrCreate(['name' => 'retailer'], ['display_name' => 'Retailer']),
             'delivery_personnel' => \App\Models\Role::firstOrCreate(['name' => 'delivery_personnel'], ['display_name' => 'Delivery Personnel']),
             'manufacturer' => \App\Models\Role::firstOrCreate(['name' => 'manufacturer'], ['display_name' => 'Manufacturer']),
@@ -81,13 +80,6 @@ class DatabaseSeeder extends Seeder
         ];
 
         // 2. Create users for each role
-        $warehouseManager = \App\Models\User::firstOrCreate([
-            'email' => 'warehouse@genzfashionz.com',
-        ], [
-            'name' => 'Warehouse Manager',
-            'password' => bcrypt('WarehousePass123'),
-            'role_id' => $roles['warehouse_manager']->id,
-        ]);
         $retailer = \App\Models\User::firstOrCreate([
             'email' => 'retailer@genzfashionz.com',
         ], [
@@ -114,20 +106,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Vendor User',
             'password' => bcrypt('VendorPass123'),
             'role_id' => $roles['vendor']->id,
-        ]);
-
-        // 3. Create and assign a warehouse to the warehouse manager
-        $warehouse = \App\Models\Warehouse::firstOrCreate([
-            'name' => 'Central Warehouse',
-        ], [
-            'location' => '123 Warehouse Ave',
-            'capacity' => 10000,
-            'current_utilization' => 2000,
-            'manager_id' => $warehouseManager->id,
-            'contact_person' => $warehouseManager->name,
-            'phone' => '555-0001',
-            'email' => 'warehouse@genzfashionz.com',
-            'status' => 'active',
         ]);
 
         // 4. Create and assign a retail store to the retailer
@@ -165,20 +143,7 @@ class DatabaseSeeder extends Seeder
         // 6. Create inventory for warehouse and retail store
         \App\Models\Inventory::firstOrCreate([
             'product_id' => $product->id,
-            'warehouse_id' => $warehouse->id,
-        ], [
-            'location_type' => 'warehouse',
-            'location_id' => $warehouse->id,
-            'quantity' => 500,
-            'reserved_quantity' => 50,
-            'available_quantity' => 450,
-            'batch_number' => 'BATCH-001',
-            'status' => 'active',
-        ]);
-        \App\Models\Inventory::firstOrCreate([
-            'product_id' => $product->id,
             'warehouse_id' => null,
-            'retail_store_id' => $retailStore->id,
         ], [
             'location_type' => 'retail',
             'location_id' => $retailStore->id,

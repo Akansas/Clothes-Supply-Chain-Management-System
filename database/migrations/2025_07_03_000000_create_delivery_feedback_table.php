@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('delivery_feedback', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('delivery_id')->constrained()->onDelete('cascade');
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->foreignId('delivery_id')->constrained('deliveries')->onDelete('cascade');
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->unsignedTinyInteger('rating'); // 1-5
             $table->text('comment')->nullable();

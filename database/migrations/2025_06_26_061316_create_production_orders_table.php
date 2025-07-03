@@ -38,6 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supervisor_id')->nullable();
             $table->boolean('is_rush_order')->default(false);
             $table->text('notes')->nullable();
+            $table->unsignedBigInteger('retailer_id')->nullable();
             $table->timestamps();
 
             $table->foreign('design_id')->references('id')->on('designs')->nullOnDelete();

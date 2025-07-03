@@ -31,6 +31,10 @@
                             <input type="number" step="0.01" class="form-control" id="price" name="price" value="{{ old('price', $product->price) }}">
                         </div>
                         <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity / Stock</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity', $quantity) }}" min="0" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="image" class="form-label">Product Image</label>
                             <input type="file" class="form-control" id="image" name="image" accept="image/*">
                             @if($product->image)

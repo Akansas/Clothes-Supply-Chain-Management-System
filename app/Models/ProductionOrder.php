@@ -83,6 +83,11 @@ class ProductionOrder extends Model
         return $this->hasMany(QualityCheck::class);
     }
 
+    public function retailer()
+    {
+        return $this->belongsTo(User::class, 'retailer_id');
+    }
+
     // Scopes
     public function scopeByStatus($query, $status)
     {

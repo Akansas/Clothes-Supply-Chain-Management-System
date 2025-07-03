@@ -415,3 +415,8 @@ Route::get('/chat/dashboard', function () {
     return view('chat.dashboard');
 })->name('chat.dashboard')->middleware(['auth', 'role:admin']);
 
+// Temporary debug route to inspect products
+Route::get('/debug/products', function () {
+    return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
+});
+

@@ -14,6 +14,7 @@ use App\Models\RawMaterialSupplier;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -49,6 +50,11 @@ class DashboardController extends Controller
             ->whereNull('supplier_id')
             ->with('inventory')
             ->get();
+        // Debug: Log the products being fetched
+        Log::info('Manufacturer Dashboard Products', [
+            'manufacturer_id' => $manufacturer ? $manufacturer->id : null,
+            'products' => $products->toArray(),
+        ]);
         // Production stages in progress
         $activeStages = ProductionStage::whereHas('productionOrder', function ($query) use ($user) {
             $query->where('manufacturer_id', $user->id);
@@ -63,7 +69,14 @@ class DashboardController extends Controller
             ->with(['messages.user', 'participants'])
             ->latest('updated_at')
             ->get();
-        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'products'));
+        // Fetch production orders made by retailers for this manufacturer
+        $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $user->id)
+            ->whereNotNull('retailer_id')
+            ->with(['product', 'retailer'])
+            ->latest()
+            ->take(10)
+            ->get();
+        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'products', 'retailerOrders'));
     }
 
     /**

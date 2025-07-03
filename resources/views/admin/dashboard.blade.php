@@ -167,6 +167,7 @@
                 <div class="card-body">
                     <div class="row">
                         @foreach($roles as $role)
+                        @if(!in_array($role->name, ['inspector', 'warehouse_manager', 'warehouse']))
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center">
@@ -179,6 +180,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         @endforeach
                     </div>
                 </div>

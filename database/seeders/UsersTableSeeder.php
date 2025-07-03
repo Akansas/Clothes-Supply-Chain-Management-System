@@ -21,17 +21,5 @@ class UsersTableSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('secret'),
         ]);
-
-        $inspectorRole = \App\Models\Role::where('name', 'inspector')->first();
-        if ($inspectorRole) {
-            \App\Models\User::firstOrCreate([
-                'email' => 'inspector@genzfashionz.com',
-            ], [
-                'name' => 'Inspector User',
-                'email_verified_at' => now(),
-                'password' => Hash::make('secret'),
-                'role_id' => $inspectorRole->id,
-            ]);
-        }
     }
 }

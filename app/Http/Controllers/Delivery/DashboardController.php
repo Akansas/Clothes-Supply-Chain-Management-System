@@ -78,7 +78,7 @@ class DashboardController extends Controller
                 ->first()->avg_days ?? 0,
         ];
 
-        return view('delivery.dashboard', compact('stats', 'todayDeliveries', 'pendingDeliveries', 'recentCompleted', 'performance', 'deliveryPartner'));
+        return view('delivery.dashboard', compact('stats', 'todayDeliveries', 'pendingDeliveries', 'recentCompleted', 'performance', 'deliveryPartner') + ['role' => $user->role->name ?? '']);
     }
 
     /**

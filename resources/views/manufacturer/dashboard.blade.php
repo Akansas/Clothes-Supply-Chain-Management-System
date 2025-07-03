@@ -125,6 +125,51 @@
         </div>
     </div>
 
+    <!-- Production Orders from Retailers -->
+    @if(isset($retailerOrders) && $retailerOrders->count() > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Production Orders from Retailers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Retailer</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Due Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($retailerOrders as $order)
+                                <tr>
+                                    <td>{{ $order->order_number }}</td>
+                                    <td>{{ $order->retailer->name ?? 'N/A' }}</td>
+                                    <td>{{ $order->product->name ?? 'N/A' }}</td>
+                                    <td>{{ $order->quantity }}</td>
+                                    <td>{{ ucfirst($order->status) }}</td>
+                                    <td>{{ $order->due_date ? $order->due_date->format('Y-m-d') : '-' }}</td>
+                                    <td>
+                                        <a href="{{ route('manufacturer.production-orders.show', $order->id) }}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Quick Actions -->
     <div class="row">
         <div class="col-12">

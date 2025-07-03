@@ -26,11 +26,6 @@ class RolesTableSeeder extends Seeder
                 'description' => 'Product manufacturers and factories',
             ],
             [
-                'name' => 'warehouse_manager',
-                'display_name' => 'Warehouse Manager',
-                'description' => 'Warehouse and distribution center managers',
-            ],
-            [
                 'name' => 'retailer',
                 'display_name' => 'Retailer',
                 'description' => 'Retail store owners and managers',
@@ -67,13 +62,6 @@ class RolesTableSeeder extends Seeder
             'name' => 'admin',
             'display_name' => 'Administrator',
             'description' => 'Administrator',
-        ]);
-        DB::table('roles')->updateOrInsert([
-            'name' => 'inspector',
-        ], [
-            'name' => 'inspector',
-            'display_name' => 'Inspector',
-            'description' => 'Quality Inspector',
         ]);
     }
 }

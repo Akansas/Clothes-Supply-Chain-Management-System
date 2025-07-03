@@ -76,7 +76,7 @@ class CustomRegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        $roles = Role::all();
+        $roles = Role::whereNotIn('name', ['inspector', 'warehouse_manager', 'warehouse'])->get();
         return view('auth.register', compact('roles'));
     }
 

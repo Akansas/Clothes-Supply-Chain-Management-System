@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manufacturer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -42,6 +43,9 @@ class ProductController extends Controller
             'material' => $material,
             'cost' => $cost,
             'unit' => $unit,
+            'manufacturer_id' => auth()->id(),
+            'supplier_id' => null,
+            'is_active' => true,
         ]);
         $warehouse = \App\Models\Warehouse::first();
         if ($warehouse) {
@@ -63,7 +67,9 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $categories = ['T-Shirt', 'Shirt', 'Pants', 'Dress', 'Jacket', 'Other'];
-        return view('manufacturer.products.edit', compact('product', 'categories'));
+        $inventory = $product->inventory;
+        $quantity = $inventory ? $inventory->quantity : 0;
+        return view('manufacturer.products.edit', compact('product', 'categories', 'quantity'));
     }
 
     public function update(Request $request, $id)
@@ -75,6 +81,7 @@ class ProductController extends Controller
             'category' => 'nullable|string|max:100',
             'price' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:2048',
+            'quantity' => 'required|integer|min:0',
         ]);
         $data = [
             'name' => $request->name,
@@ -86,6 +93,15 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $product->update($data);
+        $inventory = $product->inventories()->first();
+        if ($inventory) {
+            $inventory->quantity = $request->quantity;
+            $inventory->available_quantity = $request->quantity;
+            $inventory->save();
+            Log::info('Updated inventory quantity', ['product_id' => $product->id, 'inventory_id' => $inventory->id, 'quantity' => $inventory->quantity]);
+        } else {
+            Log::warning('No inventory found for product', ['product_id' => $product->id]);
+        }
         return redirect()->route('manufacturer.dashboard')->with('success', 'Product updated successfully.');
     }
 
