@@ -36,11 +36,6 @@ class RolesTableSeeder extends Seeder
                 'description' => 'Delivery drivers and logistics personnel',
             ],
             [
-                'name' => 'customer',
-                'display_name' => 'Customer',
-                'description' => 'End customers and consumers',
-            ],
-            [
                 'name' => 'admin',
                 'display_name' => 'Administrator',
                 'description' => 'System administrators with full access',

@@ -73,11 +73,7 @@ class OrderController extends Controller
     public function create()
     {
         $products = Product::active()->get();
-        $customers = User::whereHas('role', function ($q) {
-            $q->where('name', 'customer');
-        })->get();
-        
-        return view('orders.create', compact('products', 'customers'));
+        return view('orders.create', compact('products'));
     }
 
     /**
@@ -86,7 +82,6 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer_id' => 'required|exists:users,id',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -108,7 +103,7 @@ class OrderController extends Controller
             $supplierId = $firstProduct->supplier_id ?? null;
             $order = Order::create([
                 'order_number' => 'ORD-' . date('Ymd') . '-' . strtoupper(uniqid()),
-                'customer_id' => $request->customer_id,
+                'customer_id' => Auth::user()->id,
                 'retail_store_id' => Auth::user()->retailStore->id ?? null,
                 'status' => 'pending',
                 'total_amount' => $total,

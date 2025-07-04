@@ -48,8 +48,8 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        // Get unique roles by name, excluding inspector and warehouse_manager
-        $roles = \App\Models\Role::whereNotIn('name', ['inspector', 'warehouse_manager', 'warehouse'])->get()->unique('name')->values();
+        // Get unique roles by name, excluding inspector, warehouse_manager, warehouse, and customer
+        $roles = \App\Models\Role::whereNotIn('name', ['inspector', 'warehouse_manager', 'warehouse', 'customer'])->get()->unique('name')->values();
         return view('auth.login', compact('roles'));
     }
 

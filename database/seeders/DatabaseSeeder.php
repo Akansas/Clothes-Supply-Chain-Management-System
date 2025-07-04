@@ -75,7 +75,6 @@ class DatabaseSeeder extends Seeder
             'retailer' => \App\Models\Role::firstOrCreate(['name' => 'retailer'], ['display_name' => 'Retailer']),
             'delivery_personnel' => \App\Models\Role::firstOrCreate(['name' => 'delivery_personnel'], ['display_name' => 'Delivery Personnel']),
             'manufacturer' => \App\Models\Role::firstOrCreate(['name' => 'manufacturer'], ['display_name' => 'Manufacturer']),
-            'customer' => \App\Models\Role::firstOrCreate(['name' => 'customer'], ['display_name' => 'Customer']),
             'vendor' => \App\Models\Role::firstOrCreate(['name' => 'vendor'], ['display_name' => 'Vendor']),
         ];
 
@@ -92,13 +91,6 @@ class DatabaseSeeder extends Seeder
         ], [
             'display_name' => 'Delivery Personnel',
             'description' => 'Handles deliveries',
-        ]);
-        $customer = \App\Models\User::firstOrCreate([
-            'email' => 'customer@genzfashionz.com',
-        ], [
-            'name' => 'Customer User',
-            'password' => bcrypt('CustomerPass123'),
-            'role_id' => $roles['customer']->id,
         ]);
         $vendor = \App\Models\User::firstOrCreate([
             'email' => 'vendor@genzfashionz.com',
@@ -152,23 +144,6 @@ class DatabaseSeeder extends Seeder
             'available_quantity' => 90,
             'batch_number' => 'BATCH-002',
             'status' => 'active',
-        ]);
-
-        // 7. Create an order for the customer at the retail store
-        $order = \App\Models\Order::firstOrCreate([
-            'user_id' => $customer->id,
-        ], [
-            'order_number' => 'ORD-' . uniqid(),
-            'source' => 'customer',
-            'status' => 'pending',
-            'total_amount' => 40.00,
-            'tax_amount' => 2.00,
-            'shipping_amount' => 5.00,
-            'shipping_address' => '123 Customer Street',
-            'shipping_city' => 'Customer City',
-            'shipping_state' => 'CS',
-            'shipping_zip' => '12345',
-            'shipping_country' => 'USA',
         ]);
 
         // 8. Create a delivery for the order, assigned to delivery personnel

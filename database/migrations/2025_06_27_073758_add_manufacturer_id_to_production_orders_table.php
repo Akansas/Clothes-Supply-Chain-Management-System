@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('production_orders', function (Blueprint $table) {
-            $table->foreignId('manufacturer_id')->nullable()->constrained('users')->onDelete('set null');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->unsignedBigInteger('manufacturer_id')->nullable()->after('retailer_id');
         });
     }
 
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('production_orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table) {
             // $table->dropForeign(['manufacturer_id']); // Commented out to avoid error if key does not exist
             $table->dropColumn('manufacturer_id');
         });

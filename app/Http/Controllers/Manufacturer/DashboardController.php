@@ -70,7 +70,7 @@ class DashboardController extends Controller
             ->latest('updated_at')
             ->get();
         // Fetch production orders made by retailers for this manufacturer
-        $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $user->id)
+        $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
             ->whereNotNull('retailer_id')
             ->with(['product', 'retailer'])
             ->latest()
@@ -113,13 +113,10 @@ class DashboardController extends Controller
      */
     public function showProductionOrder($id)
     {
-        $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)
-            ->with(['product', 'stages', 'qualityChecks'])
+        $manufacturer = \App\Models\Manufacturer::first();
+        $order = ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
+            ->with(['product', 'stages', 'qualityChecks', 'retailer'])
             ->findOrFail($id);
-
         return view('manufacturer.production-orders.show', compact('order'));
     }
 
@@ -441,12 +438,19 @@ class DashboardController extends Controller
     /**
      * Show profile
      */
-    public function profile()
+    public function showProfile()
     {
-        $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        
-        return view('manufacturer.profile.index', compact('user', 'manufacturer'));
+        $manufacturer = auth()->user()->manufacturer;
+        return view('manufacturer.profile.show', compact('manufacturer'));
+    }
+
+    /**
+     * Edit profile
+     */
+    public function editProfile()
+    {
+        $manufacturer = auth()->user()->manufacturer;
+        return view('manufacturer.profile.edit', compact('manufacturer'));
     }
 
     /**
@@ -454,28 +458,14 @@ class DashboardController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        
+        $manufacturer = auth()->user()->manufacturer;
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'manufacturer_name' => 'required|string|max:255',
-            'manufacturer_address' => 'required|string',
-            'manufacturer_phone' => 'required|string|max:20',
+            'company_name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'required|email|max:255',
         ]);
-
-        $user->update($request->only(['name', 'email', 'phone']));
-        
-        if ($manufacturer) {
-            $manufacturer->update([
-                'name' => $request->manufacturer_name,
-                'address' => $request->manufacturer_address,
-                'phone' => $request->manufacturer_phone,
-            ]);
-        }
-
+        $manufacturer->update($request->only(['company_name', 'address', 'phone', 'email']));
         return redirect()->route('manufacturer.profile')->with('success', 'Profile updated successfully!');
     }
 
@@ -613,6 +603,19 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'Order marked as ready to ship.');
     }
 
+    public function deliverProductionOrder(Request $request, $id)
+    {
+        $user = auth()->user();
+        $manufacturer = $user->manufacturer;
+        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        if (in_array($order->status, ['ready_to_ship', 'shipped'])) {
+            $order->status = 'delivered';
+            // $order->delivered_at = now(); // Uncomment if you add this column
+            $order->save();
+        }
+        return redirect()->back()->with('success', 'Order marked as delivered.');
+    }
+
     /**
      * Start a production stage
      */
@@ -724,5 +727,33 @@ class DashboardController extends Controller
         $order->status = 'cancelled';
         $order->save();
         return redirect()->route('manufacturer.purchase-orders')->with('success', 'Order cancelled successfully.');
+    }
+
+    /**
+     * Display all production orders from retailers for the manufacturer.
+     */
+    public function retailerOrders()
+    {
+        $user = auth()->user();
+        $manufacturerId = $user->manufacturer_id;
+        $orders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturerId)
+            ->whereNotNull('retailer_id')
+            ->with(['product', 'retailer'])
+            ->latest()
+            ->paginate(20);
+        return view('manufacturer.retailer-orders', compact('orders'));
+    }
+
+    public function markAsDelivered(Request $request, $id)
+    {
+        $user = auth()->user();
+        $manufacturer = $user->manufacturer;
+        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        if (in_array($order->status, ['ready_to_ship', 'shipped'])) {
+            $order->status = 'delivered';
+            $order->delivered_at = now();
+            $order->save();
+        }
+        return redirect()->back()->with('success', 'Order marked as delivered.');
     }
 }

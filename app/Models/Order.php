@@ -11,44 +11,93 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'customer_id',
-        'retail_store_id',
         'order_number',
-        'source',
+        'design_id',
+        'product_id',
+        'quantity',
+        'size_breakdown',
+        'color_breakdown',
+        'fabric_requirements',
+        'accessories_requirements',
+        'production_line',
+        'priority',
         'status',
+        'start_date',
+        'due_date',
+        'completion_date',
+        'estimated_cost',
+        'actual_cost',
+        'quality_score',
+        'defect_rate',
+        'production_notes',
+        'quality_notes',
+        'assigned_to',
+        'supervisor_id',
+        'is_rush_order',
+        'notes',
+        'user_id',
+        'retailer_id',
+        'manufacturer_id',
         'total_amount',
-        'tax_amount',
-        'shipping_amount',
         'shipping_address',
         'shipping_city',
         'shipping_state',
         'shipping_zip',
         'shipping_country',
-        'billing_address',
-        'payment_method',
-        'payment_status',
-        'notes',
-        'order_date',
-        'confirmed_at',
-        'shipped_at',
-        'delivered_at',
-        'cancelled_at',
-        'supplier_id',
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
-        'shipping_amount' => 'decimal:2',
-        'order_date' => 'datetime',
-        'confirmed_at' => 'datetime',
-        'shipped_at' => 'datetime',
-        'delivered_at' => 'datetime',
-        'cancelled_at' => 'datetime',
+        'quantity' => 'integer',
+        'size_breakdown' => 'array',
+        'color_breakdown' => 'array',
+        'fabric_requirements' => 'array',
+        'accessories_requirements' => 'array',
+        'start_date' => 'date',
+        'due_date' => 'date',
+        'completion_date' => 'date',
+        'estimated_cost' => 'decimal:2',
+        'actual_cost' => 'decimal:2',
+        'quality_score' => 'integer',
+        'defect_rate' => 'decimal:2',
+        'is_rush_order' => 'boolean',
     ];
 
     // Relationships
+    public function design()
+    {
+        return $this->belongsTo(Design::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function productionStages()
+    {
+        return $this->hasMany(ProductionStage::class);
+    }
+
+    public function qualityChecks()
+    {
+        return $this->hasMany(QualityCheck::class);
+    }
+
+    public function retailer()
+    {
+        return $this->belongsTo(User::class, 'retailer_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

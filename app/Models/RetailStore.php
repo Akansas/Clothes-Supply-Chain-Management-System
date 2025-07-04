@@ -18,6 +18,9 @@ class RetailStore extends Model
         'status',
         'opening_hours',
         'description',
+        'contact_person',
+        'opening_time',
+        'closing_time',
     ];
 
     protected $casts = [

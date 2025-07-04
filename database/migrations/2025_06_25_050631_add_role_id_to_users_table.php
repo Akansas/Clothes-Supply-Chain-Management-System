@@ -16,6 +16,11 @@ return new class extends Migration
                 $table->foreignId('role_id')->nullable()->constrained()->onDelete('set null');
             });
         }
+        if (!Schema::hasColumn('users', 'manufacturer_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreignId('manufacturer_id')->nullable()->constrained('manufacturers')->onDelete('set null');
+            });
+        }
     }
 
     /**

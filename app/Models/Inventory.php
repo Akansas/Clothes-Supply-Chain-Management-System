@@ -10,6 +10,7 @@ class Inventory extends Model
     use HasFactory;
 
     protected $fillable = [
+        'retail_store_id',
         'product_id',
         'warehouse_id',
         'location_type',

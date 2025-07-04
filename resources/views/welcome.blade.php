@@ -121,10 +121,6 @@
             <div class="role-icon"><i class="bi bi-truck"></i></div>
             <div>Delivery Personnel</div>
         </div>
-        <div class="col-md-2 col-6 mb-4">
-            <div class="role-icon"><i class="bi bi-person"></i></div>
-            <div>Customer</div>
-        </div>
     </div>
     @guest
     <div class="text-center my-5">

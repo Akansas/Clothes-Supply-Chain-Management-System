@@ -115,6 +115,16 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
     Route::get('/production-orders/{id}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'showProductionOrder'])->name('manufacturer.production-orders.show');
     Route::put('/production-orders/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateProductionOrderStatus'])->name('manufacturer.production-orders.update-status');
     
+    // Production order actions
+    Route::post('/production-orders/{id}/accept', [App\Http\Controllers\Manufacturer\DashboardController::class, 'acceptProductionOrder'])->name('manufacturer.production-orders.accept');
+    Route::post('/production-orders/{id}/reject', [App\Http\Controllers\Manufacturer\DashboardController::class, 'rejectProductionOrder'])->name('manufacturer.production-orders.reject');
+    Route::post('/production-orders/{id}/start', [App\Http\Controllers\Manufacturer\DashboardController::class, 'startProductionOrder'])->name('manufacturer.production-orders.start');
+    Route::post('/production-orders/{id}/complete', [App\Http\Controllers\Manufacturer\DashboardController::class, 'completeProductionOrder'])->name('manufacturer.production-orders.complete');
+    Route::post('/production-orders/{id}/ship', [App\Http\Controllers\Manufacturer\DashboardController::class, 'markReadyToShip'])->name('manufacturer.production-orders.ship');
+    Route::post('/manufacturer/production-orders/{id}/deliver', [App\Http\Controllers\Manufacturer\DashboardController::class, 'deliverProductionOrder'])
+        ->name('manufacturer.production-orders.deliver')
+        ->middleware(['auth', 'role:manufacturer']);
+    
     // Production Stages
     Route::get('/production-stages', [App\Http\Controllers\Manufacturer\DashboardController::class, 'productionStages'])->name('manufacturer.production-stages');
     Route::put('/production-stages/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateStageStatus'])->name('manufacturer.production-stages.update-status');
@@ -137,8 +147,9 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
     Route::get('/materials/browse', [App\Http\Controllers\Manufacturer\DashboardController::class, 'browseMaterials'])->name('manufacturer.materials.browse');
     
     // Profile Management
-    Route::get('/profile', [App\Http\Controllers\Manufacturer\DashboardController::class, 'profile'])->name('manufacturer.profile');
-    Route::put('/profile', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateProfile'])->name('manufacturer.profile.update');
+    Route::get('/profile', [App\Http\Controllers\Manufacturer\DashboardController::class, 'showProfile'])->name('manufacturer.profile');
+    Route::get('/profile/edit', [App\Http\Controllers\Manufacturer\DashboardController::class, 'editProfile'])->name('manufacturer.profile.edit');
+    Route::post('/profile/edit', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateProfile'])->name('manufacturer.profile.update');
 
     // Raw Material Order
     Route::get('/materials/order/{material}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'orderMaterial'])->name('manufacturer.materials.order');
@@ -156,6 +167,9 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
     Route::get('/purchase-orders/{order}/edit', [App\Http\Controllers\Manufacturer\DashboardController::class, 'editPurchaseOrder'])->name('manufacturer.purchase-orders.edit');
     Route::put('/purchase-orders/{order}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updatePurchaseOrder'])->name('manufacturer.purchase-orders.update');
     Route::delete('/purchase-orders/{order}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'cancelPurchaseOrder'])->name('manufacturer.purchase-orders.cancel');
+
+    // Retailer Orders Management
+    Route::get('/retailer-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'retailerOrders'])->name('manufacturer.retailer-orders');
 });
 
 // Retailer Routes
@@ -173,7 +187,7 @@ Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function
     
     // Inventory routes
     Route::get('/inventory', [App\Http\Controllers\Retailer\DashboardController::class, 'inventory'])->name('retailer.inventory');
-    Route::put('/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'updateInventory'])->name('retailer.inventory.update');
+    Route::put('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'retailerUpdateInventory'])->name('retailer.inventory.update');
     Route::post('/inventory/add', [App\Http\Controllers\Retailer\DashboardController::class, 'addToInventory'])->name('retailer.inventory.add');
     
     // Returns routes
@@ -186,6 +200,26 @@ Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function
     // Profile routes
     Route::get('/profile', [App\Http\Controllers\Retailer\DashboardController::class, 'profile'])->name('retailer.profile');
     Route::put('/profile', [App\Http\Controllers\Retailer\DashboardController::class, 'updateProfile'])->name('retailer.profile.update');
+
+    // Browse manufacturer products
+    Route::get('/products/browse', [App\Http\Controllers\Retailer\ProductController::class, 'browseManufacturerProducts'])->name('retailer.products.browse');
+    // Place production order
+    Route::get('/production-orders/create/{product}', [App\Http\Controllers\Retailer\ProductController::class, 'createProductionOrder'])->name('retailer.production-orders.create');
+    Route::post('/production-orders', [App\Http\Controllers\Retailer\ProductController::class, 'storeProductionOrder'])->name('retailer.production-orders.store');
+
+    // Production Orders routes
+    Route::get('/production-orders', [App\Http\Controllers\Retailer\ProductController::class, 'productionOrdersIndex'])->name('retailer.production-orders.index');
+
+    // New routes for editing and updating retailer orders
+    Route::get('/retailer/orders/{id}/edit', [App\Http\Controllers\Retailer\DashboardController::class, 'editOrder'])->name('retailer.orders.edit');
+    Route::put('/retailer/orders/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'updateOrder'])->name('retailer.orders.update');
+
+    // Retailer inventory routes
+    Route::get('/retailer/inventory/create', [App\Http\Controllers\Retailer\DashboardController::class, 'createInventory'])->name('retailer.inventory.create');
+    Route::post('/retailer/inventory', [App\Http\Controllers\Retailer\DashboardController::class, 'storeInventory'])->name('retailer.inventory.store');
+    Route::get('/retailer/inventory/{id}/edit', [App\Http\Controllers\Retailer\DashboardController::class, 'editInventory'])->name('retailer.inventory.edit');
+    Route::put('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'updateInventory'])->name('retailer.inventory.update');
+    Route::delete('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'destroyInventory'])->name('retailer.inventory.destroy');
 });
 
 // Delivery Routes
@@ -219,34 +253,6 @@ Route::prefix('delivery')->middleware(['auth', 'role:delivery,delivery_personnel
     // Profile Management
     Route::get('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'profile'])->name('delivery.profile');
     Route::put('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'updateProfile'])->name('delivery.profile.update');
-});
-
-// Customer Routes
-Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('customer.dashboard');
-    
-    // Products
-    Route::get('/products', [App\Http\Controllers\Customer\DashboardController::class, 'browseProducts'])->name('customer.products.browse');
-    Route::get('/products/{id}', [App\Http\Controllers\Customer\DashboardController::class, 'showProduct'])->name('customer.products.show');
-    
-    // Cart
-    Route::get('/cart', [App\Http\Controllers\Customer\DashboardController::class, 'cart'])->name('customer.cart');
-    Route::post('/cart/add/{productId}', [App\Http\Controllers\Customer\DashboardController::class, 'addToCart'])->name('customer.cart.add');
-    Route::delete('/cart/remove/{productId}', [App\Http\Controllers\Customer\DashboardController::class, 'removeFromCart'])->name('customer.cart.remove');
-    
-    // Checkout
-    Route::get('/checkout', [App\Http\Controllers\Customer\DashboardController::class, 'checkout'])->name('customer.checkout');
-    Route::post('/checkout/place-order', [App\Http\Controllers\Customer\DashboardController::class, 'placeOrder'])->name('customer.checkout.place-order');
-    
-    // Orders
-    Route::get('/orders', [App\Http\Controllers\Customer\DashboardController::class, 'orders'])->name('customer.orders');
-    Route::get('/orders/{id}', [App\Http\Controllers\Customer\DashboardController::class, 'showOrder'])->name('customer.orders.show');
-    Route::get('/orders/{id}/track', [App\Http\Controllers\Customer\DashboardController::class, 'trackOrder'])->name('customer.orders.track');
-    Route::post('/orders/{id}/cancel', [App\Http\Controllers\Customer\DashboardController::class, 'cancelOrder'])->name('customer.orders.cancel');
-    
-    // Profile
-    Route::get('/profile', [App\Http\Controllers\Customer\DashboardController::class, 'profile'])->name('customer.profile');
-    Route::put('/profile', [App\Http\Controllers\Customer\DashboardController::class, 'updateProfile'])->name('customer.profile.update');
 });
 
 // Inventory Management Routes

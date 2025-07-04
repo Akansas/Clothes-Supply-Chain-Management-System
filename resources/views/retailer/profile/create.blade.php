@@ -103,4 +103,33 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (!form) return;
+    function to24Hour(timeStr) {
+        if (!timeStr) return '';
+        // If already in H:i:s format, return as is
+        if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) return timeStr;
+        // If in H:i format, add seconds
+        if (/^\d{2}:\d{2}$/.test(timeStr)) return timeStr + ':00';
+        // If in 12-hour format with AM/PM
+        let [time, modifier] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':');
+        hours = parseInt(hours, 10);
+        if (modifier === 'PM' && hours < 12) hours += 12;
+        if (modifier === 'AM' && hours === 12) hours = 0;
+        return (hours < 10 ? '0' : '') + hours + ':' + minutes + ':00';
+    }
+    form.addEventListener('submit', function(e) {
+        let opening = document.getElementById('opening_time');
+        let closing = document.getElementById('closing_time');
+        if (opening && opening.value && !opening.value.match(/^\d{2}:\d{2}:\d{2}$/)) opening.value = to24Hour(opening.value);
+        if (closing && closing.value && !closing.value.match(/^\d{2}:\d{2}:\d{2}$/)) closing.value = to24Hour(closing.value);
+    });
+});
+</script>
 @endsection 

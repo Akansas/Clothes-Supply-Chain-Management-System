@@ -37,7 +37,6 @@ class Role extends Model
             'retailer' => '/retailer/dashboard',
             'delivery_personnel' => '/delivery/dashboard',
             'delivery' => '/delivery/dashboard',
-            'customer' => '/customer/dashboard',
             'raw_material_supplier' => '/supplier/dashboard',
             'supplier' => '/supplier/dashboard',
             'inspector' => '/inspector/dashboard',
@@ -57,7 +56,6 @@ class Role extends Model
             'warehouse_manager' => ['inventory_management', 'order_management', 'chat', 'analytics', 'reports'],
             'retailer' => ['inventory_management', 'order_management', 'customer_management', 'chat', 'analytics', 'reports'],
             'delivery_personnel' => ['delivery_management', 'chat', 'reports'],
-            'customer' => ['order_management', 'chat', 'reports'],
             'inspector' => ['quality_management', 'facility_management', 'chat', 'reports'],
         ];
 

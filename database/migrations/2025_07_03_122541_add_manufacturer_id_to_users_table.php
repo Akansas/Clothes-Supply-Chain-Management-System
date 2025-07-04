@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->date('completion_date')->nullable()->after('due_date');
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('manufacturer_id')->nullable()->constrained('manufacturers')->onDelete('set null');
         });
     }
 
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('completion_date');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['manufacturer_id']);
+            $table->dropColumn('manufacturer_id');
         });
     }
 };

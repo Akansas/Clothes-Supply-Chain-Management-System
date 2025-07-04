@@ -40,6 +40,11 @@
                     <a class="nav-link" href="{{ route('profile.edit') }}">
                         <span class="no-icon">My Account</span>
                     </a>
+                    @if(auth()->user() && auth()->user()->hasRole('manufacturer'))
+                        <ul class="dropdown-menu show" style="position: absolute;">
+                            <li><a class="dropdown-item" href="{{ route('manufacturer.profile') }}">Manufacturer Profile</a></li>
+                        </ul>
+                    @endif
                 </li>
                 @if(auth()->user() && auth()->user()->hasRole('admin'))
                 <li class="nav-item">

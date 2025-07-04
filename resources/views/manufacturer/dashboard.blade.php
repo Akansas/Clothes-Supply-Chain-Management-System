@@ -194,6 +194,11 @@
                                 <i class="fas fa-chart-bar me-2"></i>Analytics
                             </a>
                         </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ route('manufacturer.retailer-orders') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-list me-2"></i>Retailer Orders Management
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -128,14 +128,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the customer segments for the user.
-     */
-    public function customerSegments()
-    {
-        return $this->hasMany(CustomerSegment::class, 'customer_id');
-    }
-
-    /**
      * Get the report logs for the user.
      */
     public function reportLogs()
@@ -239,11 +231,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the manufacturer associated with the user.
+     * Get the manufacturer profile associated with the user.
      */
     public function manufacturer()
     {
-        return $this->hasOne(\App\Models\Manufacturer::class, 'user_id');
+        return $this->belongsTo(Manufacturer::class);
     }
 
     /**
@@ -252,14 +244,6 @@ class User extends Authenticatable
     public function rawMaterialSupplier()
     {
         return $this->hasOne(\App\Models\RawMaterialSupplier::class, 'user_id');
-    }
-
-    /**
-     * Get the orders where this user is the customer.
-     */
-    public function customerOrders()
-    {
-        return $this->hasMany(Order::class, 'customer_id');
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -34,19 +35,20 @@ class DashboardController extends Controller
 
         // Statistics
         $stats = [
-            'total_orders' => Order::where('retail_store_id', $retailStore->id)->count(),
-            'pending_orders' => Order::where('retail_store_id', $retailStore->id)->where('status', 'pending')->count(),
-            'total_revenue' => Order::where('retail_store_id', $retailStore->id)->where('status', 'delivered')->sum('total_amount'),
+            'total_orders' => Order::where('retailer_id', $user->id)->count(),
+            'pending_orders' => Order::where('retailer_id', $user->id)->where('status', 'pending')->count(),
+            'total_cost' => Order::where('retailer_id', $user->id)
+                ->where('status', '!=', 'cancelled')
+                ->sum('total_amount'),
             'low_stock_products' => Inventory::where('retail_store_id', $retailStore->id)->where('quantity', '<', 10)->count(),
             'products_count' => Inventory::where('retail_store_id', $retailStore->id)->count(),
-            'monthly_orders' => Order::where('retail_store_id', $retailStore->id)
+            'monthly_orders' => Order::where('retailer_id', $user->id)
                 ->whereMonth('created_at', now()->month)
                 ->count(),
         ];
 
         // Recent orders
-        $recentOrders = Order::where('retail_store_id', $retailStore->id)
-            ->with(['user', 'orderItems.product'])
+        $recentOrders = Order::where('retailer_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
@@ -67,26 +69,10 @@ class DashboardController extends Controller
     public function orders(Request $request)
     {
         $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $query = Order::where('retail_store_id', $retailStore->id)
-            ->with(['user', 'orderItems.product']);
-
-        // Filter by status
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by date range
-        if ($request->date_from) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->date_to) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $orders = $query->latest()->paginate(15);
-
+        $orders = \App\Models\Order::with(['product.manufacturer'])
+            ->where('retailer_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
         return view('retailer.orders.index', compact('orders'));
     }
 
@@ -96,12 +82,19 @@ class DashboardController extends Controller
     public function showOrder($id)
     {
         $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $order = Order::where('retail_store_id', $retailStore->id)
+        // Try to find by retailer_id first (production orders)
+        $order = \App\Models\Order::where('retailer_id', $user->id)
             ->with(['user', 'orderItems.product', 'deliveries'])
-            ->findOrFail($id);
-
+            ->find($id);
+        // If not found, try by retail_store_id (store orders)
+        if (!$order && $user->managedRetailStore) {
+            $order = \App\Models\Order::where('retail_store_id', $user->managedRetailStore->id)
+                ->with(['user', 'orderItems.product', 'deliveries'])
+                ->find($id);
+        }
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
         return view('retailer.orders.show', compact('order'));
     }
 
@@ -111,20 +104,23 @@ class DashboardController extends Controller
     public function updateOrderStatus(Request $request, $id)
     {
         $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $order = Order::where('retail_store_id', $retailStore->id)->findOrFail($id);
-        
+        // Try to find by retailer_id first (production orders)
+        $order = \App\Models\Order::where('retailer_id', $user->id)->find($id);
+        // If not found, try by retail_store_id (store orders)
+        if (!$order && $user->managedRetailStore) {
+            $order = \App\Models\Order::where('retail_store_id', $user->managedRetailStore->id)->find($id);
+        }
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
         $request->validate([
             'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled',
             'notes' => 'nullable|string',
         ]);
-
         $order->update([
             'status' => $request->status,
             'notes' => $request->notes,
         ]);
-
         // Update timestamps based on status
         switch ($request->status) {
             case 'confirmed':
@@ -140,7 +136,6 @@ class DashboardController extends Controller
                 $order->update(['cancelled_at' => now()]);
                 break;
         }
-
         return redirect()->route('retailer.orders.show', $order->id)->with('success', 'Order status updated successfully!');
     }
 
@@ -171,6 +166,8 @@ class DashboardController extends Controller
         }
 
         $inventory = $query->paginate(15);
+        // Debug output
+        \Log::info('Retailer inventory:', $inventory->toArray());
 
         return view('retailer.inventory.index', compact('inventory'));
     }
@@ -232,84 +229,24 @@ class DashboardController extends Controller
     }
 
     /**
-     * Show returns management
-     */
-    public function returns(Request $request)
-    {
-        $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $query = Order::where('retail_store_id', $retailStore->id)
-            ->where('status', 'delivered')
-            ->with(['user', 'orderItems.product']);
-
-        $returns = $query->latest()->paginate(15);
-
-        return view('retailer.returns.index', compact('returns'));
-    }
-
-    /**
-     * Process return
-     */
-    public function processReturn(Request $request, $orderId)
-    {
-        $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $order = Order::where('retail_store_id', $retailStore->id)->findOrFail($orderId);
-        
-        $request->validate([
-            'return_reason' => 'required|string',
-            'refund_amount' => 'required|numeric|min:0|max:' . $order->total_amount,
-            'return_items' => 'required|array',
-        ]);
-
-        // Update order status to returned
-        $order->update([
-            'status' => 'returned',
-            'notes' => 'Return processed: ' . $request->return_reason,
-        ]);
-
-        // Restock returned items
-        foreach ($request->return_items as $itemId => $quantity) {
-            $orderItem = OrderItem::where('order_id', $order->id)
-                ->where('id', $itemId)
-                ->first();
-
-            if ($orderItem && $quantity > 0) {
-                $inventory = Inventory::where('retail_store_id', $retailStore->id)
-                    ->where('product_id', $orderItem->product_id)
-                    ->first();
-
-                if ($inventory) {
-                    $inventory->increment('quantity', $quantity);
-                }
-            }
-        }
-
-        return redirect()->route('retailer.returns')->with('success', 'Return processed successfully!');
-    }
-
-    /**
      * Show analytics/reports
      */
     public function analytics()
     {
         $user = auth()->user();
         $retailStore = $user->managedRetailStore;
-        
-        // Monthly sales data
-        $monthlySales = Order::where('retail_store_id', $retailStore->id)
+        // Monthly sales data for this retailer
+        $monthlySales = Order::where('retailer_id', $user->id)
             ->where('status', 'delivered')
             ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
             ->whereYear('created_at', now()->year)
             ->groupBy('month')
             ->get();
 
-        // Top selling products
+        // Top selling products for this retailer
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('orders.retail_store_id', $retailStore->id)
+            ->where('orders.retailer_id', $user->id)
             ->where('orders.status', 'delivered')
             ->selectRaw('products.name, SUM(order_items.quantity) as total_sold')
             ->groupBy('products.id', 'products.name')
@@ -317,13 +254,19 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // Order status distribution
-        $orderStatuses = Order::where('retail_store_id', $retailStore->id)
+        // Order status distribution for this retailer
+        $orderStatuses = Order::where('retailer_id', $user->id)
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->get();
 
-        return view('retailer.analytics', compact('monthlySales', 'topProducts', 'orderStatuses'));
+        // Inventory stats for this retailer
+        $inventoryStats = [
+            'total_products' => $retailStore ? $retailStore->inventories()->count() : 0,
+            'total_quantity' => $retailStore ? $retailStore->inventories()->sum('quantity') : 0,
+        ];
+
+        return view('retailer.analytics', compact('monthlySales', 'topProducts', 'orderStatuses', 'inventoryStats'));
     }
 
     /**
@@ -392,8 +335,8 @@ class DashboardController extends Controller
             'address' => 'required|string|max:500',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
-            'opening_time' => 'required|date_format:H:i:s',
-            'closing_time' => 'required|date_format:H:i:s|after:opening_time',
+            'opening_time' => 'required|date_format:H:i',
+            'closing_time' => 'required|date_format:H:i|after:opening_time',
         ]);
 
         $user = auth()->user();
@@ -406,11 +349,128 @@ class DashboardController extends Controller
             'contact_person' => $user->name,
             'phone' => $request->phone,
             'email' => $request->email,
-            'opening_time' => $request->opening_time,
-            'closing_time' => $request->closing_time,
+            'opening_time' => $request->opening_time . ':00',
+            'closing_time' => $request->closing_time . ':00',
             'status' => 'active',
         ]);
 
         return redirect()->route('retailer.dashboard')->with('success', 'Retail store profile created successfully!');
+    }
+
+    /**
+     * Show the form for editing an order
+     */
+    public function editOrder($id)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('retailer_id', $user->id)->findOrFail($id);
+        return view('retailer.orders.edit', compact('order'));
+    }
+
+    /**
+     * Update the specified order
+     */
+    public function updateOrder(Request $request, $id)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('retailer_id', $user->id)->findOrFail($id);
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+            'due_date' => 'required|date|after:today',
+            'notes' => 'nullable|string',
+            'shipping_address' => 'required|string',
+            'shipping_city' => 'required|string',
+            'shipping_state' => 'required|string',
+            'shipping_zip' => 'required|string',
+            'shipping_country' => 'required|string',
+        ]);
+        $order->update($request->only([
+            'quantity',
+            'due_date',
+            'notes',
+            'shipping_address',
+            'shipping_city',
+            'shipping_state',
+            'shipping_zip',
+            'shipping_country',
+        ]));
+        return redirect()->route('retailer.orders')->with('success', 'Order updated successfully!');
+    }
+
+    /**
+     * Show form to add a product to inventory
+     */
+    public function createInventory()
+    {
+        return view('retailer.inventory.create');
+    }
+
+    /**
+     * Store a new product in inventory
+     */
+    public function storeInventory(Request $request)
+    {
+        $user = auth()->user();
+        $retailStore = $user->managedRetailStore;
+        $request->validate([
+            'product_name' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
+        ]);
+        // Find or create product
+        $product = \App\Models\Product::firstOrCreate(
+            ['name' => $request->product_name],
+            ['is_active' => true]
+        );
+        // Find or create inventory
+        $inventory = \App\Models\Inventory::firstOrNew([
+            'retail_store_id' => $retailStore->id,
+            'product_id' => $product->id,
+        ]);
+        $inventory->quantity += $request->quantity;
+        $inventory->retail_store_id = $retailStore->id;
+        $inventory->location_id = $retailStore->id;
+        $inventory->save();
+        \Log::info('Saved inventory:', $inventory->toArray());
+        \Log::info('Current retail store ID:', ['retail_store_id' => $retailStore->id]);
+        return redirect()->route('retailer.inventory')->with('success', 'Product added/updated in inventory!');
+    }
+
+    /**
+     * Show form to edit an inventory item
+     */
+    public function editInventory($id)
+    {
+        $user = auth()->user();
+        $retailStore = $user->managedRetailStore;
+        $inventory = \App\Models\Inventory::where('retail_store_id', $retailStore->id)->findOrFail($id);
+        return view('retailer.inventory.edit', compact('inventory'));
+    }
+
+    /**
+     * Update an inventory item (retailer)
+     */
+    public function retailerUpdateInventory(Request $request, $id)
+    {
+        $user = auth()->user();
+        $retailStore = $user->managedRetailStore;
+        $inventory = \App\Models\Inventory::where('retail_store_id', $retailStore->id)->findOrFail($id);
+        $request->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+        $inventory->quantity = $request->quantity;
+        $inventory->save();
+        return redirect()->route('retailer.inventory')->with('success', 'Inventory updated!');
+    }
+
+    /**
+     * Delete an inventory item
+     */
+    public function destroyInventory($id)
+    {
+        $user = auth()->user();
+        $retailStore = $user->managedRetailStore;
+        $inventory = \App\Models\Inventory::where('retail_store_id', $retailStore->id)->findOrFail($id);
+        $inventory->delete();
+        return redirect()->route('retailer.inventory')->with('success', 'Inventory item deleted!');
     }
 }
