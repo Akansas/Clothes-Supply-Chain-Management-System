@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->unsignedBigInteger('retailer_id')->nullable()->after('vendor_id');
-        });
+        // Schema::table('orders', function (Blueprint $table) {
+        //     $table->unsignedBigInteger('retailer_id')->nullable();
+        // });
     }
 
     public function down()

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('production_orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_number')->unique();
             $table->unsignedBigInteger('design_id')->nullable();
@@ -39,6 +39,8 @@ return new class extends Migration
             $table->boolean('is_rush_order')->default(false);
             $table->text('notes')->nullable();
             $table->unsignedBigInteger('retailer_id')->nullable();
+            $table->unsignedBigInteger('manufacturer_id')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
 
             $table->foreign('design_id')->references('id')->on('designs')->nullOnDelete();
@@ -54,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('production_orders');
     }
 };

@@ -146,6 +146,23 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
+        // 7. Create a sample order for the retailer
+        $order = \App\Models\Order::firstOrCreate([
+            'user_id' => $retailer->id,
+            'order_number' => 'ORDER-001',
+        ], [
+            'source' => 'retailer',
+            'status' => 'pending',
+            'total_amount' => 100,
+            'tax_amount' => 10,
+            'shipping_amount' => 5,
+            'shipping_address' => '123 Main St',
+            'shipping_city' => 'City',
+            'shipping_state' => 'State',
+            'shipping_zip' => '12345',
+            'shipping_country' => 'Country',
+        ]);
+
         // 8. Create a delivery for the order, assigned to delivery personnel
         \App\Models\Delivery::firstOrCreate([
             'order_id' => $order->id,
@@ -190,13 +207,18 @@ class DatabaseSeeder extends Seeder
             'manufacturer_id' => $manufacturer->id,
             'name' => 'Demo Product',
         ], [
+            'sku' => 'DEMO-001',
             'description' => 'A demo product for testing',
+            'material' => 'Cotton',
+            'cost' => 10.00,
+            'unit' => 'pcs',
         ]);
 
         // Ensure at least one production order exists
         $productionOrder = \App\Models\ProductionOrder::firstOrCreate([
             'manufacturer_id' => $manufacturer->id,
             'product_id' => $product->id,
+            'order_number' => 'PO-001',
         ], [
             'quantity' => 100,
             'status' => 'pending',
@@ -207,7 +229,7 @@ class DatabaseSeeder extends Seeder
         foreach ($stages as $stageName) {
             \App\Models\ProductionStage::firstOrCreate([
                 'production_order_id' => $productionOrder->id,
-                'name' => $stageName,
+                'stage_name' => $stageName,
             ], [
                 'status' => 'pending',
             ]);

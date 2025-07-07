@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('production_orders', function (Blueprint $table) {
-            $table->date('shipment_date')->nullable()->after('completed_at');
-            $table->string('tracking_number')->nullable()->after('shipment_date');
+            $table->date('shipment_date')->nullable();
+            $table->string('tracking_number')->nullable();
         });
     }
 
