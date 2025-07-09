@@ -82,6 +82,23 @@
         </div>
     @endif
     
+    @if(session('impersonate'))
+        <div style="background: #ffc107; color: #222; padding: 12px; text-align: center; position: relative; z-index: 1000;">
+            <strong>Impersonation Mode:</strong> You are impersonating another user.
+            <form id="stop-impersonate-form" action="{{ route('admin.stopImpersonate') }}" method="POST" style="display:inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-danger ms-3">Stop Impersonating</button>
+            </form>
+        </div>
+        <script>
+            document.getElementById('stop-impersonate-form').addEventListener('submit', function(e) {
+                setTimeout(function() {
+                    window.location.href = '/admin/dashboard';
+                }, 300);
+            });
+        </script>
+    @endif
+    
     @yield('content')
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

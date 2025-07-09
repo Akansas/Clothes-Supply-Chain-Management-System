@@ -13,6 +13,7 @@ use App\Models\QualityCheck;
 use App\Models\FacilityVisit;
 use App\Models\ProductionOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -23,6 +24,8 @@ class DashboardController extends Controller
         foreach ($roles as $role) {
             $userCounts[$role->name] = User::where('role_id', $role->id)->count();
         }
+        $roleCounts = $userCounts;
+        $users = User::with('role', 'vendor')->get();
 
         // Supply Chain Overview Statistics
         $totalOrders = Order::count();
@@ -86,7 +89,8 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'roles', 
-            'userCounts', 
+            'roleCounts', 
+            'users',
             'totalOrders', 
             'pendingOrders', 
             'completedOrders',
@@ -150,5 +154,32 @@ class DashboardController extends Controller
         ];
 
         return view('admin.supply-chain-monitoring', compact('supplyChainData'));
+    }
+
+    public function impersonate(Request $request)
+    {
+        $adminId = Auth::id();
+        $userId = $request->input('user_id');
+        if (session()->has('impersonate')) {
+            return redirect()->back()->with('error', 'Already impersonating a user. Please stop impersonation first.');
+        }
+        session(['impersonate' => $adminId]);
+        Auth::loginUsingId($userId);
+        session()->forget('role'); // Clear any custom session role keys
+        $user = Auth::user();
+        $dashboardRoute = $user->role ? $user->role->getDashboardRoute() : '/';
+        return redirect($dashboardRoute)->with('success', 'You are now impersonating this user.');
+    }
+
+    public function stopImpersonate()
+    {
+        if (session()->has('impersonate')) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+            session()->forget('impersonate');
+            return redirect()->route('logout'); // Force a full logout and require login
+        }
+        return redirect()->route('logout');
     }
 } 

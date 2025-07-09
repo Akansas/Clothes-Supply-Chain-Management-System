@@ -57,7 +57,13 @@ Route::get('/home', function () {
 })->name('home');
 
 // Default dashboard for users without roles
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if ($user && $user->role && method_exists($user->role, 'getDashboardRoute')) {
+        return redirect($user->role->getDashboardRoute());
+    }
+    return redirect('/'); // Or show a 404 or error page
+})->name('dashboard');
 
 // Vendor Routes
 Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () {
@@ -102,6 +108,7 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
     Route::put('/profile', [App\Http\Controllers\Vendor\DashboardController::class, 'updateProfile'])->name('vendor.profile.update');
     // Profile creation route
     Route::get('/profile/create', [App\Http\Controllers\Vendor\ProfileController::class, 'create'])->name('vendor.profile.create');
+    Route::post('/profile', [App\Http\Controllers\Vendor\ProfileController::class, 'store'])->name('vendor.profile.store');
 });
 
 // Manufacturer Routes
@@ -315,6 +322,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/system-overview', [App\Http\Controllers\Admin\DashboardController::class, 'systemOverview'])->name('admin.system-overview');
     Route::get('/supply-chain-monitoring', [App\Http\Controllers\Admin\DashboardController::class, 'supplyChainMonitoring'])->name('admin.supply-chain-monitoring');
     Route::resource('user', UserController::class)->except(['create', 'store']);
+    Route::post('/impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'impersonate'])->name('admin.impersonate');
+    Route::post('/stop-impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'stopImpersonate'])->name('admin.stopImpersonate');
+});
+
+Route::get('/admin/stop-impersonate', function () {
+    return redirect('/admin/dashboard');
 });
 
 // Supplier Routes
