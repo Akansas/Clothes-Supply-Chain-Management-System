@@ -438,4 +438,4 @@ Route::get('/chat/dashboard', function () {
 Route::get('/debug/products', function () {
     return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
 });
-
+Route::get('/admin/supplier-dashboard/{supplier_id}', [\App\Http\Controllers\AdminController::class, 'viewSupplierDashboard'])->middleware('auth');
