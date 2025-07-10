@@ -439,3 +439,12 @@ Route::get('/debug/products', function () {
     return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chat/contacts', [ChatController::class, 'contacts'])->name('chat.contacts');
+    Route::get('/chat/messages/{other}', [ChatController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/send/{other}', [ChatController::class, 'send'])->name('chat.send');
+    Route::post('/chat/mark-as-read/{other}', [ChatController::class, 'markAsRead'])->name('chat.markAsRead');
+    Route::post('/chat/typing/{other}', [ChatController::class, 'typing'])->name('chat.typing');
+    Route::get('/chat/notifications', [ChatController::class, 'notifications'])->name('chat.notifications');
+});
+

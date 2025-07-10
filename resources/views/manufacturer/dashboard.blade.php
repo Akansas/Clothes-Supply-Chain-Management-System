@@ -8,6 +8,13 @@
         </div>
     </div>
 
+    <!-- Manufacturer Chat Widget -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <manufacturer-chat :user-id="{{ auth()->id() }}"></manufacturer-chat>
+        </div>
+    </div>
+
     <!-- Action Buttons -->
     <div class="row mb-4">
         <div class="col-12">

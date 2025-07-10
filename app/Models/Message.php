@@ -9,33 +9,20 @@ class Message extends Model
 {
     use HasFactory;
 
-    /**
-     * Get the conversation this message belongs to.
-     */
-    public function conversation()
-    {
-        return $this->belongsTo(Conversation::class);
-    }
+    protected $fillable = [
+        'sender_id',
+        'receiver_id',
+        'message_text',
+        'read_at',
+    ];
 
-    /**
-     * Get the sender of the message.
-     */
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    /**
-     * Get the user who sent the message.
-     */
-    public function user()
+    public function receiver()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'receiver_id');
     }
-
-    protected $fillable = [
-        'conversation_id',
-        'user_id',
-        'body',
-    ];
 }

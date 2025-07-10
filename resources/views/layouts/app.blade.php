@@ -26,6 +26,7 @@
         .navbar-brand { font-weight: bold; }
         .container { margin-top: 40px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -56,50 +57,52 @@
         </div>
     </div>
 </nav>
-<div class="container">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    
-    @if(session('impersonate'))
-        <div style="background: #ffc107; color: #222; padding: 12px; text-align: center; position: relative; z-index: 1000;">
-            <strong>Impersonation Mode:</strong> You are impersonating another user.
-            <form id="stop-impersonate-form" action="{{ route('admin.stopImpersonate') }}" method="POST" style="display:inline">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-danger ms-3">Stop Impersonating</button>
-            </form>
-        </div>
-        <script>
-            document.getElementById('stop-impersonate-form').addEventListener('submit', function(e) {
-                setTimeout(function() {
-                    window.location.href = '/admin/dashboard';
-                }, 300);
-            });
-        </script>
-    @endif
-    
-    @yield('content')
+<div id="app">
+    <div class="container">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @if(session('impersonate'))
+            <div style="background: #ffc107; color: #222; padding: 12px; text-align: center; position: relative; z-index: 1000;">
+                <strong>Impersonation Mode:</strong> You are impersonating another user.
+                <form id="stop-impersonate-form" action="{{ route('admin.stopImpersonate') }}" method="POST" style="display:inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-danger ms-3">Stop Impersonating</button>
+                </form>
+            </div>
+            <script>
+                document.getElementById('stop-impersonate-form').addEventListener('submit', function(e) {
+                    setTimeout(function() {
+                        window.location.href = '/admin/dashboard';
+                    }, 300);
+                });
+            </script>
+        @endif
+        
+        @yield('content')
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
