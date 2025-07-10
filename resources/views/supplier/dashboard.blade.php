@@ -230,6 +230,11 @@
         </div>
     </div>
     @endif
+    <div class="row mb-4">
+        <div class="col-12">
+            <supplier-chat :user-id="{{ auth()->id() }}"></supplier-chat>
+        </div>
+    </div>
 </div>
 
 <!-- Modals -->
