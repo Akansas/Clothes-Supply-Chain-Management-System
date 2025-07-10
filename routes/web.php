@@ -439,6 +439,9 @@ Route::get('/debug/products', function () {
     return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
 });
 
+Route::get('/admin/supplier-dashboard/{supplier_id}', [\App\Http\Controllers\AdminController::class, 'viewSupplierDashboard'])->middleware('auth');
+
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/chat/contacts', [ChatController::class, 'contacts'])->name('chat.contacts');
     Route::get('/chat/messages/{other}', [ChatController::class, 'messages'])->name('chat.messages');
@@ -447,4 +450,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/chat/typing/{other}', [ChatController::class, 'typing'])->name('chat.typing');
     Route::get('/chat/notifications', [ChatController::class, 'notifications'])->name('chat.notifications');
 });
+
 

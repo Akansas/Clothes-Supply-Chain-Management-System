@@ -145,4 +145,9 @@ class Vendor extends Model
     {
         return $this->hasMany(\App\Models\Conversation::class, 'vendor_id');
     }
+    public function orders()
+    {
+        return
+        $this->hasMany(\App\Models\Order::class);
+    }
 }
