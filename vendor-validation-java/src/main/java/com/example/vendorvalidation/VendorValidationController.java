@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -36,7 +35,8 @@ public class VendorValidationController {
             allApplications.add(result); // Store every application
             if ("approved".equals(result.getStatus())) {
                 // Save PDF for admin dashboard
-                File dir = new File("admin-pdf-uploads");
+                String basePath = System.getProperty("user.dir") + File.separator + "admin-pdf-uploads";
+                File dir = new File(basePath);
                 if (!dir.exists()) dir.mkdirs();
                 File dest = new File(dir, pdf.getOriginalFilename());
                 pdf.transferTo(dest);

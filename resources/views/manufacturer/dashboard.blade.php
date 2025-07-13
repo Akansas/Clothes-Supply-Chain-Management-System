@@ -1,6 +1,17 @@
 @extends('layouts.app')
 @section('content')
 <div class="container py-5">
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('manufacturer.dashboard') }}">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('workforce.index') }}">Workforce Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('inventory.index') }}">Inventory Management</a>
+        </li>
+    </ul>
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="fw-bold mb-3">Welcome, {{ $manufacturer->name ?? auth()->user()->name }}</h2>

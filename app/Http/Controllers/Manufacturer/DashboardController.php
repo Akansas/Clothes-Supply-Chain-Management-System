@@ -756,4 +756,12 @@ class DashboardController extends Controller
         }
         return redirect()->back()->with('success', 'Order marked as delivered.');
     }
+
+    /**
+     * Show the order processing page
+     */
+    public function orderProcessing()
+    {
+        return view('manufacturer.order-processing');
+    }
 }

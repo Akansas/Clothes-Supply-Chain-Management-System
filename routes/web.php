@@ -177,6 +177,13 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
 
     // Retailer Orders Management
     Route::get('/retailer-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'retailerOrders'])->name('manufacturer.retailer-orders');
+
+    // Workforce Management
+    Route::resource('workforce', App\Http\Controllers\Manufacturer\WorkforceController::class);
+    // Inventory Management
+    Route::resource('inventory', App\Http\Controllers\Manufacturer\InventoryController::class);
+    // Order Processing
+    Route::get('/order-processing', [App\Http\Controllers\Manufacturer\DashboardController::class, 'orderProcessing'])->name('manufacturer.order-processing');
 });
 
 // Retailer Routes
