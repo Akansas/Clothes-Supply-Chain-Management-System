@@ -10,7 +10,7 @@ class Worker extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'email', 'phone', 'role', 'skills', 'availability', 'manufacturer_id'
+        'name', 'skill', 'shift', 'status'
     ];
 
     public function assignments()
@@ -21,5 +21,10 @@ class Worker extends Model
     public function manufacturer()
     {
         return $this->belongsTo(Manufacturer::class);
+    }
+
+    public function supplyCenter()
+    {
+        return $this->belongsTo(SupplyCenter::class);
     }
 }

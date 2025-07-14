@@ -62,6 +62,14 @@ class LoginController extends Controller
      */
     protected function authenticated($request, $user)
     {
+        // Auto-create manufacturer profile if user is a manufacturer and profile is missing
+        if ($user->role && $user->role->name === 'manufacturer' && !$user->manufacturer) {
+            \App\Models\Manufacturer::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
         if ($user->role) {
             return redirect($user->role->getDashboardRoute());
         }

@@ -112,7 +112,7 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
 });
 
 // Manufacturer Routes
-Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(function () {
+Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Manufacturer\DashboardController::class, 'index'])->name('manufacturer.dashboard');
     
     // Production Orders
@@ -180,11 +180,21 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
 
     // Workforce Management
     Route::resource('workforce', App\Http\Controllers\Manufacturer\WorkforceController::class);
+    Route::resource('tasks', App\Http\Controllers\Manufacturer\TaskController::class);
+    Route::post('tasks/{task}/assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'assign'])->name('tasks.assign');
+    Route::get('workforce-report', [App\Http\Controllers\Manufacturer\TaskController::class, 'report'])->name('workforce.report');
     // Inventory Management
     Route::resource('inventory', App\Http\Controllers\Manufacturer\InventoryController::class);
     // Order Processing
     Route::get('/order-processing', [App\Http\Controllers\Manufacturer\DashboardController::class, 'orderProcessing'])->name('manufacturer.order-processing');
+    Route::resource('supply-centers', App\Http\Controllers\Manufacturer\SupplyCenterController::class);
+    Route::get('auto-assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'autoAssign'])->name('tasks.auto-assign');
 });
+
+// Redirect old workers URLs to new workforce management
+Route::redirect('/manufacturer/workers', '/manufacturer/workforce');
+Route::redirect('/manufacturer/workers/create', '/manufacturer/workforce/create');
+Route::redirect('/manufacturer/workers/{any}', '/manufacturer/workforce', 301)->where('any', '.*');
 
 // Retailer Routes
 Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function () {
@@ -413,7 +423,7 @@ Route::get('/debug/products', function () {
     return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
 });
 
-Route::get('/admin/supplier-dashboard/{supplier_id}', [\App\Http\Controllers\AdminController::class, 'viewSupplierDashboard'])->middleware('auth');
+Route::get('/admin/supplier-dashboard/{supplier_id}', [\App\Http\Controllers\Admin\DashboardController::class, 'viewSupplierDashboard'])->middleware('auth');
 
 
 Route::middleware(['auth'])->group(function () {

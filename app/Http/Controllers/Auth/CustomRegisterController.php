@@ -89,14 +89,20 @@ class CustomRegisterController extends Controller
      */
     protected function registered($request, $user)
     {
+        // Auto-create manufacturer profile if user is a manufacturer and profile is missing
+        if ($user->role && $user->role->name === 'manufacturer' && !$user->manufacturer) {
+            \App\Models\Manufacturer::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
         // Ensure user is authenticated
         auth()->login($user);
-        
         // Redirect to role-specific dashboard
         if ($user->role) {
             return redirect($user->role->getDashboardRoute());
         }
-        
         return redirect($this->redirectTo);
     }
 }
