@@ -458,4 +458,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/chat/notifications', [ChatController::class, 'notifications'])->name('chat.notifications');
 });
 
+Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
+Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
+
 

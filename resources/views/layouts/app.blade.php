@@ -29,7 +29,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">GenZ FashionZ Supply Chain</a>
         <div class="collapse navbar-collapse justify-content-end">
@@ -58,7 +58,7 @@
     </div>
 </nav>
 <div id="app">
-    <div class="container">
+    <div class="container" style="padding-top: 80px;">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -103,6 +103,8 @@
         
         @yield('content')
     </div>
+{{-- Shared Support Footer --}}
+@include('layouts.footer.support')
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

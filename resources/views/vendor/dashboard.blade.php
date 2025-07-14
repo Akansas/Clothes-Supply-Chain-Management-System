@@ -164,9 +164,7 @@
     @endif
 
     {{-- Contact/Support Info --}}
-    <div class="alert alert-secondary mt-4">
-        <strong>Need help?</strong> Contact our support team at <a href="mailto:support@example.com">support@example.com</a> or call 0800-123-456.
-    </div>
+    {{-- Removed duplicate support footer include --}}
 
     {{-- Tooltips for Validation Criteria and Animate on Load --}}
     <script>

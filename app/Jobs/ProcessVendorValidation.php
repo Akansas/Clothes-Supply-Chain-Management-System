@@ -86,31 +86,14 @@ class ProcessVendorValidation implements ShouldQueue
                 return;
             }
         } catch (\Exception $e) {
-            // For testing purposes, simulate a successful validation when Java server is not available
-            Log::warning('Java validation server unreachable, simulating successful validation for testing: ' . $e->getMessage());
-            
-            // Simulate successful validation
-            $financial = 0.85;
-            $reputation = 0.90;
-            $compliance = 0.88;
-            $allPassed = true;
-            
-            $application->validation_results = json_encode([
-                'financial_stability' => $financial,
-                'reputation' => $reputation,
-                'compliance' => $compliance,
-            ]);
-            $application->validation_notes = 'Validation completed (simulated - Java server not available)';
-            $application->status = 'approved';
-            $application->validated_at = Carbon::now();
+            // Do not simulate approval. Mark as pending and log the error.
+            Log::error('Java validation server unreachable, cannot validate application: ' . $e->getMessage());
+
+            $application->validation_results = null;
+            $application->validation_notes = 'Validation failed: Java validation server is unavailable. Please try again later.';
+            $application->status = 'pending'; // Or 'rejected' if you prefer
+            $application->validated_at = null;
             $application->save();
-            
-            Log::info('Simulated validation completed successfully', [
-                'financial' => $financial,
-                'reputation' => $reputation,
-                'compliance' => $compliance,
-                'allPassed' => $allPassed
-            ]);
         }
 
         // Auto-schedule facility visit if approved and no visit exists
