@@ -33,7 +33,6 @@ class Role extends Model
             'vendor' => '/vendor/dashboard',
             'manufacturer' => '/manufacturer/dashboard',
             'retailer' => '/retailer/dashboard',
-            'delivery_personnel' => '/delivery/dashboard',
             'delivery' => '/delivery/dashboard',
             'raw_material_supplier' => '/supplier/dashboard',
             'supplier' => '/supplier/dashboard',
@@ -50,7 +49,6 @@ class Role extends Model
             'vendor' => ['vendor_management', 'chat', 'reports'],
             'manufacturer' => ['inventory_management', 'vendor_management', 'chat', 'analytics', 'reports'],
             'retailer' => ['inventory_management', 'order_management', 'customer_management', 'chat', 'analytics', 'reports'],
-            'delivery_personnel' => ['delivery_management', 'chat', 'reports'],
         ];
         return in_array($module, $permissions[$this->name] ?? []);
     }

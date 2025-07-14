@@ -76,7 +76,7 @@ class CustomRegisterController extends Controller
      */
     public function showRegistrationForm()
     {
-        $roles = Role::all();
+        $roles = Role::where('name', '!=', 'delivery_personnel')->get();
         return view('auth.register', compact('roles'));
     }
 

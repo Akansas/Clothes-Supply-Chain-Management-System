@@ -236,39 +236,6 @@ Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function
     Route::delete('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'destroyInventory'])->name('retailer.inventory.destroy');
 });
 
-// Delivery Routes
-Route::prefix('delivery')->middleware(['auth', 'role:delivery,delivery_personnel'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Delivery\DashboardController::class, 'index'])->name('delivery.dashboard');
-    
-    // Profile creation routes
-    Route::get('/profile/create', [App\Http\Controllers\Delivery\DashboardController::class, 'createProfile'])->name('delivery.profile.create');
-    Route::post('/profile/create', [App\Http\Controllers\Delivery\DashboardController::class, 'storeProfile'])->name('delivery.profile.store');
-    
-    // Deliveries Management
-    Route::get('/deliveries', [App\Http\Controllers\Delivery\DashboardController::class, 'deliveries'])->name('delivery.deliveries');
-    Route::get('/deliveries/{id}', [App\Http\Controllers\Delivery\DashboardController::class, 'showDelivery'])->name('delivery.deliveries.show');
-    Route::put('/deliveries/{id}/status', [App\Http\Controllers\Delivery\DashboardController::class, 'updateDeliveryStatus'])->name('delivery.deliveries.update-status');
-    
-    // Route Optimization
-    Route::get('/route-optimization', [App\Http\Controllers\Delivery\DashboardController::class, 'routeOptimization'])->name('delivery.route-optimization');
-    
-    // Schedule
-    Route::get('/schedule', [App\Http\Controllers\Delivery\DashboardController::class, 'schedule'])->name('delivery.schedule');
-    
-    // Reports
-    Route::get('/reports', [App\Http\Controllers\Delivery\DashboardController::class, 'reports'])->name('delivery.reports');
-    
-    // Analytics
-    Route::get('/analytics', [App\Http\Controllers\Delivery\DashboardController::class, 'analytics'])->name('delivery.analytics');
-    
-    // Delivery Map
-    Route::get('/map', [App\Http\Controllers\Delivery\DashboardController::class, 'deliveryMap'])->name('delivery.map');
-    
-    // Profile Management
-    Route::get('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'profile'])->name('delivery.profile');
-    Route::put('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'updateProfile'])->name('delivery.profile.update');
-});
-
 // Inventory Management Routes
 Route::prefix('inventory')->middleware(['auth'])->group(function () {
     Route::get('/', [InventoryController::class, 'index'])->name('inventory.dashboard');

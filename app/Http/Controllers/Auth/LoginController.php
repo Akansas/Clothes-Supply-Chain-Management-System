@@ -48,8 +48,8 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        // Get all available roles for login
-        $roles = \App\Models\Role::all()->unique('name')->values();
+        // Get all available roles for login, except delivery_personnel
+        $roles = \App\Models\Role::where('name', '!=', 'delivery_personnel')->get()->unique('name')->values();
         return view('auth.login', compact('roles'));
     }
 
