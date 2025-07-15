@@ -186,39 +186,203 @@
     @if(isset($salesInsights) || isset($inventoryIntelligence) || isset($customerBehavior) || isset($pricingPromotion) || isset($omnichannelEngagement) || isset($actionableAlerts) || isset($marketTrends))
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white d-flex align-items-center">
+                    <i class="fas fa-chart-bar fa-lg me-2"></i>
                     <h5 class="mb-0">Retailer Analytics</h5>
                 </div>
                 <div class="card-body">
-                    @if(isset($salesInsights))
-                        <h6>Sales Insights</h6>
-                        <pre>{{ json_encode($salesInsights, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($inventoryIntelligence))
-                        <h6>Inventory Intelligence</h6>
-                        <pre>{{ json_encode($inventoryIntelligence, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($customerBehavior))
-                        <h6>Customer Behavior</h6>
-                        <pre>{{ json_encode($customerBehavior, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($pricingPromotion))
-                        <h6>Pricing & Promotion</h6>
-                        <pre>{{ json_encode($pricingPromotion, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($omnichannelEngagement))
-                        <h6>Omnichannel Engagement</h6>
-                        <pre>{{ json_encode($omnichannelEngagement, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($actionableAlerts))
-                        <h6>Actionable Alerts</h6>
-                        <pre>{{ json_encode($actionableAlerts, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($marketTrends))
-                        <h6>Market Trends</h6>
-                        <pre>{{ json_encode($marketTrends, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
+                    <div class="row g-3">
+                        @if(isset($salesInsights))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-chart-line fa-2x text-primary me-2"></i>
+                                        <h6 class="mb-0">Sales Insights</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Sales performance and trends.</div>
+                                    <div>
+                                        @if(is_array($salesInsights))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($salesInsights as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $salesInsights }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($inventoryIntelligence))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-boxes fa-2x text-success me-2"></i>
+                                        <h6 class="mb-0">Inventory Intelligence</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Stock levels and restock alerts.</div>
+                                    <div>
+                                        @if(is_array($inventoryIntelligence))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($inventoryIntelligence as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $inventoryIntelligence }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($customerBehavior))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-users fa-2x text-info me-2"></i>
+                                        <h6 class="mb-0">Customer Behavior</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Customer preferences and patterns.</div>
+                                    <div>
+                                        @if(is_array($customerBehavior))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($customerBehavior as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $customerBehavior }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($pricingPromotion))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-tags fa-2x text-warning me-2"></i>
+                                        <h6 class="mb-0">Pricing & Promotion</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Discounts and pricing strategies.</div>
+                                    <div>
+                                        @if(is_array($pricingPromotion))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($pricingPromotion as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $pricingPromotion }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($omnichannelEngagement))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-network-wired fa-2x text-secondary me-2"></i>
+                                        <h6 class="mb-0">Omnichannel Engagement</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Multi-channel sales and engagement.</div>
+                                    <div>
+                                        @if(is_array($omnichannelEngagement))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($omnichannelEngagement as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $omnichannelEngagement }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($actionableAlerts))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-bell fa-2x text-danger me-2"></i>
+                                        <h6 class="mb-0">Actionable Alerts</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Critical issues and alerts.</div>
+                                    <div>
+                                        @if(is_array($actionableAlerts))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($actionableAlerts as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $actionableAlerts }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($marketTrends))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-chart-area fa-2x text-info me-2"></i>
+                                        <h6 class="mb-0">Market Trends</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Industry and market trends.</div>
+                                    <div>
+                                        @if(is_array($marketTrends))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($marketTrends as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $marketTrends }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

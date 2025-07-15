@@ -128,35 +128,176 @@
     @if(isset($demandForecasting) || isset($leadTimeTracking) || isset($materialCostAnalytics) || isset($qualityControlAnalysis) || isset($clientSatisfaction) || isset($capacityPlanning))
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white d-flex align-items-center">
+                    <i class="fas fa-chart-bar fa-lg me-2"></i>
                     <h5 class="mb-0">Supplier Analytics</h5>
                 </div>
                 <div class="card-body">
-                    @if(isset($demandForecasting))
-                        <h6>Demand Forecasting</h6>
-                        <pre>{{ json_encode($demandForecasting, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($leadTimeTracking))
-                        <h6>Lead Time Tracking</h6>
-                        <pre>{{ json_encode($leadTimeTracking, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($materialCostAnalytics))
-                        <h6>Material Cost Analytics</h6>
-                        <pre>{{ json_encode($materialCostAnalytics, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($qualityControlAnalysis))
-                        <h6>Quality Control Analysis</h6>
-                        <pre>{{ json_encode($qualityControlAnalysis, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($clientSatisfaction))
-                        <h6>Client Satisfaction</h6>
-                        <pre>{{ json_encode($clientSatisfaction, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($capacityPlanning))
-                        <h6>Capacity Planning</h6>
-                        <pre>{{ json_encode($capacityPlanning, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
+                    <div class="row g-3">
+                        @if(isset($demandForecasting))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-chart-line fa-2x text-primary me-2"></i>
+                                        <h6 class="mb-0">Demand Forecasting</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Predicted material demand and trends.</div>
+                                    <div>
+                                        @if(is_array($demandForecasting))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($demandForecasting as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $demandForecasting }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($leadTimeTracking))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-clock fa-2x text-success me-2"></i>
+                                        <h6 class="mb-0">Lead Time Tracking</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Average delivery and processing times.</div>
+                                    <div>
+                                        @if(is_array($leadTimeTracking))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($leadTimeTracking as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $leadTimeTracking }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($materialCostAnalytics))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-dollar-sign fa-2x text-warning me-2"></i>
+                                        <h6 class="mb-0">Material Cost Analytics</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Cost trends and savings opportunities.</div>
+                                    <div>
+                                        @if(is_array($materialCostAnalytics))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($materialCostAnalytics as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $materialCostAnalytics }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($qualityControlAnalysis))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-clipboard-check fa-2x text-secondary me-2"></i>
+                                        <h6 class="mb-0">Quality Control Analysis</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Defect rates and inspection results.</div>
+                                    <div>
+                                        @if(is_array($qualityControlAnalysis))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($qualityControlAnalysis as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $qualityControlAnalysis }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($clientSatisfaction))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-smile fa-2x text-info me-2"></i>
+                                        <h6 class="mb-0">Client Satisfaction</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Feedback and satisfaction scores.</div>
+                                    <div>
+                                        @if(is_array($clientSatisfaction))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($clientSatisfaction as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $clientSatisfaction }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($capacityPlanning))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-industry fa-2x text-success me-2"></i>
+                                        <h6 class="mb-0">Capacity Planning</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Production and delivery capacity.</div>
+                                    <div>
+                                        @if(is_array($capacityPlanning))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($capacityPlanning as $k => $v)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst(str_replace('_',' ',$k)) }}</span>
+                                                        <span class="fw-bold">{{ is_numeric($v) ? number_format($v) : $v }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $capacityPlanning }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
