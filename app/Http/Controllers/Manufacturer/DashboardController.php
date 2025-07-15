@@ -15,6 +15,7 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\ManufacturerAnalyticsService;
 
 class DashboardController extends Controller
 {
@@ -413,26 +414,26 @@ class DashboardController extends Controller
      */
     public function analytics()
     {
-        $manufacturer = $this->getManufacturerOrRedirect();
-        $monthlyProduction = ProductionOrder::where('manufacturer_id', $manufacturer->id)
-            ->where('status', 'completed')
-            ->selectRaw('MONTH(completed_at) as month, SUM(quantity) as total_quantity')
-            ->whereYear('completed_at', now()->year)
-            ->groupBy('month')
-            ->get();
-        $qualityStats = QualityCheck::where('manufacturer_id', $manufacturer->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-        $topProducts = ProductionOrder::where('manufacturer_id', $manufacturer->id)
-            ->where('status', 'completed')
-            ->selectRaw('product_id, SUM(quantity) as total_quantity')
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->with('product')
-            ->take(5)
-            ->get();
-        return view('manufacturer.analytics.index', compact('monthlyProduction', 'qualityStats', 'topProducts'));
+        $user = auth()->user();
+        $service = new ManufacturerAnalyticsService($user);
+
+        $productionScheduling = $service->getProductionScheduling();
+        $materialConsumption = $service->getMaterialConsumption();
+        $orderFulfillment = $service->getOrderFulfillment();
+        $laborEfficiency = $service->getLaborEfficiency();
+        $qualityControl = $service->getQualityControl();
+        $costOptimization = $service->getCostOptimization();
+        $workflowAlerts = $service->getWorkflowAlerts();
+
+        return view('manufacturer.analytics.index', compact(
+            'productionScheduling',
+            'materialConsumption',
+            'orderFulfillment',
+            'laborEfficiency',
+            'qualityControl',
+            'costOptimization',
+            'workflowAlerts'
+        ));
     }
 
     /**

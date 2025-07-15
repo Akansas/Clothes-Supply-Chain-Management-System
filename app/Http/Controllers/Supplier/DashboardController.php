@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Delivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\SupplierAnalyticsService;
 
 class DashboardController extends Controller
 {
@@ -162,44 +163,23 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        $supplier = $user->rawMaterialSupplier;
-        
-        // Monthly sales data
-        $monthlySales = Order::where('supplier_id', $supplier->id)
-            ->where('status', 'delivered')
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->get();
+        $service = new SupplierAnalyticsService($user);
 
-        // Top materials by sales
-        $topMaterials = Product::where('supplier_id', $supplier->id)
-            ->join('order_items', 'products.id', '=', 'order_items.product_id')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.status', 'delivered')
-            ->selectRaw('products.name, SUM(order_items.quantity) as total_sold, SUM(order_items.total_price) as total_revenue')
-            ->groupBy('products.id', 'products.name')
-            ->orderBy('total_revenue', 'desc')
-            ->take(10)
-            ->get();
+        $demandForecasting = $service->getDemandForecasting();
+        $leadTimeTracking = $service->getLeadTimeTracking();
+        $materialCostAnalytics = $service->getMaterialCostAnalytics();
+        $qualityControlAnalysis = $service->getQualityControlAnalysis();
+        $clientSatisfaction = $service->getClientSatisfaction();
+        $capacityPlanning = $service->getCapacityPlanning();
 
-        // Order status distribution
-        $orderStatuses = Order::where('supplier_id', $supplier->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-
-        // Top manufacturers
-        $topManufacturers = Order::where('supplier_id', $supplier->id)
-            ->where('status', 'delivered')
-            ->join('manufacturers', 'orders.manufacturer_id', '=', 'manufacturers.id')
-            ->selectRaw('manufacturers.name, COUNT(*) as order_count, SUM(orders.total_amount) as total_spent')
-            ->groupBy('manufacturers.id', 'manufacturers.name')
-            ->orderBy('total_spent', 'desc')
-            ->take(10)
-            ->get();
-
-        return view('supplier.analytics', compact('monthlySales', 'topMaterials', 'orderStatuses', 'topManufacturers'));
+        return view('supplier.analytics', compact(
+            'demandForecasting',
+            'leadTimeTracking',
+            'materialCostAnalytics',
+            'qualityControlAnalysis',
+            'clientSatisfaction',
+            'capacityPlanning'
+        ));
     }
 
     /**
