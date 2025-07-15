@@ -12,7 +12,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->integer('assigned_count')->default(0);
+            // $table->integer('assigned_count')->default(0); // Already exists, skip to avoid migration error
         });
     }
 
