@@ -1,8 +1,10 @@
 @extends('layouts.app')
 @section('content')
 <div class="container py-4">
-    <h2>Auto Assignment Results</h2>
-    <a href="{{ route('tasks.index') }}" class="btn btn-secondary mb-3">Back to Tasks</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 mb-0">Auto Assignment Results</h1>
+        <a href="{{ route('home') }}" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -22,10 +24,30 @@
                     <td>{{ $result['task'] }}</td>
                     <td>{{ $result['shift'] }}</td>
                     <td>{{ $result['center'] }}</td>
-                    <td>{{ $result['status'] }}</td>
+                    <td>
+                        @if(strtolower($result['status']) === 'unassigned')
+                            Unassigned
+                            <span tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="All required positions for this task are already filled or constraints (shift, center, etc.) prevent assignment." style="cursor:pointer;">
+                                <i class="fas fa-info-circle text-info"></i>
+                            </span>
+                        @else
+                            {{ $result['status'] }}
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 </div>
 @endsection 
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+@endpush 

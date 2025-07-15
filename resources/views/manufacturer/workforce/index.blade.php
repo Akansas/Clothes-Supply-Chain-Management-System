@@ -3,9 +3,9 @@
 <div class="container py-4">
     <a href="{{ route('workforce.index') }}" class="btn btn-primary mb-3 me-2 disabled">Workers</a>
     <a href="{{ route('tasks.index') }}" class="btn btn-info mb-3 ms-2">Tasks</a>
-    <a href="{{ route('workforce.report') }}" class="btn btn-secondary mb-3 ms-2">Workforce Report</a>
     <a href="{{ route('supply-centers.index') }}" class="btn btn-success mb-3 ms-2">Supply Centers</a>
     <a href="{{ route('tasks.auto-assign') }}" class="btn btn-warning mb-3 ms-2">Auto Assign</a>
+    <a href="{{ route('workforce.report') }}" class="btn btn-secondary mb-3 ms-2">Workforce Report</a>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif

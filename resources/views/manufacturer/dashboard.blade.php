@@ -102,30 +102,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card bg-secondary text-white h-100">
-                                <div class="card-body">
-                                    <h4 class="mb-0">{{ $stats['total_supply_centers'] ?? 0 }}</h4>
-                                    <small>Supply Centers</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card bg-success text-white h-100">
-                                <div class="card-body">
-                                    <h4 class="mb-0">{{ $stats['total_shifts'] ?? 0 }}</h4>
-                                    <small>Shifts</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <canvas id="workersBySupplyCenterChart"></canvas>
-                        </div>
-                        <div class="col-md-6">
-                            <canvas id="workersByShiftChart"></canvas>
-                        </div>
                     </div>
                 </div>
             </div>

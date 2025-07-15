@@ -42,7 +42,7 @@ class DashboardController extends Controller
                 ->whereMonth('completed_at', now()->month)
                 ->sum('quantity'),
             // Workforce stats
-            'total_workers' => Worker::count(),
+            'total_workers' => Worker::where('manufacturer_id', $user->manufacturer_id)->count(),
             'total_supply_centers' => SupplyCenter::where('manufacturer_id', $user->manufacturer_id)->count(),
             'total_shifts' => Shift::where('manufacturer_id', $user->manufacturer_id)->count(),
         ];
