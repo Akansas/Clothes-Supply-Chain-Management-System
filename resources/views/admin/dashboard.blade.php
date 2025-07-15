@@ -192,35 +192,196 @@
 
     <!-- Analytics Section -->
     @if(isset($systemKpis) || isset($userActivity) || isset($workflowPerformance) || isset($compliance) || isset($riskDashboard) || isset($alertsSummary))
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
+    <div class="card mb-4 shadow-lg border-0">
+        <div class="card-header bg-info text-white d-flex align-items-center">
+            <i class="fas fa-chart-bar fa-lg me-2"></i>
             <h4 class="mb-0">Admin Analytics</h4>
         </div>
         <div class="card-body">
-            @if(isset($systemKpis))
-                <h5>System KPIs</h5>
-                <pre>{{ json_encode($systemKpis, JSON_PRETTY_PRINT) }}</pre>
-            @endif
-            @if(isset($userActivity))
-                <h5>User Activity</h5>
-                <pre>{{ json_encode($userActivity, JSON_PRETTY_PRINT) }}</pre>
-            @endif
-            @if(isset($workflowPerformance))
-                <h5>Workflow Performance</h5>
-                <pre>{{ json_encode($workflowPerformance, JSON_PRETTY_PRINT) }}</pre>
-            @endif
-            @if(isset($compliance))
-                <h5>Compliance & Audit</h5>
-                <pre>{{ json_encode($compliance, JSON_PRETTY_PRINT) }}</pre>
-            @endif
-            @if(isset($riskDashboard))
-                <h5>Risk & Resilience</h5>
-                <pre>{{ json_encode($riskDashboard, JSON_PRETTY_PRINT) }}</pre>
-            @endif
-            @if(isset($alertsSummary))
-                <h5>Alerts & Executive Summaries</h5>
-                <pre>{{ json_encode($alertsSummary, JSON_PRETTY_PRINT) }}</pre>
-            @endif
+            <div class="row g-3">
+                @if(isset($systemKpis))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-tachometer-alt fa-2x text-primary me-2"></i>
+                                <h6 class="mb-0">System KPIs</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Key performance indicators for the system.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Fulfillment Rate
+                                        <span class="fw-bold">{{ isset($systemKpis->fulfillment_rate) ? number_format($systemKpis->fulfillment_rate * 100, 2) . '%' : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Avg Lead Time (days)
+                                        <span class="fw-bold">{{ $systemKpis->avg_lead_time_days ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Cost Efficiency
+                                        <span class="fw-bold">{{ isset($systemKpis->cost_efficiency) ? number_format($systemKpis->cost_efficiency, 2) : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Service Level
+                                        <span class="fw-bold">{{ isset($systemKpis->service_level) ? number_format($systemKpis->service_level * 100, 2) . '%' : 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($userActivity))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-friends fa-2x text-success me-2"></i>
+                                <h6 class="mb-0">User Activity</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Recent user activity and role analysis.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Permission Usage
+                                        <span class="fw-bold">{{ is_array($userActivity->permission_usage) ? count($userActivity->permission_usage) : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Audit Trails
+                                        <span class="fw-bold">{{ is_array($userActivity->audit_trails) ? count($userActivity->audit_trails) : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Anomalies
+                                        <span class="fw-bold">{{ is_array($userActivity->anomalies) ? count($userActivity->anomalies) : 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($workflowPerformance))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-cogs fa-2x text-warning me-2"></i>
+                                <h6 class="mb-0">Workflow Performance</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Order throughput and bottlenecks.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Order Throughput
+                                        <span class="fw-bold">{{ is_array($workflowPerformance->order_throughput) ? count($workflowPerformance->order_throughput) : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Delivery Cycles
+                                        <span class="fw-bold">{{ $workflowPerformance->delivery_cycles ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Bottlenecks
+                                        <span class="fw-bold">{{ $workflowPerformance->bottlenecks ?? 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($compliance))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-clipboard-check fa-2x text-secondary me-2"></i>
+                                <h6 class="mb-0">Compliance & Audit</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Compliance, audits, and corrective actions.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Inspection Logs
+                                        <span class="fw-bold">{{ $compliance->inspection_logs ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Quality Audits (Pass Rate)
+                                        <span class="fw-bold">{{ isset($compliance->quality_audits->pass_rate) ? number_format($compliance->quality_audits->pass_rate * 100, 2) . '%' : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Compliance Flags
+                                        <span class="fw-bold">{{ $compliance->compliance_flags ?? 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($riskDashboard))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-exclamation-triangle fa-2x text-danger me-2"></i>
+                                <h6 class="mb-0">Risk & Resilience</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Risk indicators and supplier reliability.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Overdue Orders
+                                        <span class="fw-bold">{{ $riskDashboard->risk_indicators->overdue_orders ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Supplier Reliability
+                                        <span class="fw-bold">{{ $riskDashboard->supplier_reliability ?? 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if(isset($alertsSummary))
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-bell fa-2x text-info me-2"></i>
+                                <h6 class="mb-0">Alerts & Executive Summaries</h6>
+                            </div>
+                            <div class="text-muted small mb-2">Real-time alerts and executive summaries.</div>
+                            <div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Cost Spikes
+                                        <span class="fw-bold">{{ $alertsSummary->real_time_alerts->cost_spikes ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Stockouts
+                                        <span class="fw-bold">{{ $alertsSummary->real_time_alerts->stockouts ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Total Orders
+                                        <span class="fw-bold">{{ $alertsSummary->executive_summaries->total_orders ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Total Revenue
+                                        <span class="fw-bold">${{ isset($alertsSummary->executive_summaries->total_revenue) ? number_format($alertsSummary->executive_summaries->total_revenue, 2) : 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Total Users
+                                        <span class="fw-bold">{{ $alertsSummary->executive_summaries->total_users ?? 'N/A' }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
         </div>
     </div>
     @endif

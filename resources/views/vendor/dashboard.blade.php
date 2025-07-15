@@ -139,27 +139,122 @@
     @if(isset($applicationStats) || isset($productCategories) || isset($monthlyApplications) || isset($visitStats))
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white d-flex align-items-center">
+                    <i class="fas fa-chart-bar fa-lg me-2"></i>
                     <h5 class="mb-0">Vendor Analytics</h5>
                 </div>
                 <div class="card-body">
-                    @if(isset($applicationStats))
-                        <h6>Application Status Distribution</h6>
-                        <pre>{{ json_encode($applicationStats, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($productCategories))
-                        <h6>Product Category Distribution</h6>
-                        <pre>{{ json_encode($productCategories, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($monthlyApplications))
-                        <h6>Monthly Applications</h6>
-                        <pre>{{ json_encode($monthlyApplications, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
-                    @if(isset($visitStats))
-                        <h6>Facility Visit Statistics</h6>
-                        <pre>{{ json_encode($visitStats, JSON_PRETTY_PRINT) }}</pre>
-                    @endif
+                    <div class="row g-3">
+                        @if(isset($applicationStats))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-file-alt fa-2x text-primary me-2"></i>
+                                        <h6 class="mb-0">Application Status</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Distribution of application statuses.</div>
+                                    <div>
+                                        @if(is_iterable($applicationStats))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($applicationStats as $stat)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst($stat->status) }}</span>
+                                                        <span class="fw-bold">{{ $stat->count }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $applicationStats }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($productCategories))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-tshirt fa-2x text-success me-2"></i>
+                                        <h6 class="mb-0">Product Categories</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Distribution of product categories.</div>
+                                    <div>
+                                        @if(is_iterable($productCategories))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($productCategories as $cat)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst($cat->category) }}</span>
+                                                        <span class="fw-bold">{{ $cat->count }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $productCategories }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($monthlyApplications))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-calendar-alt fa-2x text-warning me-2"></i>
+                                        <h6 class="mb-0">Monthly Applications</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Applications submitted per month.</div>
+                                    <div>
+                                        @if(is_iterable($monthlyApplications))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($monthlyApplications as $app)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>Month {{ $app->month }}</span>
+                                                        <span class="fw-bold">{{ $app->count }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $monthlyApplications }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @if(isset($visitStats))
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-warehouse fa-2x text-secondary me-2"></i>
+                                        <h6 class="mb-0">Facility Visit Stats</h6>
+                                    </div>
+                                    <div class="text-muted small mb-2">Facility visit status distribution.</div>
+                                    <div>
+                                        @if(is_iterable($visitStats))
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($visitStats as $stat)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ ucfirst($stat->status) }}</span>
+                                                        <span class="fw-bold">{{ $stat->count }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span class="fw-bold">{{ $visitStats }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
