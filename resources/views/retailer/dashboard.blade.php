@@ -182,6 +182,48 @@
             </div>
         </div>
     </div>
+    <!-- Analytics Section -->
+    @if(isset($salesInsights) || isset($inventoryIntelligence) || isset($customerBehavior) || isset($pricingPromotion) || isset($omnichannelEngagement) || isset($actionableAlerts) || isset($marketTrends))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Retailer Analytics</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($salesInsights))
+                        <h6>Sales Insights</h6>
+                        <pre>{{ json_encode($salesInsights, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($inventoryIntelligence))
+                        <h6>Inventory Intelligence</h6>
+                        <pre>{{ json_encode($inventoryIntelligence, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($customerBehavior))
+                        <h6>Customer Behavior</h6>
+                        <pre>{{ json_encode($customerBehavior, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($pricingPromotion))
+                        <h6>Pricing & Promotion</h6>
+                        <pre>{{ json_encode($pricingPromotion, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($omnichannelEngagement))
+                        <h6>Omnichannel Engagement</h6>
+                        <pre>{{ json_encode($omnichannelEngagement, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($actionableAlerts))
+                        <h6>Actionable Alerts</h6>
+                        <pre>{{ json_encode($actionableAlerts, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($marketTrends))
+                        <h6>Market Trends</h6>
+                        <pre>{{ json_encode($marketTrends, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
     <div class="row mb-4">
         <div class="col-12">
             <retailer-chat :user-id="{{ auth()->id() }}"></retailer-chat>

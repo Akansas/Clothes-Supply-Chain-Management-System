@@ -150,5 +150,40 @@
             </ul>
         </div>
     </div>
+
+    <!-- Analytics Section -->
+    @if(isset($systemKpis) || isset($userActivity) || isset($workflowPerformance) || isset($compliance) || isset($riskDashboard) || isset($alertsSummary))
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Admin Analytics</h4>
+        </div>
+        <div class="card-body">
+            @if(isset($systemKpis))
+                <h5>System KPIs</h5>
+                <pre>{{ json_encode($systemKpis, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+            @if(isset($userActivity))
+                <h5>User Activity</h5>
+                <pre>{{ json_encode($userActivity, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+            @if(isset($workflowPerformance))
+                <h5>Workflow Performance</h5>
+                <pre>{{ json_encode($workflowPerformance, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+            @if(isset($compliance))
+                <h5>Compliance & Audit</h5>
+                <pre>{{ json_encode($compliance, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+            @if(isset($riskDashboard))
+                <h5>Risk & Resilience</h5>
+                <pre>{{ json_encode($riskDashboard, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+            @if(isset($alertsSummary))
+                <h5>Alerts & Executive Summaries</h5>
+                <pre>{{ json_encode($alertsSummary, JSON_PRETTY_PRINT) }}</pre>
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 @endsection 

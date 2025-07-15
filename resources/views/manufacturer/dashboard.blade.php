@@ -166,6 +166,49 @@
         }
     </script>
 
+    <!-- Analytics Section -->
+    @if(isset($productionScheduling) || isset($materialConsumption) || isset($orderFulfillment) || isset($laborEfficiency) || isset($qualityControl) || isset($costOptimization) || isset($workflowAlerts))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Manufacturing Analytics</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($productionScheduling))
+                        <h6>Production Scheduling</h6>
+                        <pre>{{ json_encode($productionScheduling, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($materialConsumption))
+                        <h6>Material Consumption</h6>
+                        <pre>{{ json_encode($materialConsumption, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($orderFulfillment))
+                        <h6>Order Fulfillment</h6>
+                        <pre>{{ json_encode($orderFulfillment, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($laborEfficiency))
+                        <h6>Labor Efficiency</h6>
+                        <pre>{{ json_encode($laborEfficiency, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($qualityControl))
+                        <h6>Quality Control</h6>
+                        <pre>{{ json_encode($qualityControl, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($costOptimization))
+                        <h6>Cost Optimization</h6>
+                        <pre>{{ json_encode($costOptimization, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($workflowAlerts))
+                        <h6>Workflow Alerts</h6>
+                        <pre>{{ json_encode($workflowAlerts, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="row">
         <!-- Finished Products Table -->
         <div class="col-12 mb-4">

@@ -135,6 +135,37 @@
       </div>
     @endif
 
+    <!-- Analytics Section -->
+    @if(isset($applicationStats) || isset($productCategories) || isset($monthlyApplications) || isset($visitStats))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Vendor Analytics</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($applicationStats))
+                        <h6>Application Status Distribution</h6>
+                        <pre>{{ json_encode($applicationStats, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($productCategories))
+                        <h6>Product Category Distribution</h6>
+                        <pre>{{ json_encode($productCategories, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($monthlyApplications))
+                        <h6>Monthly Applications</h6>
+                        <pre>{{ json_encode($monthlyApplications, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($visitStats))
+                        <h6>Facility Visit Statistics</h6>
+                        <pre>{{ json_encode($visitStats, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Application History Table --}}
     @if($vendor->applications && $vendor->applications->count() > 1)
         <h5 class="mt-5">Application History</h5>

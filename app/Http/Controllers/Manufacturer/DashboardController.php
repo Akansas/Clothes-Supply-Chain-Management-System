@@ -103,7 +103,31 @@ class DashboardController extends Controller
             ->latest()
             ->take(10)
             ->get();
-        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'products', 'retailerOrders', 'charts'));
+        // Manufacturer Analytics
+        $analyticsService = new ManufacturerAnalyticsService($user);
+        $productionScheduling = $analyticsService->getProductionScheduling();
+        $materialConsumption = $analyticsService->getMaterialConsumption();
+        $orderFulfillment = $analyticsService->getOrderFulfillment();
+        $laborEfficiency = $analyticsService->getLaborEfficiency();
+        $qualityControl = $analyticsService->getQualityControl();
+        $costOptimization = $analyticsService->getCostOptimization();
+        $workflowAlerts = $analyticsService->getWorkflowAlerts();
+        return view('manufacturer.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'activeStages',
+            'user',
+            'products',
+            'retailerOrders',
+            'charts',
+            'productionScheduling',
+            'materialConsumption',
+            'orderFulfillment',
+            'laborEfficiency',
+            'qualityControl',
+            'costOptimization',
+            'workflowAlerts'
+        ));
     }
 
     /**

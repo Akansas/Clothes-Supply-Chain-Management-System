@@ -36,7 +36,7 @@ class DashboardController extends Controller
         $totalDeliveries = Delivery::count();
         $pendingDeliveries = Delivery::where('status', 'pending')->count();
         $totalQualityChecks = QualityCheck::count();
-        $pendingQualityChecks = QualityCheck::whereNull('pass_fail')->count(); // Quality checks not yet completed
+        $pendingQualityChecks = QualityCheck::whereNull('pass_fail')->count();
         $totalFacilityVisits = FacilityVisit::count();
         $scheduledVisits = FacilityVisit::where('status', 'scheduled')->count();
         $totalProductionOrders = ProductionOrder::count();
@@ -87,12 +87,59 @@ class DashboardController extends Controller
             ]
         ];
 
+        // Admin Analytics (example structure, adapt as needed)
+        $systemKpis = (object) [
+            'fulfillment_rate' => $completedOrders && $totalOrders ? $completedOrders / $totalOrders : null,
+            'avg_lead_time_days' => Order::avg('lead_time_days'),
+            'cost_efficiency' => Order::avg('total_amount'),
+            'service_level' => $completedOrders && $totalOrders ? $completedOrders / $totalOrders : null,
+            'department_comparison' => [
+                'suppliers' => $userCounts['raw_material_supplier'] ?? 0,
+                'manufacturers' => $userCounts['manufacturer'] ?? 0,
+                'warehouses' => $userCounts['warehouse_manager'] ?? 0,
+                'retailers' => $userCounts['retailer'] ?? 0,
+                'delivery' => $userCounts['delivery_personnel'] ?? 0,
+                'customers' => $userCounts['customer'] ?? 0,
+                'inspectors' => $userCounts['inspector'] ?? 0,
+            ],
+            'trends' => Order::selectRaw('DATE_FORMAT(created_at, "%b %Y") as month, COUNT(*) as count')
+                ->groupBy('month')
+                ->orderByRaw('MIN(created_at)')
+                ->pluck('count', 'month')->toArray(),
+        ];
+        $userActivity = (object) [
+            'login_patterns' => [], // Fill with actual login data if available
+            'permission_usage' => $roleCounts,
+            'audit_trails' => [], // Fill with actual audit data if available
+            'anomalies' => [], // Fill with actual anomaly data if available
+        ];
+        $workflowPerformance = (object) [
+            'order_throughput' => [], // Fill with actual throughput data if available
+            'delivery_cycles' => null,
+            'bottlenecks' => null,
+            'exception_handling' => null,
+        ];
+        $compliance = (object) [
+            'inspection_logs' => null,
+            'quality_audits' => (object) ['pass_rate' => null, 'fail_rate' => null],
+            'compliance_flags' => null,
+            'regulation_adherence' => null,
+            'corrective_actions' => null,
+        ];
+        $riskDashboard = (object) [
+            'risk_indicators' => (object) ['overdue_orders' => null],
+            'supplier_reliability' => null,
+        ];
+        $alertsSummary = (object) [
+            'real_time_alerts' => (object) ['cost_spikes' => null, 'stockouts' => null],
+            'executive_summaries' => (object) ['total_orders' => $totalOrders, 'total_revenue' => Order::sum('total_amount'), 'total_users' => User::count()],
+        ];
         return view('admin.dashboard', compact(
-            'roles', 
-            'roleCounts', 
+            'roles',
+            'roleCounts',
             'users',
-            'totalOrders', 
-            'pendingOrders', 
+            'totalOrders',
+            'pendingOrders',
             'completedOrders',
             'totalProducts',
             'activeProducts',
@@ -108,7 +155,13 @@ class DashboardController extends Controller
             'recentDeliveries',
             'recentQualityChecks',
             'recentFacilityVisits',
-            'supplyChainFlow'
+            'supplyChainFlow',
+            'systemKpis',
+            'userActivity',
+            'workflowPerformance',
+            'compliance',
+            'riskDashboard',
+            'alertsSummary'
         ));
     }
 

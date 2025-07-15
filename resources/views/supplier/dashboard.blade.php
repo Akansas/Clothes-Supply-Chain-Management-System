@@ -124,6 +124,45 @@
         </div>
     </div>
 
+    <!-- Analytics Section -->
+    @if(isset($demandForecasting) || isset($leadTimeTracking) || isset($materialCostAnalytics) || isset($qualityControlAnalysis) || isset($clientSatisfaction) || isset($capacityPlanning))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Supplier Analytics</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($demandForecasting))
+                        <h6>Demand Forecasting</h6>
+                        <pre>{{ json_encode($demandForecasting, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($leadTimeTracking))
+                        <h6>Lead Time Tracking</h6>
+                        <pre>{{ json_encode($leadTimeTracking, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($materialCostAnalytics))
+                        <h6>Material Cost Analytics</h6>
+                        <pre>{{ json_encode($materialCostAnalytics, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($qualityControlAnalysis))
+                        <h6>Quality Control Analysis</h6>
+                        <pre>{{ json_encode($qualityControlAnalysis, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($clientSatisfaction))
+                        <h6>Client Satisfaction</h6>
+                        <pre>{{ json_encode($clientSatisfaction, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                    @if(isset($capacityPlanning))
+                        <h6>Capacity Planning</h6>
+                        <pre>{{ json_encode($capacityPlanning, JSON_PRETTY_PRINT) }}</pre>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Main Content Tabs -->
     <div class="row">
         <div class="col-12">

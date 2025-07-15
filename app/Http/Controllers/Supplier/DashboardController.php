@@ -84,7 +84,31 @@ class DashboardController extends Controller
 
         $linkedManufacturers = $supplier->manufacturers()->with('user')->get();
 
-        return view('supplier.dashboard', compact('stats', 'recentOrders', 'pendingDeliveries', 'topMaterials', 'supplier', 'orders', 'linkedManufacturers'))->with('user', $user);
+        // Supplier Analytics
+        $service = new SupplierAnalyticsService($user);
+        $demandForecasting = $service->getDemandForecasting();
+        $leadTimeTracking = $service->getLeadTimeTracking();
+        $materialCostAnalytics = $service->getMaterialCostAnalytics();
+        $qualityControlAnalysis = $service->getQualityControlAnalysis();
+        $clientSatisfaction = $service->getClientSatisfaction();
+        $capacityPlanning = $service->getCapacityPlanning();
+
+        return view('supplier.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'pendingDeliveries',
+            'topMaterials',
+            'supplier',
+            'orders',
+            'linkedManufacturers',
+            'user',
+            'demandForecasting',
+            'leadTimeTracking',
+            'materialCostAnalytics',
+            'qualityControlAnalysis',
+            'clientSatisfaction',
+            'capacityPlanning'
+        ));
     }
 
     /**

@@ -68,11 +68,41 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // Add these lines:
+        // Product category distribution
+        $productCategories = Product::where('vendor_id', $vendor->id)
+            ->selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        // Monthly applications
+        $monthlyApplications = VendorApplication::where('vendor_id', $vendor->id)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', now()->year)
+            ->groupBy('month')
+            ->get();
+
+        // Facility visit statistics
+        $visitStats = FacilityVisit::where('vendor_id', $vendor->id)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get();
+
         $latestApplication = $vendor->applications()->latest()->first();
         $latestVisit = $vendor->facilityVisits()->latest('scheduled_date')->first();
 
-        return view('vendor.dashboard', compact('stats', 'recentApplications', 'upcomingVisits', 'recentProducts', 'applicationStats', 'vendor', 'latestApplication', 'latestVisit'));
+        return view('vendor.dashboard', compact(
+            'stats',
+            'recentApplications',
+            'upcomingVisits',
+            'recentProducts',
+            'applicationStats',
+            'productCategories',
+            'monthlyApplications',
+            'visitStats',
+            'vendor',
+            'latestApplication',
+            'latestVisit'
+        ));
     }
 
     /**

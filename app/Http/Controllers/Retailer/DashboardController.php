@@ -61,7 +61,29 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('retailer.dashboard', compact('stats', 'recentOrders', 'lowStockItems', 'retailStore'));
+        // Retailer Analytics
+        $service = new RetailerAnalyticsService($user);
+        $salesInsights = $service->getSalesInsights();
+        $inventoryIntelligence = $service->getInventoryIntelligence();
+        $customerBehavior = $service->getCustomerBehavior();
+        $pricingPromotion = $service->getPricingPromotion();
+        $omnichannelEngagement = $service->getOmnichannelEngagement();
+        $actionableAlerts = $service->getActionableAlerts();
+        $marketTrends = $service->getMarketTrends();
+
+        return view('retailer.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'lowStockItems',
+            'retailStore',
+            'salesInsights',
+            'inventoryIntelligence',
+            'customerBehavior',
+            'pricingPromotion',
+            'omnichannelEngagement',
+            'actionableAlerts',
+            'marketTrends'
+        ));
     }
 
     /**
