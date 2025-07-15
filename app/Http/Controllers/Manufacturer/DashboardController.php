@@ -19,13 +19,15 @@ use App\Services\ManufacturerAnalyticsService;
 use App\Models\Worker;
 use App\Models\SupplyCenter;
 use App\Models\Shift;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show manufacturer dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         $manufacturer = \App\Models\Manufacturer::first();
@@ -112,6 +114,25 @@ class DashboardController extends Controller
         $qualityControl = $analyticsService->getQualityControl();
         $costOptimization = $analyticsService->getCostOptimization();
         $workflowAlerts = $analyticsService->getWorkflowAlerts();
+
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
         return view('manufacturer.dashboard', compact(
             'stats',
             'recentOrders',
@@ -126,7 +147,9 @@ class DashboardController extends Controller
             'laborEfficiency',
             'qualityControl',
             'costOptimization',
-            'workflowAlerts'
+            'workflowAlerts',
+            'segments',
+            'forecast'
         ));
     }
 

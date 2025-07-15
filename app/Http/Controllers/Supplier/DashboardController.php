@@ -12,13 +12,15 @@ use App\Models\Delivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\SupplierAnalyticsService;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show supplier dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         $supplier = $user->rawMaterialSupplier;
@@ -93,6 +95,24 @@ class DashboardController extends Controller
         $clientSatisfaction = $service->getClientSatisfaction();
         $capacityPlanning = $service->getCapacityPlanning();
 
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
         return view('supplier.dashboard', compact(
             'stats',
             'recentOrders',
@@ -107,7 +127,9 @@ class DashboardController extends Controller
             'materialCostAnalytics',
             'qualityControlAnalysis',
             'clientSatisfaction',
-            'capacityPlanning'
+            'capacityPlanning',
+            'segments',
+            'forecast'
         ));
     }
 

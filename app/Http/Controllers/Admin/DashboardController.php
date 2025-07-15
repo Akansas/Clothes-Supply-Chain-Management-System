@@ -14,10 +14,12 @@ use App\Models\FacilityVisit;
 use App\Models\ProductionOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $roles = Role::where('name', '!=', 'admin')->get()->unique('name');
         $userCounts = [];
@@ -134,6 +136,24 @@ class DashboardController extends Controller
             'real_time_alerts' => (object) ['cost_spikes' => null, 'stockouts' => null],
             'executive_summaries' => (object) ['total_orders' => $totalOrders, 'total_revenue' => Order::sum('total_amount'), 'total_users' => User::count()],
         ];
+
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $segments = $ml->segmentCustomers($customers);
+        $forecast = $ml->predictDemand($sales);
+
         return view('admin.dashboard', compact(
             'roles',
             'roleCounts',
@@ -161,7 +181,9 @@ class DashboardController extends Controller
             'workflowPerformance',
             'compliance',
             'riskDashboard',
-            'alertsSummary'
+            'alertsSummary',
+            'segments',
+            'forecast'
         ));
     }
 

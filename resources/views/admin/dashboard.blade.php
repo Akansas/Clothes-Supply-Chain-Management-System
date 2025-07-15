@@ -151,6 +151,45 @@
         </div>
     </div>
 
+    <h3>Customer Segments</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer ID</th>
+                <th>Segment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($segments as $seg)
+                <tr>
+                    <td>{{ $seg['id'] }}</td>
+                    <td>{{ $seg['segment'] }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <h3>Demand Forecast (Next 14 Days)</h3>
+    <canvas id="forecastChart"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const forecast = @json($forecast);
+        const labels = Object.keys(forecast);
+        const data = Object.values(forecast);
+        new Chart(document.getElementById('forecastChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Predicted Sales',
+                    data: data,
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            }
+        });
+    </script>
+
     <!-- Analytics Section -->
     @if(isset($systemKpis) || isset($userActivity) || isset($workflowPerformance) || isset($compliance) || isset($riskDashboard) || isset($alertsSummary))
     <div class="card mb-4">

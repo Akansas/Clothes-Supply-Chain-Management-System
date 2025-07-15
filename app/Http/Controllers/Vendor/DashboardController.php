@@ -12,13 +12,15 @@ use App\Models\Design;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show vendor dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         $vendor = $user->vendor;
@@ -90,6 +92,24 @@ class DashboardController extends Controller
         $latestApplication = $vendor->applications()->latest()->first();
         $latestVisit = $vendor->facilityVisits()->latest('scheduled_date')->first();
 
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
         return view('vendor.dashboard', compact(
             'stats',
             'recentApplications',
@@ -101,7 +121,9 @@ class DashboardController extends Controller
             'visitStats',
             'vendor',
             'latestApplication',
-            'latestVisit'
+            'latestVisit',
+            'segments',
+            'forecast'
         ));
     }
 

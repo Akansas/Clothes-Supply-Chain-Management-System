@@ -13,13 +13,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\RetailerAnalyticsService;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show retailer dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         
@@ -71,6 +73,24 @@ class DashboardController extends Controller
         $actionableAlerts = $service->getActionableAlerts();
         $marketTrends = $service->getMarketTrends();
 
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
         return view('retailer.dashboard', compact(
             'stats',
             'recentOrders',
@@ -82,7 +102,9 @@ class DashboardController extends Controller
             'pricingPromotion',
             'omnichannelEngagement',
             'actionableAlerts',
-            'marketTrends'
+            'marketTrends',
+            'segments',
+            'forecast'
         ));
     }
 
