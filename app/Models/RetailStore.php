@@ -48,6 +48,11 @@ class RetailStore extends Model
      */
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'retail_store_id');
+    }
+    public function shipments()
+    {
+        return
+        $this->hasMany(\App\Models\Shipment::class);
     }
 }

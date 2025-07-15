@@ -16,6 +16,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\ManufacturerAnalyticsService;
+use App\Models\Worker;
+use App\Models\SupplyCenter;
+use App\Models\Shift;
 
 class DashboardController extends Controller
 {
@@ -39,6 +42,29 @@ class DashboardController extends Controller
                 ->where('status', 'completed')
                 ->whereMonth('completed_at', now()->month)
                 ->sum('quantity'),
+            // Workforce stats
+            'total_workers' => Worker::where('manufacturer_id', $user->manufacturer_id)->count(),
+            'total_supply_centers' => SupplyCenter::where('manufacturer_id', $user->manufacturer_id)->count(),
+            'total_shifts' => Shift::where('manufacturer_id', $user->manufacturer_id)->count(),
+        ];
+        // Workforce charts
+        $supplyCenters = SupplyCenter::where('manufacturer_id', $user->manufacturer_id)->get();
+        $workersBySupplyCenter = [
+            'labels' => $supplyCenters->pluck('name')->toArray(),
+            'data' => $supplyCenters->map(function($center) {
+                return $center->workers()->count();
+            })->toArray(),
+        ];
+        $shifts = Shift::where('manufacturer_id', $user->manufacturer_id)->get();
+        $workersByShift = [
+            'labels' => $shifts->pluck('name')->toArray(),
+            'data' => $shifts->map(function($shift) {
+                return $shift->assignments()->count();
+            })->toArray(),
+        ];
+        $charts = [
+            'workers_by_supply_center' => $workersBySupplyCenter,
+            'workers_by_shift' => $workersByShift,
         ];
         // Recent production orders
         $recentOrders = ProductionOrder::where('manufacturer_id', $user->id)
@@ -77,7 +103,7 @@ class DashboardController extends Controller
             ->latest()
             ->take(10)
             ->get();
-        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'products', 'retailerOrders'));
+        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'products', 'retailerOrders', 'charts'));
     }
 
     /**
@@ -756,5 +782,13 @@ class DashboardController extends Controller
             $order->save();
         }
         return redirect()->back()->with('success', 'Order marked as delivered.');
+    }
+
+    /**
+     * Show the order processing page
+     */
+    public function orderProcessing()
+    {
+        return view('manufacturer.order-processing');
     }
 }

@@ -235,7 +235,7 @@ class User extends Authenticatable
      */
     public function manufacturer()
     {
-        return $this->belongsTo(Manufacturer::class);
+        return $this->hasOne(\App\Models\Manufacturer::class, 'user_id');
     }
 
     /**
@@ -260,5 +260,15 @@ class User extends Authenticatable
     public function conversations()
     {
         return $this->belongsToMany(Conversation::class, 'conversation_user');
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
     }
 }
