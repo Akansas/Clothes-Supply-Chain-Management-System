@@ -106,7 +106,8 @@ class User extends Authenticatable
     /**
      * Get the conversations where user is sender.
      */
-    public function sentConversations()
+    /*
+     public function sentConversations()
     {
         return $this->hasMany(Conversation::class, 'sender_id');
     }
@@ -114,7 +115,8 @@ class User extends Authenticatable
     /**
      * Get the conversations where user is receiver.
      */
-    public function receivedConversations()
+    /*
+     public function receivedConversations()
     {
         return $this->hasMany(Conversation::class, 'receiver_id');
     }
@@ -233,10 +235,17 @@ class User extends Authenticatable
     /**
      * Get the manufacturer profile associated with the user.
      */
+    
+     //public function manufacturer()
+    //{
+    //    return $this->belongsTo(Manufacturer::class);
+    //}
+
     public function manufacturer()
     {
-        return $this->belongsTo(Manufacturer::class);
+    return $this->hasOne(\App\Models\Manufacturer::class, 'user_id');
     }
+
 
     /**
      * Get the raw material supplier associated with the user.
@@ -257,8 +266,9 @@ class User extends Authenticatable
     /**
      * Get the conversations for this user (all roles).
      */
-    public function conversations()
-    {
-        return $this->belongsToMany(Conversation::class, 'conversation_user');
-    }
+    
+    // public function conversations()
+    //{
+   //     return $this->belongsToMany(Conversation::class, 'conversation_user');
+    //}
 }

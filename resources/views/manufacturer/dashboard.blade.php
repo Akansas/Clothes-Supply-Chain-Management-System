@@ -7,6 +7,25 @@
             <p class="lead text-muted">Manage production orders, quality checks, and manufacturing processes</p>
         </div>
     </div>
+    
+    {{-- Chat Button --}}
+   <div class="container"> 
+  @if(auth()->user()->role && auth()->user()->role->name === 'manufacturer')
+    @php
+      // Assuming you have at least one supplier
+      $supplier = \App\Models\User::whereHas('rawMaterialSupplier')->first();
+    @endphp
+
+    @if($supplier)
+      <a href="{{ route('manufacturer.chat.index', ['partner' => $supplier->id]) }}" class="btn btn-primary mb-3">
+        Chat with Supplier
+      </a>
+    @else
+      <p>No supplier available for chat.</p>
+    @endif
+  @endif
+</div>
+
 
     <!-- Action Buttons -->
     <div class="row mb-4">
