@@ -199,10 +199,32 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::get('workforce-report', [App\Http\Controllers\Manufacturer\TaskController::class, 'report'])->name('workforce.report');
     // Inventory Management
     Route::resource('inventory', App\Http\Controllers\Manufacturer\InventoryController::class);
+    // Raw Material CRUD
+    Route::get('inventory/raw-materials/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'createRawMaterial'])->name('inventory.raw-materials.create');
+    Route::post('inventory/raw-materials', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeRawMaterial'])->name('inventory.raw-materials.store');
+    Route::get('inventory/raw-materials/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editRawMaterial'])->name('inventory.raw-materials.edit');
+    Route::put('inventory/raw-materials/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateRawMaterial'])->name('inventory.raw-materials.update');
+    Route::delete('inventory/raw-materials/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'destroyRawMaterial'])->name('inventory.raw-materials.destroy');
+    // Supplier CRUD
+    Route::get('inventory/suppliers/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'createSupplier'])->name('inventory.suppliers.create');
+    Route::post('inventory/suppliers', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeSupplier'])->name('inventory.suppliers.store');
+    Route::get('inventory/suppliers/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editSupplier'])->name('inventory.suppliers.edit');
+    Route::put('inventory/suppliers/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateSupplier'])->name('inventory.suppliers.update');
+    Route::delete('inventory/suppliers/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'destroySupplier'])->name('inventory.suppliers.destroy');
     // Order Processing
     Route::get('/order-processing', [App\Http\Controllers\Manufacturer\DashboardController::class, 'orderProcessing'])->name('manufacturer.order-processing');
     Route::resource('supply-centers', App\Http\Controllers\Manufacturer\SupplyCenterController::class);
     Route::get('auto-assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'autoAssign'])->name('tasks.auto-assign');
+    // Incoming Shipment CRUD
+    Route::get('inventory/incoming-shipments/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'createIncomingShipment'])->name('inventory.incoming-shipments.create');
+    Route::post('inventory/incoming-shipments', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeIncomingShipment'])->name('inventory.incoming-shipments.store');
+    Route::get('inventory/incoming-shipments/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editIncomingShipment'])->name('inventory.incoming-shipments.edit');
+    Route::put('inventory/incoming-shipments/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateIncomingShipment'])->name('inventory.incoming-shipments.update');
+    Route::delete('inventory/incoming-shipments/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'destroyIncomingShipment'])->name('inventory.incoming-shipments.destroy');
+    // Inventory Adjustment
+    Route::get('inventory/adjustments/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'showAdjustmentForm'])->name('inventory.adjustments.create');
+    Route::post('inventory/adjustments', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeAdjustment'])->name('inventory.adjustments.store');
+    Route::get('inventory/adjustments', [App\Http\Controllers\Manufacturer\InventoryController::class, 'listAdjustments'])->name('inventory.adjustments.index');
 });
 
 // Redirect old workers URLs to new workforce management

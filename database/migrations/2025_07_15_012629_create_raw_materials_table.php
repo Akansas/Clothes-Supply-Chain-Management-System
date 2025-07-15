@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('raw_materials', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->integer('quantity')->default(0);
-            $table->integer('reorder_level')->default(0);
-            $table->string('unit')->default('pcs');
-            $table->unsignedBigInteger('supplier_id')->nullable();
-            $table->string('status')->default('available'); // available, low, out, etc.
-            $table->timestamps();
-            $table->foreign('supplier_id')->references('id')->on('suppliers')->nullOnDelete();
-        });
+        // Schema::create('raw_materials', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('name');
+        //     $table->text('description')->nullable();
+        //     $table->integer('quantity')->default(0);
+        //     $table->integer('reorder_level')->default(0);
+        //     $table->string('unit')->default('pcs');
+        //     $table->unsignedBigInteger('supplier_id')->nullable();
+        //     $table->string('status')->default('available'); // available, low, out, etc.
+        //     $table->timestamps();
+        //     $table->foreign('supplier_id')->references('id')->on('suppliers')->nullOnDelete();
+        // });
     }
 
     /**
