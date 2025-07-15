@@ -4,16 +4,25 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\SendSupplierReports;
 
 class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule): void
+    protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('send:supplier-reports')->daily();
+        $schedule->command('send:delivery-partner-reports')->daily();
+        $schedule->command('send:warehouse-manager-reports')->daily();
+        $schedule->command('send:manufacturer-reports')->daily();
+        
+                     
+
     }
+    
+    
 
     /**
      * Register the commands for the application.
@@ -24,8 +33,10 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-
     protected $commands = [
-        \App\Console\Commands\MigrateRetailerOrdersToProductionOrders::class,
+        SendSupplierReports::class,
+        \App\Console\Commands\ScheduleFacilityVisitsForAllVendors::class,
     ];
+
+
 }

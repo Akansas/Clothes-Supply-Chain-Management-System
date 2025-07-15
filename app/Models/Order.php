@@ -199,4 +199,9 @@ class Order extends Model
         }
         return false;
     }
+    public function supplier()
+{
+    return $this->belongsTo(Supplier::class);
+}
+
 }

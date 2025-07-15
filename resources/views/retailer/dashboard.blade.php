@@ -182,5 +182,10 @@
             </div>
         </div>
     </div>
+    <div class="row mb-4">
+        <div class="col-12">
+            <retailer-chat :user-id="{{ auth()->id() }}"></retailer-chat>
+        </div>
+    </div>
 </div>
 @endsection 

@@ -43,7 +43,6 @@ class DashboardController extends Controller
 
         // Recent applications
         $recentApplications = VendorApplication::where('vendor_id', $vendor->id)
-            ->with(['product'])
             ->latest()
             ->take(5)
             ->get();
@@ -69,7 +68,11 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        return view('vendor.dashboard', compact('stats', 'recentApplications', 'upcomingVisits', 'recentProducts', 'applicationStats', 'vendor'));
+        // Add these lines:
+        $latestApplication = $vendor->applications()->latest()->first();
+        $latestVisit = $vendor->facilityVisits()->latest('scheduled_date')->first();
+
+        return view('vendor.dashboard', compact('stats', 'recentApplications', 'upcomingVisits', 'recentProducts', 'applicationStats', 'vendor', 'latestApplication', 'latestVisit'));
     }
 
     /**
@@ -244,7 +247,6 @@ class DashboardController extends Controller
         $vendor = $user->vendor;
         
         $application = VendorApplication::where('vendor_id', $vendor->id)
-            ->with(['product', 'facilityVisits'])
             ->findOrFail($id);
 
         return view('vendor.applications.show', compact('application'));
@@ -272,28 +274,25 @@ class DashboardController extends Controller
         $vendor = $user->vendor;
         
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'application_type' => 'required|in:new_product,product_update,quality_certification',
-            'description' => 'required|string',
-            'expected_volume' => 'required|integer|min:1',
-            'target_price' => 'required|numeric|min:0',
-            'timeline' => 'required|string',
-            'additional_notes' => 'nullable|string',
+            'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB max
         ]);
 
-        $application = VendorApplication::create([
+        // Store the PDF
+        $file = $request->file('pdf');
+        $pdfPath = $file->store('vendor_applications', 'public');
+        $originalFilename = $file->getClientOriginalName();
+
+        $application = \App\Models\VendorApplication::create([
             'vendor_id' => $vendor->id,
-            'product_id' => $request->product_id,
-            'application_type' => $request->application_type,
-            'description' => $request->description,
-            'expected_volume' => $request->expected_volume,
-            'target_price' => $request->target_price,
-            'timeline' => $request->timeline,
-            'additional_notes' => $request->additional_notes,
+            'pdf_path' => $pdfPath,
+            'original_filename' => $originalFilename,
             'status' => 'pending',
         ]);
 
-        return redirect()->route('vendor.applications.show', $application->id)
+        // Dispatch validation job
+        \App\Jobs\ProcessVendorValidation::dispatch($application->id);
+
+        return redirect()->route('vendor.dashboard')
             ->with('success', 'Application submitted successfully!');
     }
 
@@ -615,6 +614,7 @@ class DashboardController extends Controller
      */
     public function updateProfile(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
         $vendor = $user->vendor;
         
@@ -629,7 +629,11 @@ class DashboardController extends Controller
             'certifications' => 'nullable|string',
         ]);
 
-        $user->update($request->only(['name', 'email', 'phone']));
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ]);
         
         if ($vendor) {
             $vendor->update([

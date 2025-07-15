@@ -71,7 +71,13 @@ Route::get('/home', function () {
 })->name('home');
 
 // Default dashboard for users without roles
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if ($user && $user->role && method_exists($user->role, 'getDashboardRoute')) {
+        return redirect($user->role->getDashboardRoute());
+    }
+    return redirect('/'); // Or show a 404 or error page
+})->name('dashboard');
 
 // Vendor Routes
 Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () {
@@ -116,10 +122,11 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
     Route::put('/profile', [App\Http\Controllers\Vendor\DashboardController::class, 'updateProfile'])->name('vendor.profile.update');
     // Profile creation route
     Route::get('/profile/create', [App\Http\Controllers\Vendor\ProfileController::class, 'create'])->name('vendor.profile.create');
+    Route::post('/profile', [App\Http\Controllers\Vendor\ProfileController::class, 'store'])->name('vendor.profile.store');
 });
 
 // Manufacturer Routes
-Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(function () {
+Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Manufacturer\DashboardController::class, 'index'])->name('manufacturer.dashboard');
     
     // Production Orders
@@ -184,7 +191,24 @@ Route::prefix('manufacturer')->middleware(['auth', 'role:manufacturer'])->group(
 
     // Retailer Orders Management
     Route::get('/retailer-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'retailerOrders'])->name('manufacturer.retailer-orders');
+
+    // Workforce Management
+    Route::resource('workforce', App\Http\Controllers\Manufacturer\WorkforceController::class);
+    Route::resource('tasks', App\Http\Controllers\Manufacturer\TaskController::class);
+    Route::post('tasks/{task}/assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'assign'])->name('tasks.assign');
+    Route::get('workforce-report', [App\Http\Controllers\Manufacturer\TaskController::class, 'report'])->name('workforce.report');
+    // Inventory Management
+    Route::resource('inventory', App\Http\Controllers\Manufacturer\InventoryController::class);
+    // Order Processing
+    Route::get('/order-processing', [App\Http\Controllers\Manufacturer\DashboardController::class, 'orderProcessing'])->name('manufacturer.order-processing');
+    Route::resource('supply-centers', App\Http\Controllers\Manufacturer\SupplyCenterController::class);
+    Route::get('auto-assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'autoAssign'])->name('tasks.auto-assign');
 });
+
+// Redirect old workers URLs to new workforce management
+Route::redirect('/manufacturer/workers', '/manufacturer/workforce');
+Route::redirect('/manufacturer/workers/create', '/manufacturer/workforce/create');
+Route::redirect('/manufacturer/workers/{any}', '/manufacturer/workforce', 301)->where('any', '.*');
 
 // Retailer Routes
 Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function () {
@@ -234,39 +258,6 @@ Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function
     Route::get('/retailer/inventory/{id}/edit', [App\Http\Controllers\Retailer\DashboardController::class, 'editInventory'])->name('retailer.inventory.edit');
     Route::put('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'updateInventory'])->name('retailer.inventory.update');
     Route::delete('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'destroyInventory'])->name('retailer.inventory.destroy');
-});
-
-// Delivery Routes
-Route::prefix('delivery')->middleware(['auth', 'role:delivery,delivery_personnel'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Delivery\DashboardController::class, 'index'])->name('delivery.dashboard');
-    
-    // Profile creation routes
-    Route::get('/profile/create', [App\Http\Controllers\Delivery\DashboardController::class, 'createProfile'])->name('delivery.profile.create');
-    Route::post('/profile/create', [App\Http\Controllers\Delivery\DashboardController::class, 'storeProfile'])->name('delivery.profile.store');
-    
-    // Deliveries Management
-    Route::get('/deliveries', [App\Http\Controllers\Delivery\DashboardController::class, 'deliveries'])->name('delivery.deliveries');
-    Route::get('/deliveries/{id}', [App\Http\Controllers\Delivery\DashboardController::class, 'showDelivery'])->name('delivery.deliveries.show');
-    Route::put('/deliveries/{id}/status', [App\Http\Controllers\Delivery\DashboardController::class, 'updateDeliveryStatus'])->name('delivery.deliveries.update-status');
-    
-    // Route Optimization
-    Route::get('/route-optimization', [App\Http\Controllers\Delivery\DashboardController::class, 'routeOptimization'])->name('delivery.route-optimization');
-    
-    // Schedule
-    Route::get('/schedule', [App\Http\Controllers\Delivery\DashboardController::class, 'schedule'])->name('delivery.schedule');
-    
-    // Reports
-    Route::get('/reports', [App\Http\Controllers\Delivery\DashboardController::class, 'reports'])->name('delivery.reports');
-    
-    // Analytics
-    Route::get('/analytics', [App\Http\Controllers\Delivery\DashboardController::class, 'analytics'])->name('delivery.analytics');
-    
-    // Delivery Map
-    Route::get('/map', [App\Http\Controllers\Delivery\DashboardController::class, 'deliveryMap'])->name('delivery.map');
-    
-    // Profile Management
-    Route::get('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'profile'])->name('delivery.profile');
-    Route::put('/profile', [App\Http\Controllers\Delivery\DashboardController::class, 'updateProfile'])->name('delivery.profile.update');
 });
 
 // Inventory Management Routes
@@ -330,6 +321,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/system-overview', [App\Http\Controllers\Admin\DashboardController::class, 'systemOverview'])->name('admin.system-overview');
     Route::get('/supply-chain-monitoring', [App\Http\Controllers\Admin\DashboardController::class, 'supplyChainMonitoring'])->name('admin.supply-chain-monitoring');
     Route::resource('user', UserController::class)->except(['create', 'store']);
+    Route::post('/impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'impersonate'])->name('admin.impersonate');
+    Route::post('/stop-impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'stopImpersonate'])->name('admin.stopImpersonate');
+});
+
+Route::get('/admin/stop-impersonate', function () {
+    return redirect('/admin/dashboard');
 });
 
 // Supplier Routes
@@ -440,4 +437,20 @@ Route::get('/chat/dashboard', function () {
 Route::get('/debug/products', function () {
     return \App\Models\Product::orderBy('id', 'desc')->limit(10)->get(['id','name','manufacturer_id','supplier_id','is_active']);
 });
+
+Route::get('/admin/supplier-dashboard/{supplier_id}', [\App\Http\Controllers\Admin\DashboardController::class, 'viewSupplierDashboard'])->middleware('auth');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chat/contacts', [ChatController::class, 'contacts'])->name('chat.contacts');
+    Route::get('/chat/messages/{other}', [ChatController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/send/{other}', [ChatController::class, 'send'])->name('chat.send');
+    Route::post('/chat/mark-as-read/{other}', [ChatController::class, 'markAsRead'])->name('chat.markAsRead');
+    Route::post('/chat/typing/{other}', [ChatController::class, 'typing'])->name('chat.typing');
+    Route::get('/chat/notifications', [ChatController::class, 'notifications'])->name('chat.notifications');
+});
+
+Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
+Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
+
 

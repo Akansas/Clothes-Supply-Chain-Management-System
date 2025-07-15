@@ -15,6 +15,9 @@ import { createApp } from 'vue';
 
 import ExampleComponent from './components/ExampleComponent.vue';
 import DeliveryDashboard from './components/DeliveryDashboard.vue';
+import ManufacturerChat from './components/ManufacturerChat.vue';
+import SupplierChat from './components/SupplierChat.vue';
+import RetailerChat from './components/RetailerChat.vue';
 
 const el = document.getElementById('delivery-dashboard-app');
 
@@ -25,6 +28,9 @@ if (el) {
 } else {
     const app = createApp({});
     app.component('example-component', ExampleComponent);
+    app.component('manufacturer-chat', ManufacturerChat);
+    app.component('supplier-chat', SupplierChat);
+    app.component('retailer-chat', RetailerChat);
     app.mount('#app');
 }
 
