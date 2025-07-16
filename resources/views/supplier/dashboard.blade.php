@@ -164,7 +164,7 @@
 
     <!-- Quick Actions -->
     <div class="row mt-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-2 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-boxes fa-2x text-success mb-3"></i>
@@ -174,7 +174,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-2 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-clipboard-list fa-2x text-primary mb-3"></i>
@@ -184,7 +184,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-2 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-truck fa-2x text-warning mb-3"></i>
@@ -194,13 +194,23 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-2 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <i class="fas fa-comments fa-2x text-info mb-3"></i>
+                    <i class="fas fa-chart-bar fa-2x text-info mb-3"></i>
+                    <h6>Analytics</h6>
+                    <p class="text-muted small">View supply chain analytics</p>
+                    <a href="{{ route('supplier.analytics') }}" class="btn btn-outline-info btn-sm">View Analytics</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-comments fa-2x text-secondary mb-3"></i>
                     <h6>Communication</h6>
                     <p class="text-muted small">Chat with manufacturers</p>
-                    <a href="{{ route('chat.index') }}" class="btn btn-outline-info btn-sm">Chat</a>
+                    <a href="{{ route('chat.index') }}" class="btn btn-outline-secondary btn-sm">Chat</a>
                 </div>
             </div>
         </div>
