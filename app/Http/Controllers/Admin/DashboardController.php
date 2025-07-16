@@ -14,7 +14,6 @@ use App\Models\FacilityVisit;
 use App\Models\ProductionOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\MachineLearningService;
 
 class DashboardController extends Controller
 {

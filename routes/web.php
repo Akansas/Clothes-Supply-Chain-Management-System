@@ -10,7 +10,6 @@ use App\Http\Controllers\Auth\CustomRegisterController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DeliveryController;
@@ -144,8 +143,12 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     // Suppliers
     Route::get('/suppliers', [App\Http\Controllers\Manufacturer\DashboardController::class, 'suppliers'])->name('manufacturer.suppliers');
     
-    // Inventory
-    Route::get('/inventory', [App\Http\Controllers\Manufacturer\DashboardController::class, 'inventory'])->name('manufacturer.inventory');
+    // Inventory (manufacturer only, new explicit routes)
+    Route::get('inventory', [App\Http\Controllers\Manufacturer\InventoryController::class, 'index'])->name('manufacturer.inventory.index');
+    Route::get('inventory/raw-materials/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editRawMaterial'])->name('manufacturer.inventory.editRawMaterial');
+    Route::put('inventory/raw-materials/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateRawMaterial'])->name('manufacturer.inventory.updateRawMaterial');
+    Route::get('inventory/finished-products/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editFinishedProduct'])->name('manufacturer.inventory.editFinishedProduct');
+    Route::put('inventory/finished-products/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateFinishedProduct'])->name('manufacturer.inventory.updateFinishedProduct');
     
     // Analytics
     Route::get('/analytics', [App\Http\Controllers\Manufacturer\DashboardController::class, 'analytics'])->name('manufacturer.analytics');
@@ -185,13 +188,8 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::post('tasks/{task}/assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'assign'])->name('tasks.assign');
     Route::get('workforce-report', [App\Http\Controllers\Manufacturer\TaskController::class, 'report'])->name('workforce.report');
     // Inventory Management
-    Route::resource('inventory', App\Http\Controllers\Manufacturer\InventoryController::class);
     // Raw Material CRUD
-    Route::get('inventory/raw-materials/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'createRawMaterial'])->name('inventory.raw-materials.create');
-    Route::post('inventory/raw-materials', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeRawMaterial'])->name('inventory.raw-materials.store');
-    Route::get('inventory/raw-materials/{id}/edit', [App\Http\Controllers\Manufacturer\InventoryController::class, 'editRawMaterial'])->name('inventory.raw-materials.edit');
-    Route::put('inventory/raw-materials/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateRawMaterial'])->name('inventory.raw-materials.update');
-    Route::delete('inventory/raw-materials/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'destroyRawMaterial'])->name('inventory.raw-materials.destroy');
+    // (Removed legacy/duplicate raw material CRUD routes for manufacturer inventory)
     // Supplier CRUD
     Route::get('inventory/suppliers/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'createSupplier'])->name('inventory.suppliers.create');
     Route::post('inventory/suppliers', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeSupplier'])->name('inventory.suppliers.store');
@@ -295,17 +293,6 @@ Route::prefix('chat')->name('chat.')->middleware('auth')->group(function () {
     Route::get('{conversation}/messages/{message}/edit', [ChatController::class, 'editMessage'])->name('message.edit');
     Route::put('{conversation}/messages/{message}', [ChatController::class, 'updateMessage'])->name('message.update');
     Route::delete('{conversation}/messages/{message}', [ChatController::class, 'destroyMessage'])->name('message.destroy');
-});
-
-// Analytics Routes
-Route::prefix('analytics')->middleware(['auth'])->group(function () {
-    Route::get('/', [AnalyticsController::class, 'index'])->name('analytics.dashboard');
-    Route::get('/demand-forecasting', [AnalyticsController::class, 'demandForecasting'])->name('analytics.demand-forecasting');
-    Route::get('/customer-segmentation', [AnalyticsController::class, 'customerSegmentation'])->name('analytics.customer-segmentation');
-    Route::post('/generate-predictions', [AnalyticsController::class, 'generatePredictions'])->name('analytics.generate-predictions');
-    Route::post('/generate-segments', [AnalyticsController::class, 'generateSegments'])->name('analytics.generate-segments');
-    Route::get('/sales', [AnalyticsController::class, 'salesAnalytics'])->name('analytics.sales');
-    Route::get('/supplier', [AnalyticsController::class, 'supplierAnalytics'])->name('analytics.supplier');
 });
 
 // Common authenticated routes

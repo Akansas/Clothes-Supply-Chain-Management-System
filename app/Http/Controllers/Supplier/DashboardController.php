@@ -11,15 +11,13 @@ use App\Models\Order;
 use App\Models\Delivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\SupplierAnalyticsService;
-use App\Services\MachineLearningService;
 
 class DashboardController extends Controller
 {
     /**
      * Show supplier dashboard
      */
-    public function index(MachineLearningService $ml)
+    public function index()
     {
         $user = auth()->user();
         $supplier = $user->rawMaterialSupplier;
@@ -76,13 +74,7 @@ class DashboardController extends Controller
         $linkedManufacturers = $supplier->manufacturers()->with('user')->get();
 
         // Supplier Analytics
-        $service = new SupplierAnalyticsService($user);
-        $demandForecasting = $service->getDemandForecasting();
-        $leadTimeTracking = $service->getLeadTimeTracking();
-        $materialCostAnalytics = $service->getMaterialCostAnalytics();
-        $qualityControlAnalysis = $service->getQualityControlAnalysis();
-        $clientSatisfaction = $service->getClientSatisfaction();
-        $capacityPlanning = $service->getCapacityPlanning();
+        // Removed SupplierAnalyticsService and related analytics variables
 
         return view('supplier.dashboard', compact(
             'stats',
@@ -92,13 +84,8 @@ class DashboardController extends Controller
             'supplier',
             'orders',
             'linkedManufacturers',
-            'user',
-            'demandForecasting',
-            'leadTimeTracking',
-            'materialCostAnalytics',
-            'qualityControlAnalysis',
-            'clientSatisfaction',
-            'capacityPlanning'
+            'user'
+            // Removed: 'demandForecasting', 'leadTimeTracking', 'materialCostAnalytics', 'qualityControlAnalysis', 'clientSatisfaction', 'capacityPlanning'
         ));
     }
 
@@ -190,22 +177,10 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        $service = new SupplierAnalyticsService($user);
-
-        $demandForecasting = $service->getDemandForecasting();
-        $leadTimeTracking = $service->getLeadTimeTracking();
-        $materialCostAnalytics = $service->getMaterialCostAnalytics();
-        $qualityControlAnalysis = $service->getQualityControlAnalysis();
-        $clientSatisfaction = $service->getClientSatisfaction();
-        $capacityPlanning = $service->getCapacityPlanning();
+        // Removed SupplierAnalyticsService and related analytics variables
 
         return view('supplier.analytics', compact(
-            'demandForecasting',
-            'leadTimeTracking',
-            'materialCostAnalytics',
-            'qualityControlAnalysis',
-            'clientSatisfaction',
-            'capacityPlanning'
+            // Removed: 'demandForecasting', 'leadTimeTracking', 'materialCostAnalytics', 'qualityControlAnalysis', 'clientSatisfaction', 'capacityPlanning'
         ));
     }
 

@@ -43,7 +43,7 @@
             </select>
         </div>
         <button type="submit" class="btn btn-success">Update Shipment</button>
-        <a href="{{ route('inventory.index') }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ route('manufacturer.inventory.index') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 @endsection 

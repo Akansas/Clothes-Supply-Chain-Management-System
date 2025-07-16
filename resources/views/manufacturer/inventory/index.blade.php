@@ -2,172 +2,142 @@
 @section('content')
 <div class="container py-4">
     <h2>Inventory Management</h2>
-    <div class="mb-3">
-        <a href="{{ route('inventory.adjustments.create') }}" class="btn btn-outline-secondary">Adjust Inventory</a>
-        <a href="{{ route('inventory.adjustments.index') }}" class="btn btn-outline-info">View Adjustments</a>
-    </div>
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Raw Materials</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Raw Materials</h5>
-                    <p class="card-text display-6">{{ $rawMaterials->count() }}</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Reorder Point</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($rawMaterials as $material)
+                                    <tr @if(($material->delivered_quantity ?? 0) <= ($material->min_stock_level ?? 0)) style="background: #fff3cd;" @endif>
+                                        <td>{{ $material->name }}</td>
+                                        <td>{{ $material->delivered_quantity ?? 0 }}</td>
+                                        <td>{{ $material->unit ?? '-' }}</td>
+                                        <td>{{ $material->min_stock_level ?? '-' }}</td>
+                                        <td>
+                                            @if(($material->delivered_quantity ?? 0) <= ($material->min_stock_level ?? 0))
+                                                <span class="badge bg-warning text-dark">Low Stock</span>
+                                            @else
+                                                <span class="badge bg-success">OK</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('manufacturer.inventory.editRawMaterial', $material->id) }}" class="btn btn-sm btn-outline-primary">Update</a>
+                                            <a href="{{ route('manufacturer.purchase-orders') }}" class="btn btn-sm btn-outline-success">Order More</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center">No raw materials found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Suppliers</h5>
-                    <p class="card-text display-6">{{ $suppliers->count() }}</p>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
+                    <h5 class="mb-0">Finished Products (Clothes)</h5>
+                    <a href="{{ route('manufacturer.products.create') }}" class="btn btn-sm btn-success">Add Product</a>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">WIP</h5>
-                    <p class="card-text display-6">{{ $wip->count() }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Finished Goods</h5>
-                    <p class="card-text display-6">{{ $finishedGoods->count() }}</p>
+                    @if(isset($finishedProducts) && $finishedProducts->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($finishedProducts as $product)
+                                    <tr>
+                                        <td>
+                                            @if($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}" alt="Image" style="max-width: 60px;">
+                                            @else
+                                                <span class="text-muted">No Image</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $product->name }}</td>
+                                        <td>{{ $product->category ?? '-' }}</td>
+                                        <td>{{ $product->description }}</td>
+                                        <td>{{ $product->price ? ('$' . number_format($product->price, 2)) : '-' }}</td>
+                                        <td>{{ $product->inventory->quantity ?? 0 }}</td>
+                                        <td>
+                                            <a href="{{ route('manufacturer.products.edit', $product->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                            <form action="{{ route('manufacturer.products.destroy', $product->id) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center text-muted">No finished products found.</div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>Raw Materials</h4>
-        <a href="{{ route('inventory.raw-materials.create') }}" class="btn btn-primary">Add Raw Material</a>
+</div>
+@php
+    $logs = \App\Models\InventoryChangeLog::with(['product', 'user'])->latest()->limit(20)->get();
+@endphp
+<div class="card mt-5">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Recent Inventory Changes</h5>
     </div>
-    <table class="table table-bordered">
-        <thead><tr><th>Name</th><th>Quantity</th><th>Unit</th><th>Reorder Level</th><th>Status</th><th>Supplier</th><th>Actions</th></tr></thead>
-        <tbody>
-        @foreach($rawMaterials as $mat)
-            <tr>
-                <td>{{ $mat->name }}</td>
-                <td>{{ $mat->quantity }}</td>
-                <td>{{ $mat->unit }}</td>
-                <td>{{ $mat->reorder_level }}</td>
-                <td>{{ $mat->status }}</td>
-                <td>{{ $mat->supplier->name ?? 'N/A' }}</td>
-                <td>
-                    <a href="{{ route('inventory.raw-materials.edit', $mat->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('inventory.raw-materials.destroy', $mat->id) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this raw material?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>Suppliers</h4>
-        <a href="{{ route('inventory.suppliers.create') }}" class="btn btn-primary">Add Supplier</a>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Change</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($logs as $log)
+                        <tr>
+                            <td>{{ $log->created_at->format('M d, Y H:i') }}</td>
+                            <td>{{ $log->product->name ?? '-' }}</td>
+                            <td>{{ ucfirst(str_replace('_', ' ', $log->item_type)) }}</td>
+                            <td>{{ $log->old_quantity }} → <strong>{{ $log->new_quantity }}</strong></td>
+                            <td>{{ $log->user->name ?? 'User#'.$log->user_id }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="text-center">No inventory changes found.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-    <table class="table table-bordered">
-        <thead><tr><th>Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
-        <tbody>
-        @foreach($suppliers as $sup)
-            <tr>
-                <td>{{ $sup->name }}</td>
-                <td>{{ $sup->contact_info }}</td>
-                <td>{{ $sup->email }}</td>
-                <td>{{ $sup->phone }}</td>
-                <td>
-                    <a href="{{ route('inventory.suppliers.edit', $sup->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('inventory.suppliers.destroy', $sup->id) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this supplier?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>Incoming Shipments</h4>
-        <a href="{{ route('inventory.incoming-shipments.create') }}" class="btn btn-primary">Add Incoming Shipment</a>
-    </div>
-    <table class="table table-bordered">
-        <thead><tr><th>Material</th><th>Supplier</th><th>Quantity</th><th>Expected</th><th>Received</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-        @foreach($incomingShipments as $ship)
-            <tr>
-                <td>{{ $ship->rawMaterial->name ?? 'N/A' }}</td>
-                <td>{{ $ship->supplier->name ?? 'N/A' }}</td>
-                <td>{{ $ship->quantity }}</td>
-                <td>{{ $ship->expected_date }}</td>
-                <td>{{ $ship->received_date }}</td>
-                <td>{{ $ship->status }}</td>
-                <td>
-                    <a href="{{ route('inventory.incoming-shipments.edit', $ship->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('inventory.incoming-shipments.destroy', $ship->id) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this shipment?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <h4>Work In Progress (WIP)</h4>
-    <table class="table table-bordered">
-        <thead><tr><th>Product</th><th>Stage</th><th>Quantity</th><th>Started</th><th>Expected Completion</th><th>Status</th></tr></thead>
-        <tbody>
-        @foreach($wip as $item)
-            <tr>
-                <td>{{ $item->product_name }}</td>
-                <td>{{ $item->stage }}</td>
-                <td>{{ $item->quantity }}</td>
-                <td>{{ $item->started_at }}</td>
-                <td>{{ $item->expected_completion }}</td>
-                <td>{{ $item->status }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <h4>Finished Goods</h4>
-    <table class="table table-bordered">
-        <thead><tr><th>Product</th><th>Quantity</th><th>Location</th><th>Status</th><th>Ready for Shipment</th><th>Damaged</th><th>Returned</th></tr></thead>
-        <tbody>
-        @foreach($finishedGoods as $fg)
-            <tr>
-                <td>{{ $fg->product_name }}</td>
-                <td>{{ $fg->quantity }}</td>
-                <td>{{ $fg->location }}</td>
-                <td>{{ $fg->status }}</td>
-                <td>{{ $fg->ready_for_shipment ? 'Yes' : 'No' }}</td>
-                <td>{{ $fg->damaged ? 'Yes' : 'No' }}</td>
-                <td>{{ $fg->returned ? 'Yes' : 'No' }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <h4>Recent Inventory Activity</h4>
-    <table class="table table-bordered">
-        <thead><tr><th>Type</th><th>Item ID</th><th>Action</th><th>Quantity</th><th>User</th><th>Reason</th><th>Date</th></tr></thead>
-        <tbody>
-        @foreach($inventoryLogs as $log)
-            <tr>
-                <td>{{ $log->item_type }}</td>
-                <td>{{ $log->item_id }}</td>
-                <td>{{ $log->action }}</td>
-                <td>{{ $log->quantity }}</td>
-                <td>{{ $log->user->name ?? 'N/A' }}</td>
-                <td>{{ $log->reason }}</td>
-                <td>{{ $log->created_at }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
 </div>
 @endsection 

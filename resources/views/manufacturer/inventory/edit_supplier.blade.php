@@ -26,7 +26,7 @@
             <input type="text" name="phone" id="phone" class="form-control" value="{{ $supplier->phone }}">
         </div>
         <button type="submit" class="btn btn-success">Update Supplier</button>
-        <a href="{{ route('inventory.index') }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ route('manufacturer.inventory.index') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 @endsection 

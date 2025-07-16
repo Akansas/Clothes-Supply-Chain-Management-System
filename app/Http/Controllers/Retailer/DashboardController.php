@@ -12,8 +12,6 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\RetailerAnalyticsService;
-use App\Services\MachineLearningService;
 use App\Models\Customer;
 
 class DashboardController extends Controller
@@ -21,7 +19,7 @@ class DashboardController extends Controller
     /**
      * Show retailer dashboard
      */
-    public function index(MachineLearningService $ml)
+    public function index()
     {
         $user = auth()->user();
         
@@ -64,29 +62,14 @@ class DashboardController extends Controller
             ->get();
 
         // Retailer Analytics
-        $service = new RetailerAnalyticsService($user);
-        $salesInsights = $service->getSalesInsights();
-        $inventoryIntelligence = $service->getInventoryIntelligence();
-        $customerBehavior = $service->getCustomerBehavior();
-        $pricingPromotion = $service->getPricingPromotion();
-        $omnichannelEngagement = $service->getOmnichannelEngagement();
-        $actionableAlerts = $service->getActionableAlerts();
-        $marketTrends = $service->getMarketTrends();
-
-        // Remove ML integration and customer segmentation/forecasting
+        // Removed RetailerAnalyticsService and related analytics variables
 
         return view('retailer.dashboard', compact(
             'stats',
             'recentOrders',
             'lowStockItems',
-            'retailStore',
-            'salesInsights',
-            'inventoryIntelligence',
-            'customerBehavior',
-            'pricingPromotion',
-            'omnichannelEngagement',
-            'actionableAlerts',
-            'marketTrends'
+            'retailStore'
+            // Removed: 'salesInsights', 'inventoryIntelligence', 'customerBehavior', 'pricingPromotion', 'omnichannelEngagement', 'actionableAlerts', 'marketTrends'
         ));
     }
 
@@ -261,25 +244,9 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        $service = new RetailerAnalyticsService($user);
+        // Removed RetailerAnalyticsService and related analytics variables
 
-        $salesInsights = $service->getSalesInsights();
-        $inventoryIntelligence = $service->getInventoryIntelligence();
-        $customerBehavior = $service->getCustomerBehavior();
-        $pricingPromotion = $service->getPricingPromotion();
-        $omnichannelEngagement = $service->getOmnichannelEngagement();
-        $actionableAlerts = $service->getActionableAlerts();
-        $marketTrends = $service->getMarketTrends();
-
-        return view('retailer.analytics', compact(
-            'salesInsights',
-            'inventoryIntelligence',
-            'customerBehavior',
-            'pricingPromotion',
-            'omnichannelEngagement',
-            'actionableAlerts',
-            'marketTrends'
-        ));
+        return view('retailer.analytics'); // No compact()
     }
 
     /**

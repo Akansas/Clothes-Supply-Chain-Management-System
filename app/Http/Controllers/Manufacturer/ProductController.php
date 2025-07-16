@@ -23,6 +23,7 @@ class ProductController extends Controller
             'category' => 'nullable|string|max:100',
             'price' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:2048',
+            'quantity' => 'required|integer|min:0',
         ]);
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -48,19 +49,30 @@ class ProductController extends Controller
             'supplier_id' => null,
             'is_active' => true,
         ]);
+        // Ensure a warehouse exists
         $warehouse = \App\Models\Warehouse::first();
-        if ($warehouse) {
-            \App\Models\Inventory::create([
+        if (!$warehouse) {
+            $warehouse = \App\Models\Warehouse::create([
+                'name' => 'Default Warehouse',
+                'location' => 'Default Location',
+                'status' => 'active',
+            ]);
+        }
+        // Always create an inventory record for the product
+        \App\Models\Inventory::updateOrCreate(
+            [
                 'product_id' => $product->id,
                 'warehouse_id' => $warehouse->id,
+            ],
+            [
                 'location_type' => 'warehouse',
                 'location_id' => $warehouse->id,
                 'quantity' => $quantity,
                 'reserved_quantity' => 0,
                 'available_quantity' => $quantity,
                 'status' => 'active',
-            ]);
-        }
+            ]
+        );
         return redirect()->route('manufacturer.dashboard')->with('success', 'Product added successfully.');
     }
 
@@ -94,15 +106,29 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $product->update($data);
-        $inventory = $product->inventories()->first();
-        if ($inventory) {
-            $inventory->quantity = $request->quantity;
-            $inventory->available_quantity = $request->quantity;
-            $inventory->save();
-            Log::info('Updated inventory quantity', ['product_id' => $product->id, 'inventory_id' => $inventory->id, 'quantity' => $inventory->quantity]);
-        } else {
-            Log::warning('No inventory found for product', ['product_id' => $product->id]);
+        // Ensure a warehouse exists
+        $warehouse = \App\Models\Warehouse::first();
+        if (!$warehouse) {
+            $warehouse = \App\Models\Warehouse::create([
+                'name' => 'Default Warehouse',
+                'location' => 'Default Location',
+                'status' => 'active',
+            ]);
         }
+        // Always update or create the inventory record for the product
+        \App\Models\Inventory::updateOrCreate(
+            [
+                'product_id' => $product->id,
+                'warehouse_id' => $warehouse->id,
+            ],
+            [
+                'location_type' => 'warehouse',
+                'location_id' => $warehouse->id,
+                'quantity' => $request->quantity,
+                'available_quantity' => $request->quantity,
+                'status' => 'active',
+            ]
+        );
         return redirect()->route('manufacturer.dashboard')->with('success', 'Product updated successfully.');
     }
 

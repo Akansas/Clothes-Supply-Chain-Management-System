@@ -449,65 +449,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Market Trend Insights --}}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Market Trend Insights</h5>
-        </div>
-        <div class="card-body">
-            @if(!empty($marketTrends['trending_products']))
-                <h6 class="text-dark">Trending Products (Last 30 Days)</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>SKU</th>
-                                <th>Units Sold</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($marketTrends['trending_products'] as $item)
-                                <tr>
-                                    <td>{{ $item['name'] ?? 'Unknown' }}</td>
-                                    <td><code>{{ $item['sku'] ?? 'N/A' }}</code></td>
-                                    <td><span class="badge bg-dark">{{ $item['total_sold'] }}</span></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
-            <div class="row mt-3">
-                <div class="col-md-4">
-                    <div class="alert alert-dark">
-                        <strong>Market Growth Rate:</strong><br>
-                        @if($marketTrends['market_growth_rate'] !== null)
-                            <span class="badge {{ $marketTrends['market_growth_rate'] >= 0 ? 'bg-success' : 'bg-danger' }}">
-                                {{ $marketTrends['market_growth_rate'] }}%
-                            </span>
-                        @else
-                            N/A
-                        @endif
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="alert alert-dark">
-                        <strong>Seasonal Trends:</strong><br>
-                        {{ $marketTrends['seasonal_trends'] ?? 'N/A' }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="alert alert-dark">
-                        <strong>Competitive Benchmarking:</strong><br>
-                        {{ $marketTrends['competitive_benchmarking'] ?? 'N/A' }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <style>

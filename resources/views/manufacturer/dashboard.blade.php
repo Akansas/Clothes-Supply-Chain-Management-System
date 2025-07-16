@@ -9,7 +9,7 @@
             <a class="nav-link" href="{{ route('workforce.index') }}">Workforce Management</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('inventory.index') }}">Inventory Management</a>
+            <a class="nav-link" href="{{ route('manufacturer.inventory.index') }}">Inventory Management</a>
         </li>
     </ul>
     <div class="row mb-4">

@@ -15,11 +15,9 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\ManufacturerAnalyticsService;
 use App\Models\Worker;
 use App\Models\SupplyCenter;
 use App\Models\Shift;
-use App\Services\MachineLearningService;
 use App\Models\Customer;
 
 class DashboardController extends Controller
@@ -27,7 +25,7 @@ class DashboardController extends Controller
     /**
      * Show manufacturer dashboard
      */
-    public function index(MachineLearningService $ml)
+    public function index()
     {
         $user = auth()->user();
         $manufacturer = \App\Models\Manufacturer::first();
@@ -111,14 +109,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
         // Manufacturer Analytics
-        $analyticsService = new ManufacturerAnalyticsService($user);
-        $productionScheduling = $analyticsService->getProductionScheduling();
-        $materialConsumption = $analyticsService->getMaterialConsumption();
-        $orderFulfillment = $analyticsService->getOrderFulfillment();
-        $laborEfficiency = $analyticsService->getLaborEfficiency();
-        $qualityControl = $analyticsService->getQualityControl();
-        $costOptimization = $analyticsService->getCostOptimization();
-        $workflowAlerts = $analyticsService->getWorkflowAlerts();
+        // Removed ManufacturerAnalyticsService and related analytics variables
 
         // Remove ML integration and customer segmentation/forecasting
 
@@ -139,13 +130,6 @@ class DashboardController extends Controller
             'rawMaterials',
             'retailerOrders',
             'charts',
-            'productionScheduling',
-            'materialConsumption',
-            'orderFulfillment',
-            'laborEfficiency',
-            'qualityControl',
-            'costOptimization',
-            'workflowAlerts',
             'recentPurchaseOrders'
         ));
     }
@@ -485,25 +469,9 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        $service = new ManufacturerAnalyticsService($user);
+        // Removed ManufacturerAnalyticsService and related analytics variables
 
-        $productionScheduling = $service->getProductionScheduling();
-        $materialConsumption = $service->getMaterialConsumption();
-        $orderFulfillment = $service->getOrderFulfillment();
-        $laborEfficiency = $service->getLaborEfficiency();
-        $qualityControl = $service->getQualityControl();
-        $costOptimization = $service->getCostOptimization();
-        $workflowAlerts = $service->getWorkflowAlerts();
-
-        return view('manufacturer.analytics.index', compact(
-            'productionScheduling',
-            'materialConsumption',
-            'orderFulfillment',
-            'laborEfficiency',
-            'qualityControl',
-            'costOptimization',
-            'workflowAlerts'
-        ));
+        return view('manufacturer.analytics.index'); // No compact()
     }
 
     /**

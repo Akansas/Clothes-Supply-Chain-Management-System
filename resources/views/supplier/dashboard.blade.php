@@ -197,16 +197,6 @@
         <div class="col-6 col-md-2 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <i class="fas fa-chart-bar fa-2x text-info mb-3"></i>
-                    <h6>Analytics</h6>
-                    <p class="text-muted small">View supply chain analytics</p>
-                    <a href="{{ route('supplier.analytics') }}" class="btn btn-outline-info btn-sm">View Analytics</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
                     <i class="fas fa-comments fa-2x text-secondary mb-3"></i>
                     <h6>Communication</h6>
                     <p class="text-muted small">Chat with manufacturers</p>

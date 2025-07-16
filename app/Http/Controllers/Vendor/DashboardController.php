@@ -12,7 +12,6 @@ use App\Models\Design;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\MachineLearningService;
 use App\Models\Customer;
 
 class DashboardController extends Controller
@@ -592,42 +591,6 @@ class DashboardController extends Controller
 
         return redirect()->route('vendor.samples.show', $sample->id)
             ->with('success', 'Sample created successfully!');
-    }
-
-    /**
-     * Show analytics
-     */
-    public function analytics()
-    {
-        $user = auth()->user();
-        $vendor = $user->vendor;
-        
-        // Application status distribution
-        $applicationStats = VendorApplication::where('vendor_id', $vendor->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-
-        // Product category distribution
-        $productCategories = Product::where('vendor_id', $vendor->id)
-            ->selectRaw('category, COUNT(*) as count')
-            ->groupBy('category')
-            ->get();
-
-        // Monthly applications
-        $monthlyApplications = VendorApplication::where('vendor_id', $vendor->id)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->get();
-
-        // Facility visit statistics
-        $visitStats = FacilityVisit::where('vendor_id', $vendor->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-
-        return view('vendor.analytics', compact('applicationStats', 'productCategories', 'monthlyApplications', 'visitStats'));
     }
 
     /**

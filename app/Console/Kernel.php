@@ -36,6 +36,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         SendSupplierReports::class,
         \App\Console\Commands\ScheduleFacilityVisitsForAllVendors::class,
+        \App\Console\Commands\FixProductInventory::class,
     ];
 
 
