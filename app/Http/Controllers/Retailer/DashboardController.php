@@ -73,23 +73,7 @@ class DashboardController extends Controller
         $actionableAlerts = $service->getActionableAlerts();
         $marketTrends = $service->getMarketTrends();
 
-        // ML integration
-        $customers = Customer::with('orders')->get()->map(function($c) {
-            return [
-                'id' => $c->id,
-                'total_spent' => $c->orders->sum('amount'),
-                'order_count' => $c->orders->count(),
-            ];
-        })->toArray();
-        $sales = \App\Models\Order::all()->map(function($o) {
-            return [
-                'date' => $o->created_at->toDateString(),
-                'amount' => $o->amount,
-            ];
-        })->toArray();
-        $mlService = $ml;
-        $segments = $mlService->segmentCustomers($customers);
-        $forecast = $mlService->predictDemand($sales);
+        // Remove ML integration and customer segmentation/forecasting
 
         return view('retailer.dashboard', compact(
             'stats',
@@ -102,9 +86,7 @@ class DashboardController extends Controller
             'pricingPromotion',
             'omnichannelEngagement',
             'actionableAlerts',
-            'marketTrends',
-            'segments',
-            'forecast'
+            'marketTrends'
         ));
     }
 

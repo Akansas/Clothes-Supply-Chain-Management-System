@@ -120,23 +120,7 @@ class DashboardController extends Controller
         $costOptimization = $analyticsService->getCostOptimization();
         $workflowAlerts = $analyticsService->getWorkflowAlerts();
 
-        // ML integration
-        $customers = Customer::with('orders')->get()->map(function($c) {
-            return [
-                'id' => $c->id,
-                'total_spent' => $c->orders->sum('amount'),
-                'order_count' => $c->orders->count(),
-            ];
-        })->toArray();
-        $sales = \App\Models\Order::all()->map(function($o) {
-            return [
-                'date' => $o->created_at->toDateString(),
-                'amount' => $o->amount,
-            ];
-        })->toArray();
-        $mlService = $ml;
-        $segments = $mlService->segmentCustomers($customers);
-        $forecast = $mlService->predictDemand($sales);
+        // Remove ML integration and customer segmentation/forecasting
 
         // Fetch recent purchase orders for the manufacturer
         $recentPurchaseOrders = \App\Models\Order::where('user_id', $user->id)
@@ -162,8 +146,6 @@ class DashboardController extends Controller
             'qualityControl',
             'costOptimization',
             'workflowAlerts',
-            'segments',
-            'forecast',
             'recentPurchaseOrders'
         ));
     }
