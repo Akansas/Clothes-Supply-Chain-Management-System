@@ -12,13 +12,16 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\RetailerAnalyticsService;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show retailer dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         
@@ -60,7 +63,49 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('retailer.dashboard', compact('stats', 'recentOrders', 'lowStockItems', 'retailStore'));
+        // Retailer Analytics
+        $service = new RetailerAnalyticsService($user);
+        $salesInsights = $service->getSalesInsights();
+        $inventoryIntelligence = $service->getInventoryIntelligence();
+        $customerBehavior = $service->getCustomerBehavior();
+        $pricingPromotion = $service->getPricingPromotion();
+        $omnichannelEngagement = $service->getOmnichannelEngagement();
+        $actionableAlerts = $service->getActionableAlerts();
+        $marketTrends = $service->getMarketTrends();
+
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
+        return view('retailer.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'lowStockItems',
+            'retailStore',
+            'salesInsights',
+            'inventoryIntelligence',
+            'customerBehavior',
+            'pricingPromotion',
+            'omnichannelEngagement',
+            'actionableAlerts',
+            'marketTrends',
+            'segments',
+            'forecast'
+        ));
     }
 
     /**
@@ -234,39 +279,25 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        // Monthly sales data for this retailer
-        $monthlySales = Order::where('retailer_id', $user->id)
-            ->where('status', 'delivered')
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->get();
+        $service = new RetailerAnalyticsService($user);
 
-        // Top selling products for this retailer
-        $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('orders.retailer_id', $user->id)
-            ->where('orders.status', 'delivered')
-            ->selectRaw('products.name, SUM(order_items.quantity) as total_sold')
-            ->groupBy('products.id', 'products.name')
-            ->orderBy('total_sold', 'desc')
-            ->take(10)
-            ->get();
+        $salesInsights = $service->getSalesInsights();
+        $inventoryIntelligence = $service->getInventoryIntelligence();
+        $customerBehavior = $service->getCustomerBehavior();
+        $pricingPromotion = $service->getPricingPromotion();
+        $omnichannelEngagement = $service->getOmnichannelEngagement();
+        $actionableAlerts = $service->getActionableAlerts();
+        $marketTrends = $service->getMarketTrends();
 
-        // Order status distribution for this retailer
-        $orderStatuses = Order::where('retailer_id', $user->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-
-        // Inventory stats for this retailer
-        $inventoryStats = [
-            'total_products' => $retailStore ? $retailStore->inventories()->count() : 0,
-            'total_quantity' => $retailStore ? $retailStore->inventories()->sum('quantity') : 0,
-        ];
-
-        return view('retailer.analytics', compact('monthlySales', 'topProducts', 'orderStatuses', 'inventoryStats'));
+        return view('retailer.analytics', compact(
+            'salesInsights',
+            'inventoryIntelligence',
+            'customerBehavior',
+            'pricingPromotion',
+            'omnichannelEngagement',
+            'actionableAlerts',
+            'marketTrends'
+        ));
     }
 
     /**

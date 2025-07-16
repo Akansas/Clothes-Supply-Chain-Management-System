@@ -15,16 +15,19 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\ManufacturerAnalyticsService;
 use App\Models\Worker;
 use App\Models\SupplyCenter;
 use App\Models\Shift;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show manufacturer dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         $manufacturer = \App\Models\Manufacturer::first();
@@ -107,13 +110,62 @@ class DashboardController extends Controller
             ->latest()
             ->take(10)
             ->get();
+        // Manufacturer Analytics
+        $analyticsService = new ManufacturerAnalyticsService($user);
+        $productionScheduling = $analyticsService->getProductionScheduling();
+        $materialConsumption = $analyticsService->getMaterialConsumption();
+        $orderFulfillment = $analyticsService->getOrderFulfillment();
+        $laborEfficiency = $analyticsService->getLaborEfficiency();
+        $qualityControl = $analyticsService->getQualityControl();
+        $costOptimization = $analyticsService->getCostOptimization();
+        $workflowAlerts = $analyticsService->getWorkflowAlerts();
+
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
         // Fetch recent purchase orders for the manufacturer
         $recentPurchaseOrders = \App\Models\Order::where('user_id', $user->id)
             ->latest()
             ->take(5)
             ->with(['supplier.user'])
             ->get();
-        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'finishedProducts', 'rawMaterials', 'retailerOrders', 'charts', 'recentPurchaseOrders'));
+
+        return view('manufacturer.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'activeStages',
+            'user',
+            'conversations',
+            'finishedProducts',
+            'rawMaterials',
+            'retailerOrders',
+            'charts',
+            'productionScheduling',
+            'materialConsumption',
+            'orderFulfillment',
+            'laborEfficiency',
+            'qualityControl',
+            'costOptimization',
+            'workflowAlerts',
+            'segments',
+            'forecast',
+            'recentPurchaseOrders'
+        ));
     }
 
     /**
@@ -450,26 +502,26 @@ class DashboardController extends Controller
      */
     public function analytics()
     {
-        $manufacturer = $this->getManufacturerOrRedirect();
-        $monthlyProduction = ProductionOrder::where('manufacturer_id', $manufacturer->id)
-            ->where('status', 'completed')
-            ->selectRaw('MONTH(completed_at) as month, SUM(quantity) as total_quantity')
-            ->whereYear('completed_at', now()->year)
-            ->groupBy('month')
-            ->get();
-        $qualityStats = QualityCheck::where('manufacturer_id', $manufacturer->id)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-        $topProducts = ProductionOrder::where('manufacturer_id', $manufacturer->id)
-            ->where('status', 'completed')
-            ->selectRaw('product_id, SUM(quantity) as total_quantity')
-            ->groupBy('product_id')
-            ->orderByDesc('total_quantity')
-            ->with('product')
-            ->take(5)
-            ->get();
-        return view('manufacturer.analytics.index', compact('monthlyProduction', 'qualityStats', 'topProducts'));
+        $user = auth()->user();
+        $service = new ManufacturerAnalyticsService($user);
+
+        $productionScheduling = $service->getProductionScheduling();
+        $materialConsumption = $service->getMaterialConsumption();
+        $orderFulfillment = $service->getOrderFulfillment();
+        $laborEfficiency = $service->getLaborEfficiency();
+        $qualityControl = $service->getQualityControl();
+        $costOptimization = $service->getCostOptimization();
+        $workflowAlerts = $service->getWorkflowAlerts();
+
+        return view('manufacturer.analytics.index', compact(
+            'productionScheduling',
+            'materialConsumption',
+            'orderFulfillment',
+            'laborEfficiency',
+            'qualityControl',
+            'costOptimization',
+            'workflowAlerts'
+        ));
     }
 
     /**

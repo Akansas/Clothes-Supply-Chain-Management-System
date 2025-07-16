@@ -12,13 +12,15 @@ use App\Models\Design;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\MachineLearningService;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
     /**
      * Show vendor dashboard
      */
-    public function index()
+    public function index(MachineLearningService $ml)
     {
         $user = auth()->user();
         $vendor = $user->vendor;
@@ -68,11 +70,61 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // Add these lines:
+        // Product category distribution
+        $productCategories = Product::where('vendor_id', $vendor->id)
+            ->selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        // Monthly applications
+        $monthlyApplications = VendorApplication::where('vendor_id', $vendor->id)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', now()->year)
+            ->groupBy('month')
+            ->get();
+
+        // Facility visit statistics
+        $visitStats = FacilityVisit::where('vendor_id', $vendor->id)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get();
+
         $latestApplication = $vendor->applications()->latest()->first();
         $latestVisit = $vendor->facilityVisits()->latest('scheduled_date')->first();
 
-        return view('vendor.dashboard', compact('stats', 'recentApplications', 'upcomingVisits', 'recentProducts', 'applicationStats', 'vendor', 'latestApplication', 'latestVisit'));
+        // ML integration
+        $customers = Customer::with('orders')->get()->map(function($c) {
+            return [
+                'id' => $c->id,
+                'total_spent' => $c->orders->sum('amount'),
+                'order_count' => $c->orders->count(),
+            ];
+        })->toArray();
+        $sales = \App\Models\Order::all()->map(function($o) {
+            return [
+                'date' => $o->created_at->toDateString(),
+                'amount' => $o->amount,
+            ];
+        })->toArray();
+        $mlService = $ml;
+        $segments = $mlService->segmentCustomers($customers);
+        $forecast = $mlService->predictDemand($sales);
+
+        return view('vendor.dashboard', compact(
+            'stats',
+            'recentApplications',
+            'upcomingVisits',
+            'recentProducts',
+            'applicationStats',
+            'productCategories',
+            'monthlyApplications',
+            'visitStats',
+            'vendor',
+            'latestApplication',
+            'latestVisit',
+            'segments',
+            'forecast'
+        ));
     }
 
     /**
