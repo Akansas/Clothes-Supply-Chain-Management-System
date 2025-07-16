@@ -41,5 +41,3 @@ class Conversation extends Model
         return $this->belongsToMany(User::class, 'conversation_user');
     }
 }
-
-

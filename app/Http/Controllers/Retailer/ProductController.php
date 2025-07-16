@@ -82,6 +82,7 @@ class ProductController extends Controller
         ]);
         // Create a ProductionOrder for the manufacturer dashboard
         \App\Models\ProductionOrder::create([
+            'order_number' => 'PO-' . time(),
             'manufacturer_id' => $manufacturerId,
             'retailer_id' => $user->id,
             'product_id' => $product->id,

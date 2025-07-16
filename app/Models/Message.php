@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'sender_id',
         'receiver_id',
-        'message',
+        'message_text',
+        'read_at',
     ];
 
     public function sender()

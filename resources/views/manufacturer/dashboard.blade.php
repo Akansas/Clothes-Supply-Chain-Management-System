@@ -18,25 +18,6 @@
             <p class="lead text-muted">Manage production orders, quality checks, and manufacturing processes</p>
         </div>
     </div>
-    
-    {{-- Chat Button --}}
-   <div class="container"> 
-  @if(auth()->user()->role && auth()->user()->role->name === 'manufacturer')
-    @php
-      // Assuming you have at least one supplier
-      $supplier = \App\Models\User::whereHas('rawMaterialSupplier')->first();
-    @endphp
-
-    @if($supplier)
-      <a href="{{ route('manufacturer.chat.index', ['partner' => $supplier->id]) }}" class="btn btn-primary mb-3">
-        Chat with Supplier
-      </a>
-    @else
-      <p>No supplier available for chat.</p>
-    @endif
-  @endif
-</div>
-
 
     <!-- Manufacturer Chat Widget -->
     <div class="row mb-4">
@@ -175,7 +156,7 @@
                     <a href="{{ route('manufacturer.products.create') }}" class="btn btn-sm btn-success">Add Product</a>
                 </div>
                 <div class="card-body">
-                    @if(isset($products) && $products->count() > 0)
+                    @if(isset($finishedProducts) && $finishedProducts->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
@@ -190,7 +171,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($products as $product)
+                                    @foreach($finishedProducts as $product)
                                     <tr>
                                         <td>
                                             @if($product->image)
@@ -219,6 +200,48 @@
                         </div>
                     @else
                         <p class="text-muted">No finished products found.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Materials Table -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Raw Materials (Supplier Products)</h5>
+                    <a href="{{ route('manufacturer.materials.browse') }}" class="btn btn-sm btn-primary">Browse All Raw Materials</a>
+                </div>
+                <div class="card-body">
+                    @if(isset($rawMaterials) && $rawMaterials->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Supplier</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($rawMaterials as $product)
+                                    <tr>
+                                        <td>{{ $product->name }}</td>
+                                        <td>{{ $product->category ?? '-' }}</td>
+                                        <td>{{ $product->supplier->user->name ?? 'N/A' }}</td>
+                                        <td>{{ $product->price ? ('$' . number_format($product->price, 2)) : '-' }}</td>
+                                        <td>{{ $product->inventory->quantity ?? 0 }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-muted">No raw materials found.</p>
                     @endif
                 </div>
             </div>
@@ -300,6 +323,79 @@
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Purchase Orders Table -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Purchase Orders</h5>
+                    <a href="{{ route('manufacturer.purchase-orders') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    @if(isset($recentPurchaseOrders) && $recentPurchaseOrders->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Supplier</th>
+                                        <th>Total Amount</th>
+                                        <th>Status</th>
+                                        <th>Order Date</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentPurchaseOrders as $order)
+                                    @php
+                                        $badgeTextColor = $order->getStatusBadgeClass() === 'badge-warning' ? '#212529' : '#fff';
+                                        $badgeStyle = 'font-size: 1.05em; font-weight: bold; padding: 0.6em 1.2em; box-shadow: 0 1px 4px rgba(0,0,0,0.08); color: ' . $badgeTextColor . ';';
+                                    @endphp
+                                    <tr>
+                                        <td>#{{ $order->id }}</td>
+                                        <td>
+                                            @if($order->supplier)
+                                                {{ $order->supplier->company_name }}
+                                                @if($order->supplier->user)
+                                                    ({{ $order->supplier->user->name }})
+                                                @endif
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td>${{ number_format($order->total_amount, 2) }}</td>
+                                        <td>
+                                            <span class="badge {{ $order->getStatusBadgeClass() }}" style="font-size: 1em; font-weight: 600; padding: 0.4em 1em; border-radius: 1em; color: #111; background: #fff;">
+                                                {{ $order->getStatusText() ?: strtoupper($order->status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $order->created_at->format('M d, Y H:i') }}</td>
+                                        <td class="text-end">
+                                            @if(in_array($order->status, ['pending', 'confirmed']))
+                                                <a href="{{ route('manufacturer.purchase-orders.edit', $order) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                                <form action="{{ route('manufacturer.purchase-orders.cancel', $order) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                            <a href="{{ route('manufacturer.purchase-orders.show', $order) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-muted">No recent purchase orders found.</p>
+                    @endif
                 </div>
             </div>
         </div>

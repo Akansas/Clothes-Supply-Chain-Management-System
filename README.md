@@ -237,6 +237,32 @@ php artisan serve
 http://localhost:8000
 ```
 
+---
+
+## 🖌️ **Ensuring Consistent Design (CSS/JS Assets)**
+
+To make sure everyone sees the same design (especially for the welcome, login, and register pages):
+
+1. **After every pull from GitHub:**
+   - Run `npm install` (if dependencies changed)
+   - Run `npm run build` (to compile the latest assets)
+   - Run `php artisan view:clear` (to clear cached views)
+   - Refresh your browser with Ctrl+F5 (to clear browser cache)
+
+2. **Do NOT commit compiled files in `public/build`**
+   - Only commit changes in `resources/css/`, `resources/js/`, and Blade files.
+   - The `.gitignore` already excludes `public/build` (see project root).
+   - _Excluding compiled assets from git does **not** compromise collaboration. It is the standard practice for Laravel + Vite projects. Each developer and the server will generate these files as needed._
+
+3. **If you change any CSS/JS:**
+   - Commit the source files (`resources/css/`, `resources/js/`), NOT the compiled output.
+   - Notify your team to re-run `npm run build` after pulling.
+
+4. **If you add new dependencies:**
+   - Commit both `package.json` and `package-lock.json`.
+
+---
+
 ## 👥 **User Roles & Access**
 
 ### **Default Users**

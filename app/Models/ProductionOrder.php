@@ -24,6 +24,17 @@ class ProductionOrder extends Model
         'completed_at' => 'datetime',
     ];
 
+    // Auto-generate order_number if not provided
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->order_number)) {
+                $model->order_number = 'PO-' . time() . '-' . strtoupper(uniqid());
+            }
+        });
+    }
+
     // Relationships
     public function manufacturer()
     {

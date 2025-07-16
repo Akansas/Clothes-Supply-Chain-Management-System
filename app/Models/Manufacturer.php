@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RawMaterialSupplier;
-
 
 class Manufacturer extends Model
 {
@@ -71,8 +69,7 @@ class Manufacturer extends Model
     /**
      * Get the raw material suppliers for this manufacturer.
      */
-    /*
-     public function rawMaterialSuppliers()
+    public function rawMaterialSuppliers()
     {
         return $this->hasMany(RawMaterialSupplier::class);
     }
@@ -108,10 +105,4 @@ class Manufacturer extends Model
     {
         return $this->hasMany(\App\Models\Conversation::class, 'manufacturer_id');
     }
-    
-    public function rawMaterialSuppliers()
-    {
-        return $this->belongsToMany(RawMaterialSupplier::class, 'manufacturer_supplier', 'manufacturer_id', 'supplier_id');
-    }
-
 } 

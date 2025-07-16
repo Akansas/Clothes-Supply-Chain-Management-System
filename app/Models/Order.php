@@ -38,6 +38,7 @@ class Order extends Model
         'user_id',
         'retailer_id',
         'manufacturer_id',
+        'supplier_id',
         'total_amount',
         'shipping_address',
         'shipping_city',
@@ -154,19 +155,22 @@ class Order extends Model
     {
         return match($this->status) {
             'pending' => 'badge-warning',
-            'confirmed' => 'badge-info',
-            'processing' => 'badge-primary',
-            'shipped' => 'badge-secondary',
+            'approved' => 'badge-primary',
+            'rejected' => 'badge-danger',
             'delivered' => 'badge-success',
-            'cancelled' => 'badge-danger',
-            'returned' => 'badge-dark',
-            default => 'badge-light'
+            default => 'badge-secondary',
         };
     }
 
     public function getStatusText()
     {
-        return ucfirst($this->status);
+        return match($this->status) {
+            'pending' => 'Pending',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            'delivered' => 'Delivered',
+            default => ucfirst($this->status ?? 'Unknown'),
+        };
     }
 
     public function canBeCancelled()
@@ -200,8 +204,8 @@ class Order extends Model
         return false;
     }
     public function supplier()
-{
-    return $this->belongsTo(Supplier::class);
-}
+    {
+        return $this->belongsTo(\App\Models\RawMaterialSupplier::class, 'supplier_id');
+    }
 
 }

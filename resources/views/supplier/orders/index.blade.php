@@ -57,29 +57,42 @@
                         @forelse($orders as $order)
                         <tr>
                             <td>#{{ $order->id }}</td>
-                            <td>{{ $order->manufacturer->name ?? 'N/A' }}</td>
+                            <td>GenZ FashionZ</td>
                             <td>${{ number_format($order->total_amount, 2) }}</td>
                             <td>
                                 <span class="badge order-status-badge {{ $order->getStatusBadgeClass() }}">{{ $order->getStatusText() }}</span>
                             </td>
-                            <td>{{ $order->created_at->format('M d, Y') }}</td>
+                            <td>{{ $order->created_at->format('M d, Y H:i') }}</td>
                             <td class="text-end">
                                 <a href="{{ route('supplier.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">View</a>
                                 @if($order->status === 'pending')
-                                    <a href="{{ route('supplier.orders.assignDelivery', $order) }}" class="btn btn-sm btn-warning ms-1">Approve & Ship</a>
-                                @elseif($order->status === 'confirmed')
-                                    @php $hasDeliveryPersonnel = \App\Models\User::whereHas('role', function($q){ $q->where('name', 'delivery_personnel'); })->exists(); @endphp
-                                    @if($hasDeliveryPersonnel)
-                                        <a href="{{ route('supplier.orders.assignDelivery', $order) }}" class="btn btn-sm btn-success ms-1">Ship</a>
-                                    @else
-                                        <button class="btn btn-sm btn-secondary ms-1" disabled>Ship (No Personnel)</button>
-                                    @endif
+                                    <form action="{{ route('supplier.orders.updateStatus', $order) }}" method="POST" class="d-inline-block ms-1">
+                                        @csrf
+                                        <input type="hidden" name="status" value="approved">
+                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                    </form>
+                                    <form action="{{ route('supplier.orders.updateStatus', $order) }}" method="POST" class="d-inline-block ms-1">
+                                        @csrf
+                                        <input type="hidden" name="status" value="rejected">
+                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                    </form>
+                                @elseif($order->status === 'approved')
+                                    <form action="{{ route('supplier.orders.updateStatus', $order) }}" method="POST" class="d-inline-block ms-1">
+                                        @csrf
+                                        <input type="hidden" name="status" value="delivered">
+                                        <button type="submit" class="btn btn-sm btn-primary">Mark as Delivered</button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No purchase orders found.</td>
+                            <td colspan="6" class="text-center text-muted">
+                                No purchase orders found.<br>
+                                @if(!request('status'))
+                                    <small>If you expect to see orders here, please ensure your supplier profile is correctly linked to your user account and that manufacturers are placing orders for your raw materials.</small>
+                                @endif
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>

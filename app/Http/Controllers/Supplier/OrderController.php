@@ -55,14 +55,14 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:confirmed,rejected,shipped',
+            'status' => 'required|in:confirmed,rejected,shipped,approved,delivered',
         ]);
 
         $order->update(['status' => $request->status]);
 
         // Potentially trigger notifications or other events here
 
-        return redirect()->route('supplier.orders.show', $order)
+        return redirect()->route('supplier.orders.index')
             ->with('success', 'Order status updated successfully!');
     }
 

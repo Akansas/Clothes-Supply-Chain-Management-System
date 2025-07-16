@@ -72,14 +72,19 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         // Finished products for the table (use shared manufacturer profile)
-        $products = Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
+        $finishedProducts = Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
             ->whereNull('supplier_id')
             ->with('inventory')
+            ->get();
+        // Raw materials for the table
+        $rawMaterials = Product::whereNotNull('supplier_id')
+            ->with(['inventory', 'supplier.user'])
             ->get();
         // Debug: Log the products being fetched
         Log::info('Manufacturer Dashboard Products', [
             'manufacturer_id' => $manufacturer ? $manufacturer->id : null,
-            'products' => $products->toArray(),
+            'finished_products' => $finishedProducts->toArray(),
+            'raw_materials' => $rawMaterials->toArray(),
         ]);
         // Production stages in progress
         $activeStages = ProductionStage::whereHas('productionOrder', function ($query) use ($user) {
@@ -91,10 +96,10 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
         // Fetch conversations where the manufacturer is a participant
-        //$conversations = $user->conversations()
-         //   ->with(['messages.user', 'participants'])
-         //   ->latest('updated_at')
-          //  ->get();
+        $conversations = $user->conversations()
+            ->with(['messages.user', 'participants'])
+            ->latest('updated_at')
+            ->get();
         // Fetch production orders made by retailers for this manufacturer
         $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
             ->whereNotNull('retailer_id')
@@ -102,7 +107,13 @@ class DashboardController extends Controller
             ->latest()
             ->take(10)
             ->get();
-        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'products', 'retailerOrders', 'charts'));
+        // Fetch recent purchase orders for the manufacturer
+        $recentPurchaseOrders = \App\Models\Order::where('user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->with(['supplier.user'])
+            ->get();
+        return view('manufacturer.dashboard', compact('stats', 'recentOrders', 'activeStages', 'user', 'conversations', 'finishedProducts', 'rawMaterials', 'retailerOrders', 'charts', 'recentPurchaseOrders'));
     }
 
     /**
@@ -509,6 +520,13 @@ class DashboardController extends Controller
         $user = auth()->user();
         $material = \App\Models\Product::with('supplier')->where('supplier_id', '!=', null)->findOrFail($materialId);
 
+        // Debug log before creating the order
+        Log::info('DEBUG: Material for order', [
+            'material_id' => $material->id,
+            'material_supplier_id' => $material->supplier_id,
+            'material' => $material->toArray(),
+        ]);
+
         // Create the order
         $order = \App\Models\Order::create([
             'user_id' => $user->id,
@@ -523,6 +541,13 @@ class DashboardController extends Controller
             'shipping_zip' => 'To be provided',
             'shipping_country' => 'To be provided',
             'billing_address' => 'To be provided',
+        ]);
+
+        // Debug log for order creation
+        Log::info('Raw material order placed', [
+            'order_id' => $order->id,
+            'user_id' => $user->id,
+            'supplier_id' => $material->supplier_id,
         ]);
 
         // Create the order item
@@ -789,5 +814,17 @@ class DashboardController extends Controller
     public function orderProcessing()
     {
         return view('manufacturer.order-processing');
+    }
+
+    /**
+     * Show details for a single purchase order.
+     */
+    public function showPurchaseOrder($orderId)
+    {
+        $user = auth()->user();
+        $order = \App\Models\Order::where('user_id', $user->id)
+            ->with(['supplier.user', 'orderItems.product'])
+            ->findOrFail($orderId);
+        return view('manufacturer.purchase-orders.show', compact('order'));
     }
 }
