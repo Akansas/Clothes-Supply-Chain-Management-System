@@ -113,6 +113,7 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
 // Manufacturer Routes
 Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Manufacturer\DashboardController::class, 'index'])->name('manufacturer.dashboard');
+    Route::get('/report/pdf', [App\Http\Controllers\Manufacturer\DashboardController::class, 'downloadManufacturerReport'])->name('manufacturer.report.pdf');
     
     // Production Orders
     Route::get('/production-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'productionOrders'])->name('manufacturer.production-orders');
@@ -220,6 +221,7 @@ Route::redirect('/manufacturer/workers/{any}', '/manufacturer/workforce', 301)->
 // Retailer Routes
 Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Retailer\DashboardController::class, 'index'])->name('retailer.dashboard');
+    Route::get('/report/pdf', [App\Http\Controllers\Retailer\DashboardController::class, 'downloadRetailerReport'])->name('retailer.report.pdf');
     
     // Profile routes
     Route::get('/profile/create', [App\Http\Controllers\Retailer\DashboardController::class, 'createProfile'])->name('retailer.profile.create');

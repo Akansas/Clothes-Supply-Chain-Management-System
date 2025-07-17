@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Retailer;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Customer;
 
-class DashboardController extends Controller
+
+Class DashboardController extends Controller
 {
     /**
      * Show retailer dashboard
@@ -61,15 +62,39 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+
         // Retailer Analytics
         // Removed RetailerAnalyticsService and related analytics variables
+
+      /*  // Retailer Analytics
+        $service = new RetailerAnalyticsService($user);
+        $salesInsights = $service->getSalesInsights();
+        $inventoryIntelligence = $service->getInventoryIntelligence();
+        $customerBehavior = $service->getCustomerBehavior();
+        $pricingPromotion = $service->getPricingPromotion();
+        $omnichannelEngagement = $service->getOmnichannelEngagement();
+        $actionableAlerts = $service->getActionableAlerts();
+        $marketTrends = $service->getMarketTrends();
+
+        // Remove ML integration and customer segmentation/forecasting*/
 
         return view('retailer.dashboard', compact(
             'stats',
             'recentOrders',
             'lowStockItems',
+
             'retailStore'
             // Removed: 'salesInsights', 'inventoryIntelligence', 'customerBehavior', 'pricingPromotion', 'omnichannelEngagement', 'actionableAlerts', 'marketTrends'
+
+        ,
+            /*'salesInsights',
+            'inventoryIntelligence',
+            'customerBehavior',
+            'pricingPromotion',
+            'omnichannelEngagement',
+            'actionableAlerts',
+            'marketTrends'*/
+
         ));
     }
 
@@ -241,7 +266,7 @@ class DashboardController extends Controller
     /**
      * Show analytics/reports
      */
-    public function analytics()
+    /*public function analytics()
     {
         $user = auth()->user();
         // Removed RetailerAnalyticsService and related analytics variables
@@ -249,9 +274,8 @@ class DashboardController extends Controller
         return view('retailer.analytics'); // No compact()
     }
 
-    /**
-     * Show profile management
-     */
+    */
+    
     public function profile()
     {
         $user = auth()->user();
@@ -453,4 +477,42 @@ class DashboardController extends Controller
         $inventory->delete();
         return redirect()->route('retailer.inventory')->with('success', 'Inventory item deleted!');
     }
+
+public function downloadRetailerReport()
+{
+    $user = auth()->user();
+    $retailStore = $user->managedRetailStore;
+
+    $stats = [
+        'total_orders' => Order::where('retailer_id', $user->id)->count(),
+        'pending_orders' => Order::where('retailer_id', $user->id)->where('status', 'pending')->count(),
+        'total_cost' => Order::where('retailer_id', $user->id)
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_amount'),
+        'products_count' => Inventory::where('retail_store_id', $retailStore->id)->count(),
+    ];
+
+    // ✅ Here's the missing piece: you MUST define $orders
+    $orders = Order::with(['orderItems.product'])
+        ->where('retailer_id', $user->id)
+        ->latest()
+        ->take(10)
+        ->get()
+        ->flatMap(function ($order) {
+            return $order->orderItems->map(function ($item) use ($order) {
+                return (object)[
+                    'id' => $order->id,
+                    'product' => $item->product,
+                    'quantity' => $item->quantity,
+                    'created_at' => $order->created_at,
+                ];
+            });
+        });
+
+    return Pdf::loadView('reports.retailer_report', [
+        'retailer' => $retailStore,
+        'stats' => $stats,
+        'orders' => $orders,
+    ])->download('retailer_report.pdf');
+}
 }

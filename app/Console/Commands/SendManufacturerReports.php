@@ -1,50 +1,43 @@
 <?php
+// app/Console/Commands/GenerateManufacturerMonthlyReport.php
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Manufacturer;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ManufacturerReportMail;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class SendManufacturerReports extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:send-manufacturer-reports';
+    protected $signature = 'report:manufacturer-monthly';
+    protected $description = 'Generate monthly PDF reports for manufacturers';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Send daily production reports to manufacturers';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-      \Log::info('🏭 Starting manufacturer report process...');
-
-        $manufacturers = Manufacturer::with('productionOrders')->get();
+        $manufacturers = Manufacturer::all();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
 
         foreach ($manufacturers as $manufacturer) {
-            $orders = $manufacturer->productionOrders;
+            $orders = $manufacturer->productionOrders()
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->with('product')
+                ->get();
 
-            if ($orders->count() > 0) {
-                Mail::to($manufacturer->email)->send(new ManufacturerReportMail($orders));
-                \Log::info("✅ Sent report to: {$manufacturer->email}");
-            } else {
-                \Log::info("No production orders for: {$manufacturer->email}");
-            }
+            $pdf = Pdf::loadView('reports.manufacturer_report', [
+                'manufacturer' => $manufacturer,
+                'productionOrders' => $orders,
+                'date' => now()->format('F Y'),
+            ]);
+
+            $filename = 'manufacturer_report_' . $manufacturer->id . '_' . now()->format('Ym') . '.pdf';
+            Storage::put("public/reports/$filename", $pdf->output());
+
+            $this->info("Saved report: $filename");
         }
 
-        $this->info('Manufacturer reports sent.');
- }
+        return Command::SUCCESS;
+            }
 }
-    
-

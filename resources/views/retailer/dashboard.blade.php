@@ -167,6 +167,11 @@
                                                 <i class="fa fa-chart-bar"></i> View Analytics
                                             </a>
                                         </div>
+                                        <div class="col-md-3">
+    <a href="{{ route('retailer.report.pdf') }}" class="btn btn-warning btn-block">
+        <i class="fa fa-file-pdf"></i> Download PDF Report
+</a>
+</div>
                                     </div>
                                 </div>
                             </div>

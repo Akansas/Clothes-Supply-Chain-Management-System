@@ -72,9 +72,33 @@ class DashboardController extends Controller
         })->with(['orderItems.product', 'user'])->latest()->get();
 
         $linkedManufacturers = $supplier->manufacturers()->with('user')->get();
+         return view('supplier.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'pendingDeliveries',
+            'topMaterials',
+            'supplier',
+            'orders',
+            'linkedManufacturers',
+            'user'
+    ));
+    
+}
+
 
         // Supplier Analytics
         // Removed SupplierAnalyticsService and related analytics variables
+
+
+     
+       /*$service = new SupplierAnalyticsService($user);
+        $demandForecasting = $service->getDemandForecasting();
+        $leadTimeTracking = $service->getLeadTimeTracking();
+        $materialCostAnalytics = $service->getMaterialCostAnalytics();
+        $qualityControlAnalysis = $service->getQualityControlAnalysis();
+        $clientSatisfaction = $service->getClientSatisfaction();
+        $capacityPlanning = $service->getCapacityPlanning();
+>>>>>>> Stashed changes
 
         return view('supplier.dashboard', compact(
             'stats',
@@ -84,14 +108,25 @@ class DashboardController extends Controller
             'supplier',
             'orders',
             'linkedManufacturers',
+
             'user'
             // Removed: 'demandForecasting', 'leadTimeTracking', 'materialCostAnalytics', 'qualityControlAnalysis', 'clientSatisfaction', 'capacityPlanning'
         ));
     }
 
-    /**
-     * Show deliveries
-     */
+            'user',
+            'demandForecasting',
+            'leadTimeTracking',
+            'materialCostAnalytics',
+            'qualityControlAnalysis',
+            'clientSatisfaction',
+            'capacityPlanning'
+        ));*/
+    
+
+
+    
+     
     public function deliveries(Request $request)
     {
         $user = auth()->user();
@@ -110,9 +145,6 @@ class DashboardController extends Controller
         return view('supplier.deliveries.index', compact('deliveries'));
     }
 
-    /**
-     * Show delivery details
-     */
     public function showDelivery($id)
     {
         $user = auth()->user();
@@ -125,9 +157,8 @@ class DashboardController extends Controller
         return view('supplier.deliveries.show', compact('delivery'));
     }
 
-    /**
-     * Update delivery status
-     */
+    
+     
     public function updateDeliveryStatus(Request $request, $id)
     {
         $user = auth()->user();
@@ -154,9 +185,8 @@ class DashboardController extends Controller
             ->with('success', 'Delivery status updated successfully!');
     }
 
-    /**
-     * Show manufacturers
-     */
+    
+     
     public function manufacturers()
     {
         $user = auth()->user();
@@ -171,9 +201,8 @@ class DashboardController extends Controller
         return view('supplier.manufacturers.index', compact('manufacturers'));
     }
 
-    /**
-     * Show analytics
-     */
+    
+     
     public function analytics()
     {
         $user = auth()->user();
@@ -184,9 +213,8 @@ class DashboardController extends Controller
         ));
     }
 
-    /**
-     * Show profile
-     */
+    
+     
     public function profile()
     {
         $user = auth()->user();
@@ -195,9 +223,8 @@ class DashboardController extends Controller
         return view('supplier.profile.index', compact('user', 'supplier'));
     }
 
-    /**
-     * Update profile
-     */
+    
+     
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
@@ -227,3 +254,5 @@ class DashboardController extends Controller
         return redirect()->route('supplier.profile')->with('success', 'Profile updated successfully!');
     }
 }
+
+    

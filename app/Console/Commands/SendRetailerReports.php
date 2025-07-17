@@ -1,37 +1,35 @@
-<?php
-
+<?Php
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\RetailStore;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\RetailerReportMail;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class SendRetailerReports extends Command
 {
-    protected $signature = 'app:send-retailer-reports';
-    protected $description = 'Send daily order reports to retailers';
+    protected $signature = 'reports:send-retailer-pdf';
+    protected $description = 'Generate and store PDF reports for each retail store';
 
     public function handle()
     {
-        Log::info('🛒 Starting retailer report process...');
+        $retailStores = RetailStore::all();
 
-        $retailers = RetailStore::with(['orders' => function ($query) {
-            $query->whereDate('created_at', today())->with('product');
-        }])->get();
+        foreach ($retailStores as $store) {
+            $filename = 'retailer_report_' . $store->id . '_' . now()->format('Ymd') . '.pdf';
 
-        foreach ($retailers as $retailer) {
-            $orders = $retailer->orders;
+            // You can pass more data like orders or inventory if needed
+            $pdf = Pdf::loadView('reports.retailer_report', [
+                'retailer' => $store,
+                'orders' => $store->orders ?? [],
+                'inventory' => $store->inventory ?? [],
+            ]);
 
-            if ($orders->count() > 0) {
-                Mail::to($retailer->email)->send(new RetailerReportMail($orders, $retailer));
-                Log::info('✅ Sent retailer report to ' . $retailer->email);
-            } else {
-                Log::info('🟡 No orders for ' . $retailer->email);
-            }
+            Storage::put('public/reports/' . $filename, $pdf->output());
+
+            $this->info("PDF generated for store ID {$store->id}: $filename");
         }
 
-        $this->info('Retailer reports sent successfully.');
-  }
+        return Command::SUCCESS;
+}
 }
