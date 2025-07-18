@@ -18,6 +18,10 @@
             <input type="number" name="min_stock_level" class="form-control" value="{{ $material->min_stock_level ?? 0 }}" min="0" required>
             <small class="form-text text-muted">When delivered quantity drops to or below this value, you'll see a low stock warning.</small>
         </div>
+        <div class="mb-3">
+            <label for="note" class="form-label">Reason for Change/Update</label>
+            <textarea name="note" id="note" class="form-control" rows="2" required>{{ old('note', $material->note ?? '') }}</textarea>
+        </div>
         <button type="submit" class="btn btn-primary">Update</button>
         <a href="{{ route('manufacturer.inventory.index') }}" class="btn btn-secondary">Cancel</a>
     </form>

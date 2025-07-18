@@ -16,27 +16,29 @@ class InventoryController extends Controller
     {
         $user = auth()->user();
         $manufacturerId = $user->manufacturer_id;
-        // Raw materials: Only those with delivered orders for this manufacturer
-        $rawMaterials = Product::where('manufacturer_id', $manufacturerId)
-            ->whereNotNull('supplier_id')
-            ->whereHas('orderItems.order', function ($query) use ($user) {
-                $query->where('status', 'delivered')
-                      ->where('user_id', $user->id);
-            })
-            ->get();
-        // Attach delivered quantity to each raw material
-        foreach ($rawMaterials as $material) {
-            $deliveredQty = $material->orderItems()
-                ->whereHas('order', function ($query) use ($user) {
-                    $query->where('status', 'delivered')
-                          ->where('user_id', $user->id);
-                })
-                ->sum('quantity');
-            $material->delivered_quantity = $deliveredQty;
-        }
-        // Finished products: match dashboard logic
-        $manufacturer = \App\Models\Manufacturer::first();
-        $finishedProducts = Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
+        // Show all raw materials from delivered purchase orders (from this manufacturer to any supplier)
+        $deliveredOrderItems = \App\Models\OrderItem::whereHas('order', function ($query) use ($user) {
+            $query->where('status', 'delivered')
+                  ->where('user_id', $user->id)
+                  ->whereNotNull('supplier_id');
+        })
+        ->with('product')
+        ->get();
+
+        // Group by product and sum quantities
+        $rawMaterials = $deliveredOrderItems->groupBy('product_id')->map(function($items) {
+            $product = $items->first()->product;
+            return (object) [
+                'id' => $product->id,
+                'name' => $product->name,
+                'unit' => $product->unit ?? '-',
+                'min_stock_level' => $product->min_stock_level ?? '-',
+                'delivered_quantity' => $items->sum('quantity'),
+            ];
+        })->values();
+        // Finished products: only those added by this manufacturer
+        $finishedProducts = Product::where('manufacturer_id', $user->id)
+            ->where('type', 'finished_product')
             ->whereNull('supplier_id')
             ->with('inventory')
             ->get();
@@ -48,11 +50,8 @@ class InventoryController extends Controller
      */
     public function editRawMaterial($id)
     {
-        $user = auth()->user();
-        $manufacturerId = $user->manufacturer_id;
-        $material = Product::where('manufacturer_id', $manufacturerId)
-            ->whereNotNull('supplier_id')
-            ->findOrFail($id);
+        // Allow editing any product with a supplier (raw material), regardless of manufacturer_id
+        $material = \App\Models\Product::whereNotNull('supplier_id')->findOrFail($id);
         return view('manufacturer.inventory.edit_raw_material', compact('material'));
     }
 
@@ -62,13 +61,12 @@ class InventoryController extends Controller
     public function updateRawMaterial(Request $request, $id)
     {
         $user = auth()->user();
-        $manufacturerId = $user->manufacturer_id;
-        $material = Product::where('manufacturer_id', $manufacturerId)
-            ->whereNotNull('supplier_id')
-            ->findOrFail($id);
+        // Allow updating any product with a supplier (raw material), regardless of manufacturer_id
+        $material = Product::whereNotNull('supplier_id')->findOrFail($id);
         $request->validate([
             'stock_quantity' => 'required|integer|min:0',
             'min_stock_level' => 'required|integer|min:0',
+            'note' => 'required|string',
         ]);
         $oldQty = $material->stock_quantity;
         $material->stock_quantity = $request->stock_quantity;
@@ -81,7 +79,7 @@ class InventoryController extends Controller
             'old_quantity' => $oldQty,
             'new_quantity' => $material->stock_quantity,
             'user_id' => $user->id,
-            'note' => null,
+            'note' => $request->note,
         ]);
         return redirect()->route('manufacturer.inventory.index')->with('success', 'Raw material stock updated!');
     }

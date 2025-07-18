@@ -5,7 +5,6 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SendSupplierReports;
-use App\Console\Commands\SendManufacturerReports;
 
 class Kernel extends ConsoleKernel
 {
@@ -17,8 +16,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('send:supplier-reports')->daily();
         $schedule->command('send:delivery-partner-reports')->daily();
         $schedule->command('send:warehouse-manager-reports')->daily();
-        $schedule->command('app:send-manufacturer-reports')->daily();
-        $schedule->command('reports:send-retailer-pdf')->daily();
+        $schedule->command('send:manufacturer-reports')->daily();
         
                      
 
@@ -38,12 +36,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         SendSupplierReports::class,
         \App\Console\Commands\ScheduleFacilityVisitsForAllVendors::class,
-
         \App\Console\Commands\FixProductInventory::class,
-
-        \App\Console\Commands\SendManufacturerReports::class,
-        \App\Console\Commands\SendSupplierReports::class,
-
     ];
 
 

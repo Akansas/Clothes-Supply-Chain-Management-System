@@ -50,50 +50,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Product</th>
-                            <th>Manufacturer</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($productionOrders as $order)
-                            <tr>
-                                <td>{{ $order->order_number }}</td>
-                                <td>{{ $order->product->name ?? 'N/A' }}</td>
-                                <td>{{ $order->product->manufacturer->name ?? 'N/A' }}</td>
-                                <td>{{ $order->quantity }}</td>
-                                <td>
-                                    <span class="badge bg-secondary text-dark fw-bold">{{ ucfirst($order->status) }}</span>
-                                </td>
-                                <td>{{ $order->due_date ? \Carbon\Carbon::parse($order->due_date)->format('M d, Y') : 'N/A' }}</td>
-                                <td>
-                                    @if($order->status === 'cancelled')
-                                        <span class="text-danger fw-bold">Order cancelled</span>
-                                    @else
-                                        <a href="{{ route('retailer.orders.edit', $order->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                        <form action="{{ route('retailer.orders.update-status', $order->id) }}" method="POST" style="display:inline-block;">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="hidden" name="status" value="cancelled">
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</button>
-                                        </form>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center">No orders found</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                @include('retailer.orders._orders-table', ['orders' => $productionOrders])
             </div>
             <div class="d-flex justify-content-center mt-4">
                 {{ $productionOrders->links() }}

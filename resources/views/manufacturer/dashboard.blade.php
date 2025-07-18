@@ -27,86 +27,61 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <a href="{{ route('manufacturer.materials.browse') }}" class="btn btn-lg btn-primary">
-                <i class="fas fa-shopping-cart me-2"></i> View & Order Raw Materials
-            </a>
-        </div>
-    </div>
+    {{-- Removed standalone View & Order Raw Materials button and moved to Quick Actions --}}
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
+        <!-- Purchase Orders Card -->
         <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white h-100">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['total_production_orders'] }}</h4>
-                            <small>Total Orders</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-industry fa-2x"></i>
-                        </div>
-                    </div>
+                    <h5 class="card-title"><i class="fas fa-shopping-cart me-2"></i>Purchase Orders</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><span class="badge bg-warning me-1">Pending</span> {{ $purchaseOrdersStats['pending'] ?? 0 }}</li>
+                        <li><span class="badge bg-primary me-1">Approved</span> {{ $purchaseOrdersStats['approved'] ?? 0 }}</li>
+                        <li><span class="badge bg-danger me-1">Rejected</span> {{ $purchaseOrdersStats['rejected'] ?? 0 }}</li>
+                        <li><span class="badge bg-success me-1">Delivered</span> {{ $purchaseOrdersStats['delivered'] ?? 0 }}</li>
+                        <li><span class="badge bg-secondary me-1">Cancelled</span> {{ $purchaseOrdersStats['cancelled'] ?? 0 }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
+        <!-- Retailer Orders Card -->
         <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-white h-100">
+            <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['active_production_orders'] }}</h4>
-                            <small>Active Orders</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-cogs fa-2x"></i>
-                        </div>
-                    </div>
+                    <h5 class="card-title"><i class="fas fa-store me-2"></i>Retailer Orders</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><span class="badge bg-warning me-1">Pending</span> {{ $retailerOrdersStats['pending'] ?? 0 }}</li>
+                        <li><span class="badge bg-primary me-1">Approved</span> {{ $retailerOrdersStats['approved'] ?? 0 }}</li>
+                        <li><span class="badge bg-danger me-1">Rejected</span> {{ $retailerOrdersStats['rejected'] ?? 0 }}</li>
+                        <li><span class="badge bg-success me-1">Delivered</span> {{ $retailerOrdersStats['delivered'] ?? 0 }}</li>
+                        <li><span class="badge bg-secondary me-1">Cancelled</span> {{ $retailerOrdersStats['cancelled'] ?? 0 }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
+        <!-- Total Cost Card -->
         <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white h-100">
+            <div class="card h-100 bg-light">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['completed_orders'] }}</h4>
-                            <small>Completed</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x"></i>
-                        </div>
-                    </div>
+                    <h5 class="card-title"><i class="fas fa-coins me-2"></i>Total Cost</h5>
+                    <h3 class="mb-0 text-danger">${{ number_format($totalCost, 2) }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Total Revenue Card -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-cash-register me-2"></i>Total Revenue</h5>
+                    <h3 class="mb-0 text-success">${{ number_format($totalRevenue, 2) }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Workforce Distribution Management Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Workforce Distribution Management</h5>
-                    <a href="{{ route('workforce.index') }}" class="btn btn-sm btn-primary">Manage Workforce</a>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3 mb-3">
-                            <div class="card bg-info text-white h-100">
-                                <div class="card-body">
-                                    <h4 class="mb-0">{{ $stats['total_workers'] ?? 0 }}</h4>
-                                    <small>Total Workers</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Removed Workforce Distribution Management card/section as per user request --}}
     @php
         $supplyCenterJson = json_encode($charts['workers_by_supply_center'] ?? (object)[]);
         $shiftJson = json_encode($charts['workers_by_shift'] ?? (object)[]);
@@ -149,151 +124,11 @@
 
     <!-- Remove the entire Manufacturing Analytics section and its components/cards -->
 
-    <div class="row">
         <!-- Finished Products Table -->
-        <div class="col-12 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Finished Products (Clothes)</h5>
-                    <a href="{{ route('manufacturer.products.create') }}" class="btn btn-sm btn-success">Add Product</a>
-                </div>
-                <div class="card-body">
-                    @if(isset($finishedProducts) && $finishedProducts->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Description</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($finishedProducts as $product)
-                                    <tr>
-                                        <td>
-                                            @if($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}" alt="Image" style="max-width: 60px;">
-                                            @else
-                                                <span class="text-muted">No Image</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->category ?? '-' }}</td>
-                                        <td>{{ $product->description }}</td>
-                                        <td>{{ $product->price ? ('$' . number_format($product->price, 2)) : '-' }}</td>
-                                        <td>{{ $product->inventory->quantity ?? 0 }}</td>
-                                        <td>
-                                            <a href="{{ route('manufacturer.products.edit', $product->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                            <form action="{{ route('manufacturer.products.destroy', $product->id) }}" method="POST" style="display:inline-block;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-muted">No finished products found.</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Removed Finished Products (Clothes) table from dashboard. See inventory page for this table. --}}
 
     <!-- Raw Materials Table -->
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Raw Materials (Supplier Products)</h5>
-                    <a href="{{ route('manufacturer.materials.browse') }}" class="btn btn-sm btn-primary">Browse All Raw Materials</a>
-                </div>
-                <div class="card-body">
-                    @if(isset($rawMaterials) && $rawMaterials->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Supplier</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($rawMaterials as $product)
-                                    <tr>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->category ?? '-' }}</td>
-                                        <td>{{ $product->supplier->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $product->price ? ('$' . number_format($product->price, 2)) : '-' }}</td>
-                                        <td>{{ $product->inventory->quantity ?? 0 }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-muted">No raw materials found.</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Production Orders from Retailers -->
-    @if(isset($retailerOrders) && $retailerOrders->count() > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Production Orders from Retailers</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Order #</th>
-                                    <th>Retailer</th>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Status</th>
-                                    <th>Due Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($retailerOrders as $order)
-                                <tr>
-                                    <td>{{ $order->order_number }}</td>
-                                    <td>{{ $order->retailer->name ?? 'N/A' }}</td>
-                                    <td>{{ $order->product->name ?? 'N/A' }}</td>
-                                    <td>{{ $order->quantity }}</td>
-                                    <td>{{ ucfirst($order->status) }}</td>
-                                    <td>{{ $order->due_date ? $order->due_date->format('Y-m-d') : '-' }}</td>
-                                    <td>
-                                        <a href="{{ route('manufacturer.production-orders.show', $order->id) }}" class="btn btn-sm btn-primary">View</a>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+    {{-- Removed Raw Materials (Supplier Products) table as per user request --}}
 
     <!-- Quick Actions -->
     <div class="row">
@@ -305,23 +140,23 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3">
+                            <a href="{{ route('manufacturer.materials.browse') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-shopping-cart me-2"></i> View & Order Raw Materials
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
                             <a href="{{ route('manufacturer.purchase-orders') }}" class="btn btn-warning w-100">
                                 <i class="fas fa-shopping-basket me-2"></i>My Purchase Orders
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('manufacturer.quality-checks') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-clipboard-check me-2"></i>Quality Checks
+                            <a href="{{ route('manufacturer.retailer-orders') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-list me-2"></i>Retailer Orders
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{{ route('manufacturer.analytics') }}" class="btn btn-info w-100">
                                 <i class="fas fa-chart-bar me-2"></i>Analytics
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('manufacturer.retailer-orders') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-list me-2"></i>Retailer Orders Management
                             </a>
                         </div>
                     </div>

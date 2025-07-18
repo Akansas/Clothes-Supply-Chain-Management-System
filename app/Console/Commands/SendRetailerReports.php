@@ -1,43 +1,37 @@
-<?Php
+<?php
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\RetailStore;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RetailerReportMail;
 
 class SendRetailerReports extends Command
 {
-    protected $signature = 'reports:send-retailer-pdf';
-    protected $description = 'Generate and store PDF reports for each retail store';
+    protected $signature = 'app:send-retailer-reports';
+    protected $description = 'Send daily order reports to retailers';
 
-   public function handle()
-{
-    $retailStores = RetailStore::all();
-    $currentMonth = now()->format('F Y'); // e.g., July 2025
+    public function handle()
+    {
+        Log::info('🛒 Starting retailer report process...');
 
-    foreach ($retailStores as $store) {
-        $filename = 'retailer_report_' . $store->id . '_' . now()->format('Ym') . '.pdf';
+        $retailers = RetailStore::with(['orders' => function ($query) {
+            $query->whereDate('created_at', today())->with('product');
+        }])->get();
 
-        // Filter only orders made this month
-        $monthlyOrders = $store->orders()
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->with(['orderItems.product']) // Add relationships as needed
-            ->get();
+        foreach ($retailers as $retailer) {
+            $orders = $retailer->orders;
 
-        $pdf = Pdf::loadView('reports.retailer_report', [
-            'retailer' => $store,
-            'orders' => $monthlyOrders,
-            'inventory' => $store->inventory ?? [],
-            'month' => $currentMonth,
-        ]);
+            if ($orders->count() > 0) {
+                Mail::to($retailer->email)->send(new RetailerReportMail($orders, $retailer));
+                Log::info('✅ Sent retailer report to ' . $retailer->email);
+            } else {
+                Log::info('🟡 No orders for ' . $retailer->email);
+            }
+        }
 
-        Storage::put('public/reports/' . $filename, $pdf->output());
-
-        $this->info("Monthly PDF generated for store ID {$store->id}: $filename");
-    }
-
-    return Command::SUCCESS;
-}
+        $this->info('Retailer reports sent successfully.');
+  }
 }

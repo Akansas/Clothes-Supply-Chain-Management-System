@@ -271,4 +271,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
+
+    /**
+     * Get the production orders for the retailer.
+     */
+    public function retailerProductionOrders()
+    {
+        return $this->hasMany(\App\Models\ProductionOrder::class, 'retailer_id');
+    }
 }

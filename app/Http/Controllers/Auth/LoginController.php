@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -97,6 +98,12 @@ class LoginController extends Controller
         // Attempt login with credentials
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $user = Auth::user();
+            Log::info('Login debug', [
+                'user_id' => $user->id,
+                'user_role_id' => $user->role_id,
+                'form_role_id' => $roleId,
+                'credentials' => $credentials,
+            ]);
             if ($user->role_id == $roleId) {
                 return $this->sendLoginResponse($request);
             } else {

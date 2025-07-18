@@ -11,81 +11,170 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="card card-stats">
-                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-5">
-                                            <div class="icon-big text-center icon-warning">
-                                                <i class="nc-icon nc-chart text-warning"></i>
-                        </div>
-                    </div>
-                                        <div class="col-7">
-                                            <div class="numbers">
-                                                <p class="card-category">Total Orders</p>
-                                                <h4 class="card-title">{{ $stats['total_orders'] }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-                                <div class="card-footer">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-clock-o"></i> All time orders
-                </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="card card-stats">
-                                <div class="card-body">
-                            <div class="row">
-                                        <div class="col-5">
-                                            <div class="icon-big text-center icon-info">
-                                                <i class="nc-icon nc-chart-pie-35 text-info"></i>
-                                            </div>
-                                                </div>
-                                        <div class="col-7">
-                                            <div class="numbers">
-                                                <p class="card-category">Pending Orders</p>
-                                                <h4 class="card-title">{{ $stats['pending_orders'] }}</h4>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-refresh"></i> Need attention
-                                            </div>
-                                                </div>
-                                                </div>
-                                                </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="card card-stats">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-5">
-                                            <div class="icon-big text-center icon-success">
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-success mb-2">
                                                 <i class="nc-icon nc-money-coins text-success"></i>
                                             </div>
-                                        </div>
-                                        <div class="col-7">
-                                            <div class="numbers">
+                                            <div class="numbers text-center">
                                                 <p class="card-category">Total Cost</p>
                                                 <h4 class="card-title">${{ number_format($stats['total_cost'], 2) }}</h4>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer">
+                                <div class="card-footer w-100 text-center">
                                     <hr>
                                     <div class="stats">
                                         <i class="fa fa-calendar-o"></i> From all orders
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-warning mb-2">
+                                                <i class="nc-icon nc-chart text-warning"></i>
                                             </div>
-                                                </div>
-                                                </div>
-                                                </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Total Orders</p>
+                                                <h4 class="card-title">{{ $stats['total_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-clock-o"></i> All time orders
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-info mb-2">
+                                                <i class="nc-icon nc-chart-pie-35 text-info"></i>
+                                            </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Pending Orders</p>
+                                                <h4 class="card-title">{{ $stats['pending_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-refresh"></i> Need attention
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-info mb-2">
+                                                <i class="nc-icon nc-delivery-fast text-info"></i>
+                                            </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Delivered Orders</p>
+                                                <h4 class="card-title">{{ $stats['delivered_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-truck"></i> Successfully delivered
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-success mb-2">
+                                                <i class="nc-icon nc-check-2 text-success"></i>
+                                            </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Approved Orders</p>
+                                                <h4 class="card-title">{{ $stats['approved_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-check"></i> Approved by manufacturer
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-danger mb-2">
+                                                <i class="nc-icon nc-simple-remove text-danger"></i>
+                                            </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Cancelled Orders</p>
+                                                <h4 class="card-title">{{ $stats['cancelled_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-times"></i> Orders cancelled
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="card card-stats h-100 d-flex flex-column justify-content-center align-items-center">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+                                    <div class="row w-100">
+                                        <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                            <div class="icon-big text-center icon-danger mb-2">
+                                                <i class="nc-icon nc-simple-remove text-danger"></i>
+                                            </div>
+                                            <div class="numbers text-center">
+                                                <p class="card-category">Rejected Orders</p>
+                                                <h4 class="card-title">{{ $stats['rejected_orders'] }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer w-100 text-center">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-times-circle"></i> Orders rejected
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
                     <div class="row">
@@ -113,7 +202,7 @@
                                                         <td>{{ $order->order_number }}</td>
                                                         <td>${{ number_format($order->total_amount, 2) }}</td>
                                                         <td>
-                                                            <span class="badge badge-{{ $order->getStatusBadgeClass() }}">
+                                                            <span class="badge badge-{{ $order->getStatusBadgeClass() }}" style="color: #000 !important;">
                                                                 {{ $order->getStatusText() }}
                                                             </span>
                                                         </td>
@@ -167,11 +256,6 @@
                                                 <i class="fa fa-chart-bar"></i> View Analytics
                                             </a>
                                         </div>
-                                        <div class="col-md-3">
-    <a href="{{ route('retailer.report.pdf') }}" class="btn btn-warning btn-block">
-        <i class="fa fa-file-pdf"></i> Download PDF Report
-</a>
-</div>
                                     </div>
                                 </div>
                             </div>

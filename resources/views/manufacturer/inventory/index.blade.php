@@ -121,6 +121,7 @@
                         <th>Type</th>
                         <th>Change</th>
                         <th>User</th>
+                        <th>Reason</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,9 +132,10 @@
                             <td>{{ ucfirst(str_replace('_', ' ', $log->item_type)) }}</td>
                             <td>{{ $log->old_quantity }} → <strong>{{ $log->new_quantity }}</strong></td>
                             <td>{{ $log->user->name ?? 'User#'.$log->user_id }}</td>
+                            <td>{{ $log->note ?? '-' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-center">No inventory changes found.</td></tr>
+                        <tr><td colspan="6" class="text-center">No inventory changes found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

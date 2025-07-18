@@ -35,6 +35,7 @@ class ProductController extends Controller
         $unit = $request->input('unit', 'pcs');
         $quantity = $request->input('quantity', 0);
         $manufacturer = \App\Models\Manufacturer::first();
+        $userId = $manufacturer ? $manufacturer->user_id : null;
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -45,7 +46,7 @@ class ProductController extends Controller
             'material' => $material,
             'cost' => $cost,
             'unit' => $unit,
-            'manufacturer_id' => $manufacturer ? $manufacturer->id : null,
+            'manufacturer_id' => $userId,
             'supplier_id' => null,
             'is_active' => true,
         ]);

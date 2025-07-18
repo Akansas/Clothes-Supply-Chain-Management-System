@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('quality_checks', function (Blueprint $table) {
-            $table->string('status')->default('pending')->after('id');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->integer('assigned_count')->default(0);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('quality_checks', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('assigned_count');
         });
     }
 };

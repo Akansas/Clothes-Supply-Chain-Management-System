@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
             ProductsTableSeeder::class,
             ProductionOrdersTableSeeder::class,
             ProductionStagesTableSeeder::class,
-            QualityChecksTableSeeder::class,
+            // QualityChecksTableSeeder::class, // commented out to avoid error
+            RetailerOrdersDemoSeeder::class, // DEMO: Remove after testing
         ]);
 
         // Seed admin role and user
@@ -246,5 +247,8 @@ class DatabaseSeeder extends Seeder
                 'role_id' => $deliveryRole->id,
             ]);
         }
+
+        // DEMO: Retailer analytics demo orders (remove after testing)
+        // \Database\Seeders\RetailerOrdersDemoSeeder::class,
     }
 }

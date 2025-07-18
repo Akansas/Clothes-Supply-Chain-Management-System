@@ -114,15 +114,10 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Material Catalog</h5>
-                <div>
                         <a href="{{ route('supplier.materials.create') }}" class="btn btn-success">
                             <i class="fas fa-plus me-2"></i>Add Material
                         </a>
-                        <a href="{{ route('supplier.report.pdf') }}" class="btn btn-primary">
-                            <i class="fas fa-file-pdf me-2"></i>Download PDF Report
-                </a>
                     </div>
-                </div>
                     <div class="row">
                         @forelse($topMaterials as $material)
                         <div class="col-md-6 col-lg-4 mb-3">

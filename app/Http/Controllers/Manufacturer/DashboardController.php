@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Manufacturer;
 use App\Http\Controllers\Controller;
 use App\Models\ProductionOrder;
 use App\Models\ProductionStage;
-use App\Models\QualityCheck;
 use App\Models\Product;
 use App\Models\Inventory;
 use App\Models\Manufacturer;
@@ -36,7 +35,6 @@ class DashboardController extends Controller
                 ->whereIn('status', ['in_progress', 'pending'])->count(),
             'completed_orders' => ProductionOrder::where('manufacturer_id', $user->id)
                 ->where('status', 'completed')->count(),
-            'pending_quality_checks' => QualityCheck::where('status', 'pending')->count(),
             'total_products' => Product::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)->count(),
             'monthly_production' => ProductionOrder::where('manufacturer_id', $user->id)
                 ->where('status', 'completed')
@@ -101,15 +99,7 @@ class DashboardController extends Controller
             ->with(['messages.user', 'participants'])
             ->latest('updated_at')
             ->get();
-        // Fetch production orders made by retailers for this manufacturer
-        $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
-            ->whereNotNull('retailer_id')
-            ->with(['product', 'retailer'])
-            ->latest()
-            ->take(10)
-            ->get();
-        // Manufacturer Analytics
-        // Removed ManufacturerAnalyticsService and related analytics variables
+        // Remove all code related to retailerOrders and retailer production orders management.
 
         // Remove ML integration and customer segmentation/forecasting
 
@@ -120,6 +110,35 @@ class DashboardController extends Controller
             ->with(['supplier.user'])
             ->get();
 
+        // --- NEW DASHBOARD CARDS DATA ---
+        // Use the same manufacturer ID logic as the retailer orders table
+        $manufacturerId = auth()->id();
+        // Purchase Orders (from suppliers)
+        $purchaseOrderStatuses = ['pending', 'approved', 'rejected', 'delivered', 'cancelled'];
+        $purchaseOrdersStats = [];
+        foreach ($purchaseOrderStatuses as $status) {
+            $purchaseOrdersStats[$status] = \App\Models\Order::where('user_id', $user->id)->where('status', $status)->count();
+        }
+        // Retailer Orders (to retailers)
+        $retailerOrderStatuses = ['pending', 'approved', 'rejected', 'delivered', 'cancelled'];
+        $retailerOrdersStats = [];
+        foreach ($retailerOrderStatuses as $status) {
+            $retailerOrdersStats[$status] = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturerId)->whereNotNull('retailer_id')->where('status', $status)->count();
+        }
+        // Total Cost (sum of total_amount for delivered purchase orders)
+        $totalCost = \App\Models\Order::where('user_id', $user->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
+        
+        $totalRevenue = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturerId)
+            ->whereNotNull('retailer_id')
+            ->where('status', 'delivered')
+            ->with('product')
+            ->get()
+            ->sum(function($order) {
+                return ($order->product && $order->quantity) ? $order->product->price * $order->quantity : 0;
+            });
+
         return view('manufacturer.dashboard', compact(
             'stats',
             'recentOrders',
@@ -128,9 +147,12 @@ class DashboardController extends Controller
             'conversations',
             'finishedProducts',
             'rawMaterials',
-            'retailerOrders',
-            'charts',
-            'recentPurchaseOrders'
+            'recentPurchaseOrders',
+            // Add new variables for cards
+            'purchaseOrdersStats',
+            'retailerOrdersStats',
+            'totalCost',
+            'totalRevenue'
         ));
     }
 
@@ -170,7 +192,7 @@ class DashboardController extends Controller
     {
         $manufacturer = \App\Models\Manufacturer::first();
         $order = ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
-            ->with(['product', 'stages', 'qualityChecks', 'retailer'])
+            ->with(['product', 'stages', 'retailer'])
             ->findOrFail($id);
         return view('manufacturer.production-orders.show', compact('order'));
     }
@@ -272,29 +294,14 @@ class DashboardController extends Controller
     public function updateProductionOrderStatus(Request $request, $id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
         $request->validate([
-            'status' => 'required|in:pending,in_progress,completed,cancelled',
-            'notes' => 'nullable|string',
+            'status' => 'required|in:pending,approved,rejected,delivered',
         ]);
-
-        $order->update([
-            'status' => $request->status,
-            'notes' => $request->notes,
-        ]);
-
-        if ($request->status === 'completed') {
-            $order->update(['completed_at' => now()]);
-            
-            // Add to inventory
-            $this->addToInventory($order);
-        }
-
-        return redirect()->route('manufacturer.production-orders.show', $order->id)
-            ->with('success', 'Production order status updated successfully!');
+        $order->status = $request->status;
+        $order->save();
+        // Redirect to the production orders list for manufacturer (best UX)
+        return redirect()->route('manufacturer.production-orders')->with('success', 'Order status updated.');
     }
 
     /**
@@ -379,54 +386,6 @@ class DashboardController extends Controller
     }
 
     /**
-     * Show quality checks
-     */
-    public function qualityChecks(Request $request)
-    {
-        $manufacturer = $this->getManufacturerOrRedirect();
-        $query = QualityCheck::where('manufacturer_id', $manufacturer->id)
-            ->with(['product', 'productionOrder']);
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-        $qualityChecks = $query->latest()->paginate(15);
-        return view('manufacturer.quality-checks.index', compact('qualityChecks'));
-    }
-
-    /**
-     * Show quality check details
-     */
-    public function showQualityCheck($id)
-    {
-        $manufacturer = $this->getManufacturerOrRedirect();
-        $qualityCheck = QualityCheck::where('manufacturer_id', $manufacturer->id)
-            ->with(['product', 'productionOrder'])
-            ->findOrFail($id);
-        return view('manufacturer.quality-checks.show', compact('qualityCheck'));
-    }
-
-    /**
-     * Update quality check
-     */
-    public function updateQualityCheck(Request $request, $id)
-    {
-        $manufacturer = $this->getManufacturerOrRedirect();
-        $qualityCheck = QualityCheck::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        $request->validate([
-            'status' => 'required|in:pending,passed,failed',
-            'inspector_notes' => 'nullable|string',
-            'test_results' => 'nullable|string',
-        ]);
-        $qualityCheck->status = $request->status;
-        $qualityCheck->inspector_notes = $request->inspector_notes;
-        $qualityCheck->test_results = $request->test_results;
-        $qualityCheck->completed_at = now();
-        $qualityCheck->save();
-        return redirect()->route('manufacturer.quality-checks.show', $qualityCheck->id)
-            ->with('success', 'Quality check updated successfully!');
-    }
-
-    /**
      * Show suppliers
      */
     public function suppliers()
@@ -461,17 +420,6 @@ class DashboardController extends Controller
         }
         $inventory = $query->paginate(15);
         return view('manufacturer.inventory.index', compact('inventory'));
-    }
-
-    /**
-     * Show analytics
-     */
-    public function analytics()
-    {
-        $user = auth()->user();
-        // Removed ManufacturerAnalyticsService and related analytics variables
-
-        return view('manufacturer.analytics.index'); // No compact()
     }
 
     /**
@@ -564,45 +512,13 @@ class DashboardController extends Controller
     }
 
     /**
-     * Accept a production order
-     */
-    public function acceptProductionOrder($id)
-    {
-        $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        if ($order->status === 'pending') {
-            $order->status = 'accepted';
-            $order->save();
-        }
-        return redirect()->back()->with('success', 'Production order accepted.');
-    }
-
-    /**
-     * Reject a production order
-     */
-    public function rejectProductionOrder(Request $request, $id)
-    {
-        $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        if ($order->status === 'pending') {
-            $order->status = 'rejected';
-            $order->notes = $order->notes . "\nRejected: " . ($request->reason ?? 'No reason provided');
-            $order->save();
-        }
-        return redirect()->back()->with('success', 'Production order rejected.');
-    }
-
-    /**
      * Start a production order
      */
     public function startProductionOrder($id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        if (in_array($order->status, ['accepted', 'paused'])) {
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
+        if (in_array($order->status, ['approved', 'paused'])) {
             $order->startProduction();
         }
         return redirect()->back()->with('success', 'Production started.');
@@ -614,8 +530,7 @@ class DashboardController extends Controller
     public function pauseProductionOrder($id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
         if ($order->status === 'in_production') {
             $order->status = 'paused';
             $order->save();
@@ -629,8 +544,7 @@ class DashboardController extends Controller
     public function completeProductionOrder(Request $request, $id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
         if ($order->status === 'in_production') {
             $order->produced_quantity = $request->produced_quantity ?? $order->quantity;
             $order->completeProduction();
@@ -645,8 +559,7 @@ class DashboardController extends Controller
     public function markReadyToShip(Request $request, $id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
         if ($order->status === 'completed') {
             $order->status = 'ready_to_ship';
             $order->shipment_date = $request->shipment_date ?? now();
@@ -659,14 +572,12 @@ class DashboardController extends Controller
     public function deliverProductionOrder(Request $request, $id)
     {
         $user = auth()->user();
-        $manufacturer = $user->manufacturer;
-        $order = ProductionOrder::where('manufacturer_id', $manufacturer->id)->findOrFail($id);
-        if (in_array($order->status, ['ready_to_ship', 'shipped'])) {
+        $order = ProductionOrder::where('manufacturer_id', $user->id)->findOrFail($id);
+        if ($order->status === 'approved') {
             $order->status = 'delivered';
-            // $order->delivered_at = now(); // Uncomment if you add this column
             $order->save();
         }
-        return redirect()->back()->with('success', 'Order marked as delivered.');
+        return redirect()->route('manufacturer.dashboard')->with('success', 'Order marked as delivered.');
     }
 
     /**
@@ -782,21 +693,6 @@ class DashboardController extends Controller
         return redirect()->route('manufacturer.purchase-orders')->with('success', 'Order cancelled successfully.');
     }
 
-    /**
-     * Display all production orders from retailers for the manufacturer.
-     */
-    public function retailerOrders()
-    {
-        $user = auth()->user();
-        $manufacturerId = $user->manufacturer_id;
-        $orders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturerId)
-            ->whereNotNull('retailer_id')
-            ->with(['product', 'retailer'])
-            ->latest()
-            ->paginate(20);
-        return view('manufacturer.retailer-orders', compact('orders'));
-    }
-
     public function markAsDelivered(Request $request, $id)
     {
         $user = auth()->user();
@@ -828,5 +724,33 @@ class DashboardController extends Controller
             ->with(['supplier.user', 'orderItems.product'])
             ->findOrFail($orderId);
         return view('manufacturer.purchase-orders.show', compact('order'));
+    }
+
+    public function retailerOrders()
+    {
+        $manufacturerId = auth()->id();
+        $orders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturerId)
+            ->whereNotNull('retailer_id')
+            ->with(['product', 'retailer'])
+            ->latest()
+            ->paginate(20);
+        return view('manufacturer.retailer-orders', compact('orders'));
+    }
+
+    public function updateRetailerOrderStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected,delivered',
+        ]);
+        $productionOrder = \App\Models\ProductionOrder::findOrFail($id);
+        $productionOrder->status = $request->status;
+        $productionOrder->save();
+        // Also update the corresponding retailer order (by order_number)
+        $order = \App\Models\Order::where('order_number', $productionOrder->order_number)->first();
+        if ($order) {
+            $order->status = $request->status;
+            $order->save();
+        }
+        return redirect()->route('manufacturer.retailer-orders')->with('success', 'Order status updated.');
     }
 }

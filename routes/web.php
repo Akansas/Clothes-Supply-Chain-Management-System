@@ -113,7 +113,6 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
 // Manufacturer Routes
 Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Manufacturer\DashboardController::class, 'index'])->name('manufacturer.dashboard');
-    Route::get('/report/pdf', [App\Http\Controllers\Manufacturer\DashboardController::class, 'downloadManufacturerReport'])->name('manufacturer.report.pdf');
     
     // Production Orders
     Route::get('/production-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'productionOrders'])->name('manufacturer.production-orders');
@@ -122,24 +121,12 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::get('/production-orders/{id}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'showProductionOrder'])->name('manufacturer.production-orders.show');
     Route::put('/production-orders/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateProductionOrderStatus'])->name('manufacturer.production-orders.update-status');
     
-    // Production order actions
-    Route::post('/production-orders/{id}/accept', [App\Http\Controllers\Manufacturer\DashboardController::class, 'acceptProductionOrder'])->name('manufacturer.production-orders.accept');
-    Route::post('/production-orders/{id}/reject', [App\Http\Controllers\Manufacturer\DashboardController::class, 'rejectProductionOrder'])->name('manufacturer.production-orders.reject');
-    Route::post('/production-orders/{id}/start', [App\Http\Controllers\Manufacturer\DashboardController::class, 'startProductionOrder'])->name('manufacturer.production-orders.start');
-    Route::post('/production-orders/{id}/complete', [App\Http\Controllers\Manufacturer\DashboardController::class, 'completeProductionOrder'])->name('manufacturer.production-orders.complete');
-    Route::post('/production-orders/{id}/ship', [App\Http\Controllers\Manufacturer\DashboardController::class, 'markReadyToShip'])->name('manufacturer.production-orders.ship');
-    Route::post('/manufacturer/production-orders/{id}/deliver', [App\Http\Controllers\Manufacturer\DashboardController::class, 'deliverProductionOrder'])
-        ->name('manufacturer.production-orders.deliver')
-        ->middleware(['auth', 'role:manufacturer']);
+    // Production order status update (single route for all actions)
+    Route::any('/production-orders/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateProductionOrderStatus'])->name('manufacturer.production-orders.updateStatus');
     
     // Production Stages
     Route::get('/production-stages', [App\Http\Controllers\Manufacturer\DashboardController::class, 'productionStages'])->name('manufacturer.production-stages');
     Route::put('/production-stages/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateStageStatus'])->name('manufacturer.production-stages.update-status');
-    
-    // Quality Checks
-    Route::get('/quality-checks', [App\Http\Controllers\Manufacturer\DashboardController::class, 'qualityChecks'])->name('manufacturer.quality-checks');
-    Route::get('/quality-checks/{id}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'showQualityCheck'])->name('manufacturer.quality-checks.show');
-    Route::put('/quality-checks/{id}', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateQualityCheck'])->name('manufacturer.quality-checks.update');
     
     // Suppliers
     Route::get('/suppliers', [App\Http\Controllers\Manufacturer\DashboardController::class, 'suppliers'])->name('manufacturer.suppliers');
@@ -152,7 +139,7 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::put('inventory/finished-products/{id}', [App\Http\Controllers\Manufacturer\InventoryController::class, 'updateFinishedProduct'])->name('manufacturer.inventory.updateFinishedProduct');
     
     // Analytics
-    Route::get('/analytics', [App\Http\Controllers\Manufacturer\DashboardController::class, 'analytics'])->name('manufacturer.analytics');
+    Route::get('/analytics', [App\Http\Controllers\Manufacturer\AnalyticsController::class, 'index'])->name('manufacturer.analytics');
     
     // Raw Materials
     Route::get('/materials/browse', [App\Http\Controllers\Manufacturer\DashboardController::class, 'browseMaterials'])->name('manufacturer.materials.browse');
@@ -182,6 +169,7 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
 
     // Retailer Orders Management
     Route::get('/retailer-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'retailerOrders'])->name('manufacturer.retailer-orders');
+    Route::post('/retailer-orders/{id}/status', [App\Http\Controllers\Manufacturer\DashboardController::class, 'updateRetailerOrderStatus'])->name('manufacturer.retailer-orders.updateStatus');
 
     // Workforce Management
     Route::resource('workforce', App\Http\Controllers\Manufacturer\WorkforceController::class);
@@ -221,7 +209,6 @@ Route::redirect('/manufacturer/workers/{any}', '/manufacturer/workforce', 301)->
 // Retailer Routes
 Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Retailer\DashboardController::class, 'index'])->name('retailer.dashboard');
-    Route::get('/report/pdf', [App\Http\Controllers\Retailer\DashboardController::class, 'downloadRetailerReport'])->name('retailer.report.pdf');
     
     // Profile routes
     Route::get('/profile/create', [App\Http\Controllers\Retailer\DashboardController::class, 'createProfile'])->name('retailer.profile.create');
@@ -329,7 +316,7 @@ Route::get('/admin/stop-impersonate', function () {
 // Supplier Routes
 Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_supplier'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Supplier\DashboardController::class, 'index'])->name('supplier.dashboard');
-    Route::get('/report/pdf/', [App\Http\Controllers\Supplier\DashboardController::class, 'downloadSupplierReport'])->name('supplier.report.pdf');
+    
     // Material Catalog Management
     Route::resource('materials', \App\Http\Controllers\Supplier\MaterialController::class, ['as' => 'supplier']);
     

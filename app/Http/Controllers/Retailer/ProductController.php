@@ -13,15 +13,16 @@ class ProductController extends Controller
     // Show all finished products from manufacturers
     public function browseManufacturerProducts(Request $request)
     {
-        $manufacturer = \App\Models\Manufacturer::first();
         $query = Product::with('manufacturer')
-            ->where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
             ->where('is_active', true)
+            ->where('type', 'finished_product')
             ->whereNull('supplier_id');
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
         }
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -54,9 +55,10 @@ class ProductController extends Controller
         ]);
         $product = Product::findOrFail($request->product_id);
         $user = Auth::user();
-        $manufacturerId = \App\Models\Manufacturer::first()->id;
+        $manufacturerId = $product->manufacturer_id; // Use the product's manufacturer_id
+        $orderNumber = 'PO-' . time();
         $order = Order::create([
-            'order_number' => 'PO-' . time(),
+            'order_number' => $orderNumber,
             'product_id' => $product->id,
             'design_id' => $product->design_id,
             'quantity' => $request->quantity,
@@ -82,7 +84,7 @@ class ProductController extends Controller
         ]);
         // Create a ProductionOrder for the manufacturer dashboard
         \App\Models\ProductionOrder::create([
-            'order_number' => 'PO-' . time(),
+            'order_number' => $orderNumber, // Use the same order number as the Order
             'manufacturer_id' => $manufacturerId,
             'retailer_id' => $user->id,
             'product_id' => $product->id,

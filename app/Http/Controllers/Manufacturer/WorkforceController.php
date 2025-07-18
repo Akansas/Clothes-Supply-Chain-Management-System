@@ -16,7 +16,7 @@ class WorkforceController extends Controller
      */
     public function index()
     {
-        $manufacturerId = auth()->user()->manufacturer_id;
+        $manufacturerId = auth()->user()->manufacturer->id;
         $workers = Worker::where('manufacturer_id', $manufacturerId)->get();
         $shifts = Shift::where('manufacturer_id', $manufacturerId)->get();
         $assignments = WorkerAssignment::whereIn('worker_id', $workers->pluck('id'))->get();
@@ -44,12 +44,15 @@ class WorkforceController extends Controller
             'shift' => 'required|in:Morning,Evening',
             'status' => 'required|in:available,assigned',
         ]);
+        $manufacturerId = auth()->user()->manufacturer->id;
+        // Fix: Update all existing workers with NULL manufacturer_id to use the current manufacturer
+        \DB::table('workers')->whereNull('manufacturer_id')->update(['manufacturer_id' => $manufacturerId]);
         Worker::create([
             'name' => $request->name,
             'skill' => $request->skill,
             'shift' => $request->shift,
             'status' => $request->status,
-            'manufacturer_id' => auth()->user()->manufacturer->id,
+            'manufacturer_id' => $manufacturerId,
         ]);
         return redirect()->route('workforce.index')->with('success', 'Worker added successfully.');
     }

@@ -51,11 +51,6 @@ class ProductionOrder extends Model
         return $this->hasMany(ProductionStage::class);
     }
 
-    public function qualityChecks()
-    {
-        return $this->hasMany(QualityCheck::class);
-    }
-
     public function retailer()
     {
         return $this->belongsTo(\App\Models\User::class, 'retailer_id');

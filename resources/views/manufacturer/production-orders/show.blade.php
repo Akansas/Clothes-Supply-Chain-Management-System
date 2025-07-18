@@ -11,6 +11,10 @@
                 <dd class="col-sm-9">{{ $order->product->name ?? 'N/A' }}</dd>
                 <dt class="col-sm-3">Quantity</dt>
                 <dd class="col-sm-9">{{ $order->quantity }}</dd>
+                <dt class="col-sm-3">Unit Price</dt>
+                <dd class="col-sm-9">{{ $order->product && $order->product->price ? '$' . number_format($order->product->price, 2) : '-' }}</dd>
+                <dt class="col-sm-3">Total Revenue</dt>
+                <dd class="col-sm-9">{{ ($order->product && $order->quantity) ? '$' . number_format($order->product->price * $order->quantity, 2) : '-' }}</dd>
                 <dt class="col-sm-3">Status</dt>
                 <dd class="col-sm-9">{{ ucfirst($order->status) }}</dd>
                 <dt class="col-sm-3">Due Date</dt>

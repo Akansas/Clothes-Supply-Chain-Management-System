@@ -1,32 +1,5 @@
 @extends('layouts.app')
 @section('content')
-<style>
-    .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 80px 0 60px 0;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
-    }
-    .feature-icon {
-        font-size: 2.5rem;
-        color: #764ba2;
-        margin-bottom: 1rem;
-    }
-    .role-icon {
-        font-size: 2rem;
-        color: #667eea;
-        margin-bottom: 0.5rem;
-    }
-    .card.feature-hover {
-        transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-    }
-    .card.feature-hover:hover {
-        transform: translateY(-8px) scale(1.04);
-        box-shadow: 0 8px 32px rgba(118,75,162,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
-        z-index: 2;
-    }
-</style>
     <div class="hero-section">
         <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
             <div class="col-12 text-center">
@@ -150,14 +123,4 @@
 </div>
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<style>
-.role-hover {
-    transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-}
-.role-hover:hover {
-    transform: translateY(-8px) scale(1.07);
-    box-shadow: 0 8px 32px rgba(102,126,234,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
-    z-index: 2;
-}
-</style>
 @endsection

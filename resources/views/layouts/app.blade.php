@@ -22,7 +22,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/nucleo-icons@2.0.0/css/nucleo-icons.min.css" rel="stylesheet">
     <style>
-        body { background: #f8f9fa; }
+        body { background: #f8f9fa !important; }
         .navbar-brand { font-weight: bold; }
         .container { margin-top: 40px; }
     </style>
@@ -105,5 +105,68 @@
 @include('layouts.footer.support')
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Force Welcome Dashboard Styles - JavaScript Backup -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force background color
+    document.body.style.backgroundColor = '#f8f9fa';
+    
+    // Force hero section styles
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+        heroSection.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        heroSection.style.color = 'white';
+        heroSection.style.padding = '80px 0 60px 0';
+        heroSection.style.borderRadius = '1rem';
+        heroSection.style.marginBottom = '2rem';
+    }
+    
+    // Force feature icons
+    const featureIcons = document.querySelectorAll('.feature-icon');
+    featureIcons.forEach(icon => {
+        icon.style.fontSize = '2.5rem';
+        icon.style.color = '#764ba2';
+        icon.style.marginBottom = '1rem';
+    });
+    
+    // Force role icons
+    const roleIcons = document.querySelectorAll('.role-icon');
+    roleIcons.forEach(icon => {
+        icon.style.fontSize = '2rem';
+        icon.style.color = '#667eea';
+        icon.style.marginBottom = '0.5rem';
+    });
+    
+    // Force hover effects
+    const featureCards = document.querySelectorAll('.card.feature-hover');
+    featureCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.04)';
+            this.style.boxShadow = '0 8px 32px rgba(118,75,162,0.18), 0 1.5px 6px rgba(0,0,0,0.08)';
+            this.style.zIndex = '2';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+            this.style.zIndex = '';
+        });
+    });
+    
+    const roleCards = document.querySelectorAll('.role-hover');
+    roleCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.07)';
+            this.style.boxShadow = '0 8px 32px rgba(102,126,234,0.18), 0 1.5px 6px rgba(0,0,0,0.08)';
+            this.style.zIndex = '2';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+            this.style.zIndex = '';
+        });
+    });
+});
+</script>
 </body>
 </html>

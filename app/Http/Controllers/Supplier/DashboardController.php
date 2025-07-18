@@ -72,33 +72,9 @@ class DashboardController extends Controller
         })->with(['orderItems.product', 'user'])->latest()->get();
 
         $linkedManufacturers = $supplier->manufacturers()->with('user')->get();
-         return view('supplier.dashboard', compact(
-            'stats',
-            'recentOrders',
-            'pendingDeliveries',
-            'topMaterials',
-            'supplier',
-            'orders',
-            'linkedManufacturers',
-            'user'
-    ));
-    
-}
-
 
         // Supplier Analytics
         // Removed SupplierAnalyticsService and related analytics variables
-
-
-     
-       /*$service = new SupplierAnalyticsService($user);
-        $demandForecasting = $service->getDemandForecasting();
-        $leadTimeTracking = $service->getLeadTimeTracking();
-        $materialCostAnalytics = $service->getMaterialCostAnalytics();
-        $qualityControlAnalysis = $service->getQualityControlAnalysis();
-        $clientSatisfaction = $service->getClientSatisfaction();
-        $capacityPlanning = $service->getCapacityPlanning();
->>>>>>> Stashed changes
 
         return view('supplier.dashboard', compact(
             'stats',
@@ -108,25 +84,14 @@ class DashboardController extends Controller
             'supplier',
             'orders',
             'linkedManufacturers',
-
             'user'
             // Removed: 'demandForecasting', 'leadTimeTracking', 'materialCostAnalytics', 'qualityControlAnalysis', 'clientSatisfaction', 'capacityPlanning'
         ));
     }
 
-            'user',
-            'demandForecasting',
-            'leadTimeTracking',
-            'materialCostAnalytics',
-            'qualityControlAnalysis',
-            'clientSatisfaction',
-            'capacityPlanning'
-        ));*/
-    
-
-
-    
-     
+    /**
+     * Show deliveries
+     */
     public function deliveries(Request $request)
     {
         $user = auth()->user();
@@ -145,6 +110,9 @@ class DashboardController extends Controller
         return view('supplier.deliveries.index', compact('deliveries'));
     }
 
+    /**
+     * Show delivery details
+     */
     public function showDelivery($id)
     {
         $user = auth()->user();
@@ -157,8 +125,9 @@ class DashboardController extends Controller
         return view('supplier.deliveries.show', compact('delivery'));
     }
 
-    
-     
+    /**
+     * Update delivery status
+     */
     public function updateDeliveryStatus(Request $request, $id)
     {
         $user = auth()->user();
@@ -185,8 +154,9 @@ class DashboardController extends Controller
             ->with('success', 'Delivery status updated successfully!');
     }
 
-    
-     
+    /**
+     * Show manufacturers
+     */
     public function manufacturers()
     {
         $user = auth()->user();
@@ -201,8 +171,9 @@ class DashboardController extends Controller
         return view('supplier.manufacturers.index', compact('manufacturers'));
     }
 
-    
-     
+    /**
+     * Show analytics
+     */
     public function analytics()
     {
         $user = auth()->user();
@@ -213,8 +184,9 @@ class DashboardController extends Controller
         ));
     }
 
-    
-     
+    /**
+     * Show profile
+     */
     public function profile()
     {
         $user = auth()->user();
@@ -223,8 +195,9 @@ class DashboardController extends Controller
         return view('supplier.profile.index', compact('user', 'supplier'));
     }
 
-    
-     
+    /**
+     * Update profile
+     */
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
@@ -253,35 +226,4 @@ class DashboardController extends Controller
 
         return redirect()->route('supplier.profile')->with('success', 'Profile updated successfully!');
     }
-   public function downloadSupplierReport()
-{
-    $user = auth()->user();
-    $supplier = $user->rawMaterialSupplier;
-
-    if (!$supplier) {
-        return redirect()->back()->with('error', 'Supplier profile not found.');
-    }
-
-    $month = now()->format('F Y');
-
-    // Get product IDs supplied by this supplier
-    $productIds = \App\Models\Product::where('supplier_id', $supplier->id)->pluck('id');
-
-    // Get manufacturer orders that include the supplier's products
-    $orders = \App\Models\Order::whereNotNull('manufacturer_id')
-        ->whereHas('orderItems', function ($q) use ($productIds) {
-            $q->whereIn('product_id', $productIds);
-        })
-        ->whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->with(['orderItems.product', 'manufacturer.user'])
-        ->latest()
-        ->get();
-
-    $pdf = \PDF::loadView('reports.supplier_report', compact('supplier', 'orders', 'month'));
-
-    return $pdf->download('supplier_report_' . $supplier->id . '.pdf');
 }
-}
-
-    

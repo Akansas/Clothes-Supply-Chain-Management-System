@@ -1,0 +1,69 @@
+/* Welcome Dashboard Critical Styles - Maximum Specificity */
+:root {
+    --hero-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --hero-color: white;
+    --feature-icon-color: #764ba2;
+    --role-icon-color: #667eea;
+    --bg-color: #f8f9fa;
+}
+
+/* Force light grey background with maximum specificity */
+html body,
+html body * {
+    background-color: var(--bg-color) !important;
+}
+
+/* Hero Section with maximum specificity */
+html body .hero-section,
+html body div.hero-section {
+    background: var(--hero-bg) !important;
+    background-image: var(--hero-bg) !important;
+    color: var(--hero-color) !important;
+    padding: 80px 0 60px 0 !important;
+    border-radius: 1rem !important;
+    margin-bottom: 2rem !important;
+}
+
+/* Feature Icons with maximum specificity */
+html body .feature-icon,
+html body div.feature-icon,
+html body i.feature-icon {
+    font-size: 2.5rem !important;
+    color: var(--feature-icon-color) !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Role Icons with maximum specificity */
+html body .role-icon,
+html body div.role-icon,
+html body i.role-icon {
+    font-size: 2rem !important;
+    color: var(--role-icon-color) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Feature Cards Hover with maximum specificity */
+html body .card.feature-hover,
+html body div.card.feature-hover {
+    transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s !important;
+}
+
+html body .card.feature-hover:hover,
+html body div.card.feature-hover:hover {
+    transform: translateY(-8px) scale(1.04) !important;
+    box-shadow: 0 8px 32px rgba(118,75,162,0.18), 0 1.5px 6px rgba(0,0,0,0.08) !important;
+    z-index: 2 !important;
+}
+
+/* Role Cards Hover with maximum specificity */
+html body .role-hover,
+html body div.role-hover {
+    transition: transform 0.2s cubic-bezier(.4,2,.6,1), box-shadow 0.2s !important;
+}
+
+html body .role-hover:hover,
+html body div.role-hover:hover {
+    transform: translateY(-8px) scale(1.07) !important;
+    box-shadow: 0 8px 32px rgba(102,126,234,0.18), 0 1.5px 6px rgba(0,0,0,0.08) !important;
+    z-index: 2 !important;
+}
