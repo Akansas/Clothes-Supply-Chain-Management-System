@@ -324,10 +324,6 @@
                                 <i class="fas fa-list me-2"></i>Retailer Orders Management
                             </a>
                         </div>
-                          <div class="col-md-3">
-    <a href="{{ route('manufacturer.report.pdf') }}" class="btn btn-warning btn-block">
-        <i class="fa fa-file-pdf"></i> Download PDF Report
-</a>
                     </div>
                 </div>
             </div>

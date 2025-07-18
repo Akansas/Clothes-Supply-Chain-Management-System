@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Manufacturer;
-use Barryvdh\DomPDF\Facade\pdf;
+
 use App\Http\Controllers\Controller;
 use App\Models\ProductionOrder;
 use App\Models\ProductionStage;
@@ -19,7 +19,6 @@ use App\Models\Worker;
 use App\Models\SupplyCenter;
 use App\Models\Shift;
 use App\Models\Customer;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -109,20 +108,8 @@ class DashboardController extends Controller
             ->latest()
             ->take(10)
             ->get();
-
         // Manufacturer Analytics
         // Removed ManufacturerAnalyticsService and related analytics variables
-
-        /*// Manufacturer Analytics
-        $analyticsService = new ManufacturerAnalyticsService($user);
-        $productionScheduling = $analyticsService->getProductionScheduling();
-        $materialConsumption = $analyticsService->getMaterialConsumption();
-        $orderFulfillment = $analyticsService->getOrderFulfillment();
-        $laborEfficiency = $analyticsService->getLaborEfficiency();
-        $qualityControl = $analyticsService->getQualityControl();
-        $costOptimization = $analyticsService->getCostOptimization();
-        $workflowAlerts = $analyticsService->getWorkflowAlerts();*/
-
 
         // Remove ML integration and customer segmentation/forecasting
 
@@ -132,10 +119,6 @@ class DashboardController extends Controller
             ->take(5)
             ->with(['supplier.user'])
             ->get();
-            $manufacturerId = $user->manufacturer ? $user->manufacturer->id : null;
-$today = now()->format('Y_m_d');
-$reportPath = "public/reports/manufacturers/manufacturer_report_{$manufacturerId}_{$today}.pdf";
-
 
         return view('manufacturer.dashboard', compact(
             'stats',
@@ -147,55 +130,9 @@ $reportPath = "public/reports/manufacturers/manufacturer_report_{$manufacturerId
             'rawMaterials',
             'retailerOrders',
             'charts',
-
-
-          /* 'productionScheduling',
-            'materialConsumption',
-            'orderFulfillment',
-            'laborEfficiency',
-            'qualityControl',
-            'costOptimization',
-            'workflowAlerts',*/
-
             'recentPurchaseOrders'
         ));
     }
-       public function downloadManufacturerReport()
-{
-    // Get the currently logged-in manufacturer
-    $user = Auth::user();
-    $manufacturer = Manufacturer::where('user_id', $user->id)->first();
-
-    if (!$manufacturer) {
-        return redirect()->back()->with('error', 'Manufacturer not found.');
-    }
-
-    // Get current month and year
-    $currentMonth = now()->format('F Y');
-    $monthNumber = now()->month;
-    $year = now()->year;
-
-    // Fetch production orders for current month
-    $productionOrders = $manufacturer->productionOrders()
-        ->whereMonth('created_at', $monthNumber)
-        ->whereYear('created_at', $year)
-        ->with('product') // Ensure product relationship is loaded
-        ->get();
-
-    // Generate the PDF
-    $pdf = Pdf::loadView('reports.manufacturer_report', [
-        'manufacturer' => $manufacturer,
-        'productionOrders' => $productionOrders,
-        'month' => $currentMonth,
-    ]);
-
-    // Create filename
-    $filename = 'Manufacturer_Report_' . now()->format('F_Y') . '.pdf';
-
-    // Return the file for download
-    return $pdf->download($filename);
-}
-
 
     /**
      * Show production orders

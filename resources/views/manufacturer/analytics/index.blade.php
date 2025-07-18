@@ -3,7 +3,7 @@
 <div class="container py-5">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold text-center mb-3">Manufacturer Analytics Dashboard</h2>
+    <h2 class="fw-bold text-center mb-3">Manufacturer Analytics Dashboard</h2>
             <p class="text-muted text-center">Comprehensive insights for your manufacturing operations</p>
         </div>
     </div>
@@ -129,7 +129,7 @@
         <div class="card-header bg-success text-white">
             <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Order Fulfillment & Cycle Time Analysis</h5>
         </div>
-        <div class="card-body">
+                                <div class="card-body">
             @if(!empty($orderFulfillment['orders']))
                 <div class="table-responsive">
                     <table class="table table-sm">
@@ -159,7 +159,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @endforeach
+                                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -171,9 +171,9 @@
 
             <div class="alert alert-info mt-3">
                 <strong>Phase Times:</strong> {{ $orderFulfillment['phase_times'] ?? 'N/A' }}
-            </div>
-        </div>
-    </div>
+                                </div>
+                            </div>
+                        </div>
 
     {{-- Labor Efficiency & Cost Analytics --}}
     <div class="card mb-4 shadow-sm">
@@ -198,7 +198,7 @@
                                     <td><span class="badge bg-warning">{{ $row['total_output'] ?? $row->total_output }}</span></td>
                                     <td><span class="badge bg-info">{{ $row['total_hours'] ?? $row->total_hours }}</span></td>
                                 </tr>
-                            @endforeach
+                    @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -267,19 +267,19 @@
         <div class="card-body">
             @if(!empty($costOptimization['costs']))
                 <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Product</th>
                                 <th>Labor Cost</th>
                                 <th>Material Cost</th>
                                 <th>Equipment Cost</th>
                                 <th>Overhead Cost</th>
                                 <th>Total Cost</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
                             @foreach($costOptimization['costs'] as $row)
                                 <tr>
                                     <td>{{ $row['product']['name'] ?? $row->product->name ?? 'Unknown' }}</td>
@@ -289,10 +289,10 @@
                                     <td><span class="badge bg-secondary">${{ number_format($row['overhead_cost'] ?? $row->overhead_cost, 2) }}</span></td>
                                     <td><span class="badge bg-primary">${{ number_format($row['total_cost'] ?? $row->total_cost, 2) }}</span></td>
                                     <td><span class="badge bg-dark">{{ $row['quantity'] ?? $row->quantity }}</span></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
                 </div>
             @else
                 <div class="alert alert-info">
