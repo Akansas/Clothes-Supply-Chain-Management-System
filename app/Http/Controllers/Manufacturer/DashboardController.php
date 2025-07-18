@@ -160,17 +160,41 @@ $reportPath = "public/reports/manufacturers/manufacturer_report_{$manufacturerId
             'recentPurchaseOrders'
         ));
     }
-        public function downloadManufacturerReport()
+       public function downloadManufacturerReport()
 {
-    $data = [
-        'date' => now()->format('F j, Y'),
-        // Add any data needed for the view
-    ];
+    // Get the currently logged-in manufacturer
+    $user = Auth::user();
+    $manufacturer = Manufacturer::where('user_id', $user->id)->first();
 
-    $pdf = Pdf::loadView('reports.manufacturer_report', $data);
-    return $pdf->download('manufacturer_report.pdf');
+    if (!$manufacturer) {
+        return redirect()->back()->with('error', 'Manufacturer not found.');
+    }
+
+    // Get current month and year
+    $currentMonth = now()->format('F Y');
+    $monthNumber = now()->month;
+    $year = now()->year;
+
+    // Fetch production orders for current month
+    $productionOrders = $manufacturer->productionOrders()
+        ->whereMonth('created_at', $monthNumber)
+        ->whereYear('created_at', $year)
+        ->with('product') // Ensure product relationship is loaded
+        ->get();
+
+    // Generate the PDF
+    $pdf = Pdf::loadView('reports.manufacturer_report', [
+        'manufacturer' => $manufacturer,
+        'productionOrders' => $productionOrders,
+        'month' => $currentMonth,
+    ]);
+
+    // Create filename
+    $filename = 'Manufacturer_Report_' . now()->format('F_Y') . '.pdf';
+
+    // Return the file for download
+    return $pdf->download($filename);
 }
-    
 
 
     /**

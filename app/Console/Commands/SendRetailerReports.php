@@ -11,25 +11,33 @@ class SendRetailerReports extends Command
     protected $signature = 'reports:send-retailer-pdf';
     protected $description = 'Generate and store PDF reports for each retail store';
 
-    public function handle()
-    {
-        $retailStores = RetailStore::all();
+   public function handle()
+{
+    $retailStores = RetailStore::all();
+    $currentMonth = now()->format('F Y'); // e.g., July 2025
 
-        foreach ($retailStores as $store) {
-            $filename = 'retailer_report_' . $store->id . '_' . now()->format('Ymd') . '.pdf';
+    foreach ($retailStores as $store) {
+        $filename = 'retailer_report_' . $store->id . '_' . now()->format('Ym') . '.pdf';
 
-            // You can pass more data like orders or inventory if needed
-            $pdf = Pdf::loadView('reports.retailer_report', [
-                'retailer' => $store,
-                'orders' => $store->orders ?? [],
-                'inventory' => $store->inventory ?? [],
-            ]);
+        // Filter only orders made this month
+        $monthlyOrders = $store->orders()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->with(['orderItems.product']) // Add relationships as needed
+            ->get();
 
-            Storage::put('public/reports/' . $filename, $pdf->output());
+        $pdf = Pdf::loadView('reports.retailer_report', [
+            'retailer' => $store,
+            'orders' => $monthlyOrders,
+            'inventory' => $store->inventory ?? [],
+            'month' => $currentMonth,
+        ]);
 
-            $this->info("PDF generated for store ID {$store->id}: $filename");
-        }
+        Storage::put('public/reports/' . $filename, $pdf->output());
 
-        return Command::SUCCESS;
+        $this->info("Monthly PDF generated for store ID {$store->id}: $filename");
+    }
+
+    return Command::SUCCESS;
 }
 }

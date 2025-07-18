@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Retailer Report</title>
+    <title>Retailer Monthly Report</title>
     <style>
         body { font-family: sans-serif; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; }
@@ -14,13 +14,15 @@
         if (!isset($retailer) && isset($store)) {
             $retailer = $store;
         }
+
+        // Month fallback
+        $reportMonth = $month ?? \Carbon\Carbon::now()->format('F Y');
     @endphp
 
-    <h2>Retailer Report for {{ $retailer->name ?? 'Retailer' }}</h2>
-    <p>Date: {{ now()->toFormattedDateString() }}</p>
+    <h2>Retailer Report for {{ $retailer->name ?? 'Retailer' }} — {{ $reportMonth }}</h2>
 
     @if ($orders->isEmpty())
-        <p>No orders found.</p>
+        <p>No orders found for {{ $reportMonth }}.</p>
     @else
         <table>
             <thead>
@@ -45,6 +47,5 @@
             </tbody>
         </table>
     @endif
-    <p>Date: {{ \Carbon\Carbon::now('Africa/Kampala')->format('l, d F Y — H:i A') }}</p>
 </body>
 </html>

@@ -42,6 +42,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\FixProductInventory::class,
 
         \App\Console\Commands\SendManufacturerReports::class,
+        \App\Console\Commands\SendSupplierReports::class,
 
     ];
 

@@ -17,19 +17,20 @@ class SendManufacturerReports extends Command
     public function handle()
     {
         $manufacturers = Manufacturer::all();
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        $currentMonth = now()->format('F Y'); // e.g., July 2025
+
 
         foreach ($manufacturers as $manufacturer) {
             $orders = $manufacturer->productionOrders()
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->with('product')
-                ->get();
+                 ->whereMonth('created_at', now()->month)
+                 ->whereYear('created_at', now()->year)
+                 ->with(['orderItems.product']) // Add relationships as needed
+                 ->get();
 
             $pdf = Pdf::loadView('reports.manufacturer_report', [
                 'manufacturer' => $manufacturer,
                 'productionOrders' => $orders,
-                'date' => now()->format('F Y'),
+                'month' =>$currentMonth,
             ]);
 
             $filename = 'manufacturer_report_' . $manufacturer->id . '_' . now()->format('Ym') . '.pdf';

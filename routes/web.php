@@ -329,7 +329,7 @@ Route::get('/admin/stop-impersonate', function () {
 // Supplier Routes
 Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_supplier'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Supplier\DashboardController::class, 'index'])->name('supplier.dashboard');
-    
+    Route::get('/report/pdf/', [App\Http\Controllers\Supplier\DashboardController::class, 'downloadSupplierReport'])->name('supplier.report.pdf');
     // Material Catalog Management
     Route::resource('materials', \App\Http\Controllers\Supplier\MaterialController::class, ['as' => 'supplier']);
     

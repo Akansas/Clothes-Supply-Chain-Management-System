@@ -253,6 +253,35 @@ class DashboardController extends Controller
 
         return redirect()->route('supplier.profile')->with('success', 'Profile updated successfully!');
     }
+   public function downloadSupplierReport()
+{
+    $user = auth()->user();
+    $supplier = $user->rawMaterialSupplier;
+
+    if (!$supplier) {
+        return redirect()->back()->with('error', 'Supplier profile not found.');
+    }
+
+    $month = now()->format('F Y');
+
+    // Get product IDs supplied by this supplier
+    $productIds = \App\Models\Product::where('supplier_id', $supplier->id)->pluck('id');
+
+    // Get manufacturer orders that include the supplier's products
+    $orders = \App\Models\Order::whereNotNull('manufacturer_id')
+        ->whereHas('orderItems', function ($q) use ($productIds) {
+            $q->whereIn('product_id', $productIds);
+        })
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->with(['orderItems.product', 'manufacturer.user'])
+        ->latest()
+        ->get();
+
+    $pdf = \PDF::loadView('reports.supplier_report', compact('supplier', 'orders', 'month'));
+
+    return $pdf->download('supplier_report_' . $supplier->id . '.pdf');
+}
 }
 
     
