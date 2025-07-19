@@ -8,6 +8,9 @@ use App\Models\Product;
 use App\Models\Manufacturer;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Role;
+use App\Models\OrderItem;
+use Carbon\Carbon;
 use App\Models\Delivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,9 +76,67 @@ class DashboardController extends Controller
 
         $linkedManufacturers = $supplier->manufacturers()->with('user')->get();
 
+
+        $revenues = Order::where('supplier_id', $supplier->id)
+         ->selectRaw('MONTHNAME(created_at) as month, SUM(total_amount) as total')
+         ->whereYear('created_at', Carbon::now()->year)
+         ->groupByRaw('MONTH(created_at), MONTHNAME(created_at)')
+         ->orderByRaw('MONTH(created_at)')
+         ->pluck('total', 'month');
+
+        $months = $revenues->keys();
+        $totals = $revenues->values();
+
+        $topOrderedProducts = OrderItem::select('product_id', DB::raw('SUM(quantity) as total_ordered'))
+        ->whereHas('product', function($query) use ($supplier) {
+        $query->where('supplier_id', $supplier->id);
+    })
+        ->groupBy('product_id')
+        ->orderByDesc('total_ordered')
+        ->with('product')  // Ensure you have a relation defined in OrderItem model: product()
+        ->take(5)
+       ->get();
+
+       $productNames = $topOrderedProducts->pluck('product.name');
+       $productQuantities = $topOrderedProducts->pluck('total_ordered');
+
+       $lowStockProducts = Product::where('supplier_id', $supplier->id)
+       ->where('stock_quantity', '<=', 10)   // Threshold can be adjusted
+       ->orderBy('stock_quantity', 'asc')
+       ->get();
+
+       $manufacturerRole = Role::where('name', 'manufacturer')->first();
+
+    // Get all manufacturers as users with that role
+       $manufacturers = $manufacturerRole
+        ? User::where('role_id', $manufacturerRole->id)->get()
+        : collect();
+
+
+         return view('supplier.dashboard', compact(
+            'stats',
+            'recentOrders',
+            'pendingDeliveries',
+            'topMaterials',
+            'supplier',
+            'orders',
+            'linkedManufacturers',
+            'user',
+            'months',
+            'totals',
+            'productNames',
+            'productQuantities',
+            'lowStockProducts',
+            'manufacturers'
+    ));
+    
+}
+
+
         // Supplier Analytics
         // Removed SupplierAnalyticsService and related analytics variables
 
+        /*
         return view('supplier.dashboard', compact(
             'stats',
             'recentOrders',

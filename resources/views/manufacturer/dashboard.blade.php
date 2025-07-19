@@ -80,6 +80,82 @@
             </div>
         </div>
     </div>
+    <!-- Monthly Revenue Chart -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Monthly Revenue Chart</h5>
+            </div>
+            <div class="card-body">
+                <div style="max-width: 400px; margin: 0 auto;">
+                   <canvas id="revenueChart" width="400" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($months) !!},
+            datasets: [{
+                label: 'Monthly Revenue (USD)',
+                data: {!! json_encode($totals) !!},
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<!-- Top-Selling Products Pie Chart -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Top-Selling Products (Pie Chart)</h5>
+    </div>
+    <div class="card-body">
+        <div style="max-width: 300px; margin: 0 auto;">
+             <canvas id="topSellingProductsChart" width="300" height="300"></canvas>
+         </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctxTopProducts = document.getElementById('topSellingProductsChart').getContext('2d');
+
+    new Chart(ctxTopProducts, {
+        type: 'pie',
+        data: {
+            labels: {!! json_encode($topProductNames) !!},
+            datasets: [{
+                data: {!! json_encode($topProductQuantities) !!},
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+
+
 
     {{-- Removed Workforce Distribution Management card/section as per user request --}}
     @php
@@ -243,42 +319,31 @@
         </div>
     </div>
 
-    @if(isset($conversations))
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Supplier Chat</h5>
-                </div>
-                <div class="card-body">
-                    @foreach($conversations as $conversation)
-                        <h6>Chat with:
-                            @foreach($conversation->participants as $participant)
-                                @if($participant->id !== $user->id)
-                                    {{ $participant->name }}
-                                @endif
-                            @endforeach
-                        </h6>
-                        <div>
-                            @php
-                                $recentMessages = $conversation->messages->sortByDesc('created_at')->take(3)->reverse();
-                            @endphp
-                            @foreach($recentMessages as $message)
-                                <div>
-                                    <strong>{{ $message->user->name }}:</strong>
-                                    {{ $message->body }}
-                                    <span class="text-muted small">{{ $message->created_at->diffForHumans() }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                        <a href="{{ route('chat.show', $conversation) }}" class="btn btn-outline-primary btn-sm mt-2 mb-2">
-                            Go to Chat
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+
+<h3>Suppliers</h3>
+<ul>
+  @forelse($suppliers as $supplier)
+    <li>
+      <a href="{{ route('manufacturer.chat.index', ['partner' => $supplier->id]) }}">
+        Chat with {{ $supplier->name }}
+      </a>
+    </li>
+  @empty
+    <p>No suppliers found.</p>
+  @endforelse
+</ul>
+
+
+
+<h3>Retailers</h3>
+<ul>
+  @foreach($retailers as $retailer)
+    <li>
+      <a href="{{ route('manufacturer.chat.index', ['partner' => $retailer->id]) }}">
+        Chat with {{ $retailer->name }}
+      </a>
+    </li>
+  @endforeach
+</ul>
 </div>
 @endsection 

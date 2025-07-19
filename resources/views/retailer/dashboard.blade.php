@@ -277,10 +277,17 @@
         </div>
     </div>
     <!-- Remove all ML-related analytics sections and cards. Only keep simple stats, recent orders, and low stock items. -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <retailer-chat :user-id="{{ auth()->id() }}"></retailer-chat>
-        </div>
-    </div>
-</div>
+    
+<ul>
+    @forelse ($manufacturers as $manufacturer)
+        <li>
+            <a href="{{ route('retailer.chat.index', ['partner' => $manufacturer->id]) }}" class="btn btn-primary">
+                Chat with {{ $manufacturer->name }}
+            </a>
+        </li>
+    @empty
+        <li>No manufacturers found.</li>
+    @endforelse
+</ul>
+
 @endsection 

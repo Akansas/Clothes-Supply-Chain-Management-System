@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Inventory;
 use App\Models\RetailStore;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -66,6 +67,16 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+            $retailer = $user->retailerProfile;  // or however your retailer profile is retrieved
+
+    // Fetch all manufacturers
+    $manufacturerRole = Role::where('name', 'manufacturer')->first();
+    $manufacturers = $manufacturerRole
+        ? User::where('role_id', $manufacturerRole->id)->get()
+        : collect();
+
+
+
         // Retailer Analytics
         // Removed RetailerAnalyticsService and related analytics variables
 
@@ -73,6 +84,10 @@ class DashboardController extends Controller
             'stats',
             'recentOrders',
             'lowStockItems',
+            'retailStore',
+            'retailer',
+            'manufacturers',
+            'user',
             'retailStore'
             // Removed: 'salesInsights', 'inventoryIntelligence', 'customerBehavior', 'pricingPromotion', 'omnichannelEngagement', 'actionableAlerts', 'marketTrends'
         ));

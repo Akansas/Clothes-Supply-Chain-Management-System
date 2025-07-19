@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductionOrder;
 use App\Models\ProductionStage;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Inventory;
 use App\Models\Manufacturer;
 use App\Models\User;
@@ -101,6 +102,19 @@ class DashboardController extends Controller
             ->latest('updated_at')
             ->get();*/
         // Remove all code related to retailerOrders and retailer production orders management.
+        //$conversations = $user->conversations()
+          //  ->with(['messages.user', 'participants'])
+           // ->latest('updated_at')
+            //->get();
+        // Fetch production orders made by retailers for this manufacturer
+        $retailerOrders = \App\Models\ProductionOrder::where('manufacturer_id', $manufacturer ? $manufacturer->id : null)
+            ->whereNotNull('retailer_id')
+            ->with(['product', 'retailer'])
+            ->latest()
+            ->take(10)
+            ->get();
+        // Manufacturer Analytics
+        // Removed ManufacturerAnalyticsService and related analytics variables
 
         // Remove ML integration and customer segmentation/forecasting
 
@@ -110,6 +124,40 @@ class DashboardController extends Controller
             ->take(5)
             ->with(['supplier.user'])
             ->get();
+
+        $revenues = DB::table('production_orders')
+          ->join('products', 'production_orders.product_id', '=', 'products.id')
+          ->selectRaw('MONTHNAME(production_orders.created_at) as month, SUM(production_orders.quantity * products.price) as total')
+          ->groupBy(DB::raw('MONTH(production_orders.created_at)'), DB::raw('MONTHNAME(production_orders.created_at)'))
+          ->orderBy(DB::raw('MONTH(production_orders.created_at)'))
+          ->get();
+
+        $months = $revenues->pluck('month');
+        $totals = $revenues->pluck('total');
+
+        $topSellingProductsData = DB::table('production_orders')
+          ->join('products', 'production_orders.product_id', '=', 'products.id')
+          ->select('products.name', DB::raw('SUM(production_orders.quantity) as total_sold'))
+          ->groupBy('products.name')
+          ->orderByDesc('total_sold')
+          ->limit(5)
+          ->get();
+
+        $topProductNames = $topSellingProductsData->pluck('name');
+        $topProductQuantities = $topSellingProductsData->pluck('total_sold');
+
+        //$supplierRole = Role::where('name', 'supplier')->first();
+        //$suppliers = $supplierRole ? User::where('role_id', $supplierRole->id)->get() : collect();
+
+        $supplierRole = Role::where('name', 'raw_material_supplier')->first();
+        $suppliers = $supplierRole ? User::where('role_id', $supplierRole->id)->get() : collect();
+
+
+
+        // Get all retailer users
+        $retailerRole = Role::where('name', 'retailer')->first();
+        $retailers = $retailerRole ? User::where('role_id', $retailerRole->id)->get() : collect();
+
 
         // --- NEW DASHBOARD CARDS DATA ---
         // Use the same manufacturer ID logic as the retailer orders table
@@ -152,7 +200,16 @@ class DashboardController extends Controller
             'purchaseOrdersStats',
             'retailerOrdersStats',
             'totalCost',
-            'totalRevenue'
+            'totalRevenue',
+            'retailerOrders',
+            'charts',
+            'recentPurchaseOrders',
+            'months',
+            'totals',
+            'topProductNames',
+            'topProductQuantities',
+            'suppliers',
+            'retailers' 
         ));
     }
 

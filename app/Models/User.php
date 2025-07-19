@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\ChatConversation;
+use App\Models\ChatMessage;
+
 
 class User extends Authenticatable
 {
@@ -245,15 +248,47 @@ class User extends Authenticatable
      * Get the conversations for this user (all roles).
      */
 
-    public function sentMessages()
+    /**
+ * Get the chat conversations for this user (all roles).
+ */
+/*
+ public function conversations()
+{
+    return $this->hasMany(ChatConversation::class, 'user_id');
+}
+
+/**
+ * Get the chat messages sent by the user.
+ */
+public function sentMessages()
+{
+    return $this->hasMany(ChatMessage::class, 'sender_id');
+}
+
+/**
+ * Get the chat messages received by the user.
+ */
+public function receivedMessages()
+{
+    return $this->hasMany(ChatMessage::class, 'receiver_id');
+}  
+
+    public function chatConversationsAsManufacturer()
     {
-        return $this->hasMany(Message::class, 'sender_id');
+        return $this->hasMany(ChatConversation::class, 'manufacturer_id');
     }
 
-    public function receivedMessages()
+    public function chatConversationsAsSupplier()
     {
-        return $this->hasMany(Message::class, 'receiver_id');
+        return $this->hasMany(ChatConversation::class, 'supplier_id');
     }
+
+    public function chatConversationsAsRetailer()
+    {
+        return $this->hasMany(ChatConversation::class, 'retailer_id');
+    }
+
+    
 
     /**
      * Get the production orders for the retailer.

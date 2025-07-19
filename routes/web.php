@@ -30,6 +30,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::middleware(['auth'])->prefix('supplier')->name('supplier.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Supplier\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Supplier\ChatController::class, 'send'])->name('chat.send');
+});
+
+Route::middleware(['auth'])->prefix('manufacturer')->name('manufacturer.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Manufacturer\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Manufacturer\ChatController::class, 'send'])->name('chat.send');
+});
+
+Route::middleware(['auth'])->prefix('retailer')->name('retailer.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Retailer\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Retailer\ChatController::class, 'send'])->name('chat.send');
+});
+
+
 // Custom registration routes
 Route::get('/register', [CustomRegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [CustomRegisterController::class, 'register']);

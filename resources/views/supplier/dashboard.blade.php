@@ -112,6 +112,53 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+    <div class="card-header">Monthly Revenue (USD)</div>
+    <div class="card-body">
+        <canvas id="monthlyRevenueChart" style="width:100%; max-height:250px;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+
+    new Chart(monthlyRevenueCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($months) !!},
+            datasets: [{
+                label: 'Revenue (USD)',
+                data: {!! json_encode($totals) !!},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {responsive: true, scales: {y: {beginAtZero: true}}}
+    });
+</script>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <strong> Low Stock Materials</strong>
+    </div>
+    <div class="card-body">
+        @if($lowStockProducts->count() > 0)
+            <ul class="list-group">
+                @foreach($lowStockProducts as $product)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ $product->name }}
+                        <span class="badge bg-danger rounded-pill">{{ $product->stock_quantity }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            <p class="text-success mb-0">All products are sufficiently stocked.</p>
+        @endif
+    </div>
+</div>
+
     <!-- Main Content Tabs -->
     <div class="row">
         <div class="col-12">
@@ -169,6 +216,33 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+    <div class="card-header">Top Ordered Materials</div>
+    <div class="card-body">
+                <div style="max-width: 400px; margin: 0 auto;">
+                   <canvas id="topOrderedProductsChart" width="400" height="250"></canvas>
+                </div>
+         </div>
+
+<script>
+    const ctx = document.getElementById('topOrderedProductsChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {!! json_encode($productNames) !!},
+            datasets: [{
+                data: {!! json_encode($productQuantities) !!},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+
+
     <!-- Quick Actions -->
     <div class="row mt-4">
         <div class="col-6 col-md-2 mb-3">
@@ -201,48 +275,22 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="fas fa-comments fa-2x text-secondary mb-3"></i>
-                    <h6>Communication</h6>
-                    <p class="text-muted small">Chat with manufacturers</p>
-                    <a href="{{ route('chat.index') }}" class="btn btn-outline-secondary btn-sm">Chat</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @if(isset($conversations))
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Manufacturer Chat</h5>
-                </div>
-                <div class="card-body">
-                    @foreach($conversations as $conversation)
-                        <h6>Chat with: 
-                            @foreach($conversation->participants as $participant)
-                                @if($participant->id !== $user->id)
-                                    {{ $participant->name }}
-                                @endif
-                            @endforeach
-                        </h6>
-                        @php $editingMessageId = request('edit'); @endphp
-                        @include('chat._chat-partial', ['conversation' => $conversation, 'editingMessageId' => $editingMessageId])
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-    <div class="row mb-4">
-        <div class="col-12">
-            <supplier-chat :user-id="{{ auth()->id() }}"></supplier-chat>
-        </div>
-    </div>
 </div>
+
+<h3>Chat with Manufacturers</h3>
+
+<ul>
+    @forelse ($manufacturers as $manufacturer)
+        <li>
+            <a href="{{ route('supplier.chat.index', ['partner' => $manufacturer->id]) }}">
+                Chat with {{ $manufacturer->name }}
+            </a>
+        </li>
+    @empty
+        <li>No manufacturers found.</li>
+    @endforelse
+</ul>
+
 
 <!-- Modals -->
 <!-- Add Material Modal -->
