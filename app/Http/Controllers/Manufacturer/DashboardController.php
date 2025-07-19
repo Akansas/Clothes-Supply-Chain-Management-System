@@ -209,6 +209,12 @@ class DashboardController extends Controller
             'topProductNames',
             'topProductQuantities',
             'suppliers',
+            'retailers',
+            'recentPurchaseOrders',
+            'purchaseOrdersStats',
+            'retailerOrdersStats',
+            'totalCost',
+            'totalRevenue',
             'retailers' 
         ));
     }
