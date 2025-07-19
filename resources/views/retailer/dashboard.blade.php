@@ -256,6 +256,11 @@
                                                 <i class="fa fa-chart-bar"></i> View Analytics
                                             </a>
                                         </div>
+                                        <div class="col-md-3">
+               <a href="{{ route('retailer.downloadReport') }}" class="btn btn-warning btn-block">
+               <i class="fa fa-file-pdf-o"></i> Download Monthly Report (PDF)
+                                   </a>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

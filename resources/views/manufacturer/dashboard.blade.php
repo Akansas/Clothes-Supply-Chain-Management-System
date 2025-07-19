@@ -159,6 +159,11 @@
                                 <i class="fas fa-chart-bar me-2"></i>Analytics
                             </a>
                         </div>
+                        <div class="col-md-3 mb-3">
+    <a href="{{ route('manufacturer.report.pdf') }}" class="btn btn-success w-100">
+        <i class="fas fa-file-pdf me-2"></i> Download Monthly PDF Report
+    </a>
+</div>
                     </div>
                 </div>
             </div>

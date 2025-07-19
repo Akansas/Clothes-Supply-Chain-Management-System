@@ -39,6 +39,13 @@
     </div>
 
     <!-- KPI Cards -->
+     <div class="row mb-3">
+    <div class="col-12 text-end">
+        <a href="{{ route('supplier.report.pdf') }}" class="btn btn-outline-success">
+            <i class="fas fa-file-pdf me-2"></i>Download PDF Report
+        </a>
+  </div>
+</div>
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">

@@ -113,7 +113,7 @@ Route::prefix('vendor')->middleware(['auth', 'role:vendor'])->group(function () 
 // Manufacturer Routes
 Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Manufacturer\DashboardController::class, 'index'])->name('manufacturer.dashboard');
-    
+    Route::get('/report/pdf', [App\Http\Controllers\Manufacturer\DashboardController::class, 'downloadManufacturerReport'])->name('manufacturer.report.pdf');
     // Production Orders
     Route::get('/production-orders', [App\Http\Controllers\Manufacturer\DashboardController::class, 'productionOrders'])->name('manufacturer.production-orders');
     Route::get('/production-orders/create', [App\Http\Controllers\Manufacturer\DashboardController::class, 'createProductionOrder'])->name('manufacturer.production-orders.create');
@@ -209,6 +209,7 @@ Route::redirect('/manufacturer/workers/{any}', '/manufacturer/workforce', 301)->
 // Retailer Routes
 Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Retailer\DashboardController::class, 'index'])->name('retailer.dashboard');
+    Route::get('report/pdf', [App\Http\Controllers\Retailer\DashboardController::class, 'downloadReport'])->name('retailer.downloadReport');
     
     // Profile routes
     Route::get('/profile/create', [App\Http\Controllers\Retailer\DashboardController::class, 'createProfile'])->name('retailer.profile.create');
@@ -316,6 +317,7 @@ Route::get('/admin/stop-impersonate', function () {
 // Supplier Routes
 Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_supplier'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Supplier\DashboardController::class, 'index'])->name('supplier.dashboard');
+    Route::get('/report/pdf', [App\Http\Controllers\Supplier\DashboardController::class, 'downloadSupplierReport'])->name('supplier.report.pdf');
     
     // Material Catalog Management
     Route::resource('materials', \App\Http\Controllers\Supplier\MaterialController::class, ['as' => 'supplier']);

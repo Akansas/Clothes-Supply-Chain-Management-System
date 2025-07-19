@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Retailer;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -462,4 +463,35 @@ class DashboardController extends Controller
         $inventory->delete();
         return redirect()->route('retailer.inventory')->with('success', 'Inventory item deleted!');
     }
+
+public function downloadReport()
+{
+    $retailer = Auth::user();
+
+    // Assuming each user has one RetailStore
+    $store = RetailStore::where('manager_id', $retailer->id)->first();
+
+    if (!$store) {
+        return redirect()->back()->with('error', 'Retail store not found.');
+    }
+
+    // Filter orders for the current month
+    $orders = $store->orders()
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->get();
+
+    // You can also include inventory if you want
+    $inventory = $store->inventory ?? [];
+
+    $pdf = Pdf::loadView('reports.retailer_report', [
+        'retailer' => $store,
+        'orders' => $orders,
+        'inventory' => $inventory,
+        'month' => now()->format('F Y')
+    ]);
+
+    return $pdf->download('retailer_report_' . now()->format('Y_m') . '.pdf');
+}
+
 }

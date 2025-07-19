@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Manufacturer;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 use App\Models\ProductionOrder;
 use App\Models\ProductionStage;
@@ -18,6 +18,7 @@ use App\Models\Worker;
 use App\Models\SupplyCenter;
 use App\Models\Shift;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -95,10 +96,10 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
         // Fetch conversations where the manufacturer is a participant
-        $conversations = $user->conversations()
+       /* $conversations = $user->conversations()
             ->with(['messages.user', 'participants'])
             ->latest('updated_at')
-            ->get();
+            ->get();*/
         // Remove all code related to retailerOrders and retailer production orders management.
 
         // Remove ML integration and customer segmentation/forecasting
@@ -144,7 +145,6 @@ class DashboardController extends Controller
             'recentOrders',
             'activeStages',
             'user',
-            'conversations',
             'finishedProducts',
             'rawMaterials',
             'recentPurchaseOrders',
@@ -753,4 +753,40 @@ class DashboardController extends Controller
         }
         return redirect()->route('manufacturer.retailer-orders')->with('success', 'Order status updated.');
     }
+
+public function downloadManufacturerReport()
+{
+    // Get the currently logged-in manufacturer
+    $user = Auth::user();
+    $manufacturer = Manufacturer::where('user_id', $user->id)->first();
+
+    if (!$manufacturer) {
+        return redirect()->back()->with('error', 'Manufacturer not found.');
+    }
+
+    // Get current month and year
+    $currentMonth = now()->format('F Y');
+    $monthNumber = now()->month;
+    $year = now()->year;
+
+    // Fetch production orders for current month
+    $productionOrders = $manufacturer->productionOrders()
+        ->whereMonth('created_at', $monthNumber)
+        ->whereYear('created_at', $year)
+        ->with('product') // Ensure product relationship is loaded
+        ->get();
+
+    // Generate the PDF
+    $pdf = Pdf::loadView('reports.manufacturer_report', [
+        'manufacturer' => $manufacturer,
+        'productionOrders' => $productionOrders,
+        'month' => $currentMonth,
+    ]);
+
+    // Create filename
+    $filename = 'Manufacturer_Report_' . now()->format('F_Y') . '.pdf';
+
+    // Return the file for download
+    return $pdf->download($filename);
+}
 }
