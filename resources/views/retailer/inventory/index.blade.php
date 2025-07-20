@@ -28,14 +28,28 @@
                         <tr>
                             <th>Product</th>
                             <th>Quantity</th>
+                            <th>Min Stock</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($inventory as $item)
-                            <tr>
+                            @php
+                                $minStock = $item->product->min_stock_level ?? 10;
+                                $isLow = $item->quantity < $minStock;
+                            @endphp
+                            <tr @if($isLow) style="background-color: #fff3cd;" @endif>
                                 <td>{{ $item->product->name ?? 'N/A' }}</td>
                                 <td>{{ $item->quantity }}</td>
+                                <td>{{ $minStock }}</td>
+                                <td>
+                                    @if($isLow)
+                                        <span class="badge bg-warning text-dark">Low</span>
+                                    @else
+                                        <span class="badge bg-success">OK</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <a href="{{ route('retailer.inventory.edit', $item->id) }}" class="btn btn-sm btn-warning">Edit</a>
                                     <form action="{{ route('retailer.inventory.destroy', $item->id) }}" method="POST" style="display:inline-block;">
@@ -47,7 +61,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center">No inventory items found</td>
+                                <td colspan="5" class="text-center">No inventory items found</td>
                             </tr>
                         @endforelse
                     </tbody>

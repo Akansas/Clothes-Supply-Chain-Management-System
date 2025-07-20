@@ -9,11 +9,11 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Delivery;
 use App\Models\Inventory;
-use App\Models\QualityCheck;
 use App\Models\FacilityVisit;
 use App\Models\ProductionOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -27,25 +27,41 @@ class DashboardController extends Controller
         $roleCounts = $userCounts;
         $users = User::with('role', 'vendor')->get();
 
-        // Supply Chain Overview Statistics
+        // Supply Chain Overview Statistics - Using exact data structure from manufacturer dashboard
         $totalOrders = Order::count();
         $pendingOrders = Order::where('status', 'pending')->count();
         $completedOrders = Order::where('status', 'completed')->count();
+        
+        // Use exact data from manufacturer report
+        // Purchase Orders (from suppliers) - same logic as manufacturer dashboard
+        $purchaseOrderStatuses = ['pending', 'approved', 'rejected', 'delivered', 'cancelled'];
+        $purchaseOrdersStats = [];
+        foreach ($purchaseOrderStatuses as $status) {
+            $purchaseOrdersStats[$status] = Order::where('status', $status)->count();
+        }
+        $totalPurchaseOrders = array_sum($purchaseOrdersStats);
+        
+        // Retailer Orders (to retailers) - same logic as manufacturer dashboard
+        $retailerOrderStatuses = ['pending', 'approved', 'rejected', 'delivered', 'cancelled'];
+        $retailerOrdersStats = [];
+        foreach ($retailerOrderStatuses as $status) {
+            $retailerOrdersStats[$status] = ProductionOrder::whereNotNull('retailer_id')->where('status', $status)->count();
+        }
+        $totalRetailerOrders = array_sum($retailerOrdersStats);
         $totalProducts = Product::count();
         $activeProducts = Product::where('is_active', true)->count();
         $totalDeliveries = Delivery::count();
         $pendingDeliveries = Delivery::where('status', 'pending')->count();
-        $totalQualityChecks = QualityCheck::count();
-        $pendingQualityChecks = QualityCheck::whereNull('pass_fail')->count();
         $totalFacilityVisits = FacilityVisit::count();
         $scheduledVisits = FacilityVisit::where('status', 'scheduled')->count();
         $totalProductionOrders = ProductionOrder::count();
         $activeProductionOrders = ProductionOrder::whereIn('status', ['in_progress', 'pending'])->count();
+        // Use the calculated total from the breakdown above
+        $retailerOrders = $totalRetailerOrders;
 
         // Recent Activities
         $recentOrders = Order::with(['user', 'orderItems.product'])->latest()->take(5)->get();
         $recentDeliveries = Delivery::with(['order', 'driver'])->latest()->take(5)->get();
-        $recentQualityChecks = QualityCheck::with(['inspector', 'productionOrder.product'])->latest()->take(5)->get();
         $recentFacilityVisits = FacilityVisit::with(['inspector', 'vendor'])->latest()->take(5)->get();
 
         // Supply Chain Flow Data
@@ -82,7 +98,7 @@ class DashboardController extends Controller
             ],
             'inspectors' => [
                 'count' => $userCounts['inspector'] ?? 0,
-                'active_orders' => $pendingQualityChecks,
+                'active_orders' => 0, // No pending quality checks
                 'recent_activity' => 'Quality checks pending'
             ]
         ];
@@ -102,19 +118,21 @@ class DashboardController extends Controller
             'totalOrders',
             'pendingOrders',
             'completedOrders',
+            'purchaseOrdersStats',
+            'retailerOrdersStats',
+            'totalPurchaseOrders',
+            'totalRetailerOrders',
             'totalProducts',
             'activeProducts',
             'totalDeliveries',
             'pendingDeliveries',
-            'totalQualityChecks',
-            'pendingQualityChecks',
             'totalFacilityVisits',
             'scheduledVisits',
             'totalProductionOrders',
             'activeProductionOrders',
+            'retailerOrders',
             'recentOrders',
             'recentDeliveries',
-            'recentQualityChecks',
             'recentFacilityVisits',
             'supplyChainFlow'
         ));
@@ -126,7 +144,91 @@ class DashboardController extends Controller
     public function usersByRole($roleName)
     {
         $role = Role::where('name', $roleName)->firstOrFail();
-        $users = User::where('role_id', $role->id)->with(['orders', 'deliveries'])->get();
+        
+        if ($roleName === 'vendor') {
+            // For vendors, load vendor data and applications
+            $users = User::where('role_id', $role->id)
+                ->with(['vendor', 'vendor.applications', 'vendor.latestApplication'])
+                ->get();
+            
+            // Debug: Log the data being loaded
+            Log::info('Vendor users data:', [
+                'total_users' => $users->count(),
+                'users_with_vendor' => $users->filter(function($user) { return $user->vendor; })->count(),
+                'users_data' => $users->map(function($user) {
+                    return [
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'has_vendor' => $user->vendor ? 'yes' : 'no',
+                        'vendor_phone' => $user->vendor ? $user->vendor->phone : 'no vendor',
+                        'user_phone' => $user->phone,
+                        'latest_application' => $user->vendor && $user->vendor->latestApplication ? $user->vendor->latestApplication->status : 'no application'
+                    ];
+                })->toArray()
+            ]);
+        } elseif ($roleName === 'raw_material_supplier') {
+            // For raw material suppliers, load supplier data
+            $users = User::where('role_id', $role->id)
+                ->with(['rawMaterialSupplier'])
+                ->get();
+            
+            // Debug: Log the data being loaded
+            Log::info('Raw material supplier users data:', [
+                'total_users' => $users->count(),
+                'users_with_supplier' => $users->filter(function($user) { return $user->rawMaterialSupplier; })->count(),
+                'users_data' => $users->map(function($user) {
+                    return [
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'has_supplier' => $user->rawMaterialSupplier ? 'yes' : 'no',
+                        'supplier_phone' => $user->rawMaterialSupplier ? $user->rawMaterialSupplier->phone : 'no supplier',
+                        'user_phone' => $user->phone,
+                    ];
+                })->toArray()
+            ]);
+        } elseif ($roleName === 'manufacturer') {
+            // For manufacturers, load manufacturer data
+            $users = User::where('role_id', $role->id)
+                ->with(['manufacturer'])
+                ->get();
+            
+            // Debug: Log the data being loaded
+            Log::info('Manufacturer users data:', [
+                'total_users' => $users->count(),
+                'users_with_manufacturer' => $users->filter(function($user) { return $user->manufacturer; })->count(),
+                'users_data' => $users->map(function($user) {
+                    return [
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'has_manufacturer' => $user->manufacturer ? 'yes' : 'no',
+                        'manufacturer_phone' => $user->manufacturer ? $user->manufacturer->phone : 'no manufacturer',
+                        'user_phone' => $user->phone,
+                    ];
+                })->toArray()
+            ]);
+        } elseif ($roleName === 'retailer') {
+            // For retailers, load retail store data
+            $users = User::where('role_id', $role->id)
+                ->with(['managedRetailStore'])
+                ->get();
+            
+            // Debug: Log the data being loaded
+            Log::info('Retailer users data:', [
+                'total_users' => $users->count(),
+                'users_with_store' => $users->filter(function($user) { return $user->managedRetailStore; })->count(),
+                'users_data' => $users->map(function($user) {
+                    return [
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'has_store' => $user->managedRetailStore ? 'yes' : 'no',
+                        'store_phone' => $user->managedRetailStore ? $user->managedRetailStore->phone : 'no store',
+                        'user_phone' => $user->phone,
+                    ];
+                })->toArray()
+            ]);
+        } else {
+            $users = User::where('role_id', $role->id)->with(['orders', 'deliveries'])->get();
+        }
         
         return view('admin.users-by-role', compact('role', 'users'));
     }
@@ -141,7 +243,6 @@ class DashboardController extends Controller
             'total_orders' => Order::count(),
             'total_products' => Product::count(),
             'total_deliveries' => Delivery::count(),
-            'total_quality_checks' => QualityCheck::count(),
             'total_facility_visits' => FacilityVisit::count(),
             'total_production_orders' => ProductionOrder::count(),
         ];
@@ -157,7 +258,6 @@ class DashboardController extends Controller
         $supplyChainData = [
             'orders_by_status' => Order::selectRaw('status, count(*) as count')->groupBy('status')->get(),
             'deliveries_by_status' => Delivery::selectRaw('status, count(*) as count')->groupBy('status')->get(),
-            'quality_checks_by_status' => QualityCheck::selectRaw('pass_fail as status, count(*) as count')->groupBy('pass_fail')->get(),
             'production_orders_by_status' => ProductionOrder::selectRaw('status, count(*) as count')->groupBy('status')->get(),
         ];
 
@@ -182,12 +282,15 @@ class DashboardController extends Controller
     public function stopImpersonate()
     {
         if (session()->has('impersonate')) {
-            Auth::logout();
-            session()->invalidate();
-            session()->regenerateToken();
+            $adminId = session('impersonate');
             session()->forget('impersonate');
-            return redirect()->route('logout'); // Force a full logout and require login
+            
+            // Log back in as the admin
+            Auth::loginUsingId($adminId);
+            
+            return redirect()->route('admin.dashboard')->with('success', 'Impersonation stopped. You are now back to your admin account.');
         }
-        return redirect()->route('logout');
+        
+        return redirect()->route('admin.dashboard')->with('error', 'No impersonation session found.');
     }
 } 

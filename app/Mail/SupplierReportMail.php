@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -8,16 +10,26 @@ class SupplierReportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $orders;
+    public $supplier;
+    public $inventory;
+    public $pendingOrders;
 
-    public function __construct($orders)
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($supplier, $inventory, $pendingOrders)
     {
-        $this->orders = $orders;
+        $this->supplier = $supplier;
+        $this->inventory = $inventory;
+        $this->pendingOrders = $pendingOrders;
     }
 
+    /**
+     * Build the message.
+     */
     public function build()
     {
-        return $this->subject('Your Purchase Orders for Today')
-                    ->view('emails.supplier_report');
- }
+        return $this->subject('Daily Supplier Report')
+            ->view('emails.supplier_report');
+    }
 }

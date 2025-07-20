@@ -16,7 +16,9 @@ class ProductController extends Controller
         $query = Product::with('manufacturer')
             ->where('is_active', true)
             ->where('type', 'finished_product')
-            ->whereNull('supplier_id');
+            ->whereNull('supplier_id')
+            ->whereNotNull('manufacturer_id') // Only show products with valid manufacturer
+            ->whereHas('manufacturer'); // Ensure the manufacturer relationship exists
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -28,7 +30,7 @@ class ProductController extends Controller
             $query->where('category', $request->category);
         }
         $products = $query->paginate(12);
-        $categories = Product::whereNotNull('manufacturer_id')->distinct()->pluck('category')->filter();
+        $categories = Product::whereNotNull('manufacturer_id')->whereHas('manufacturer')->distinct()->pluck('category')->filter();
         return view('retailer.products.browse', compact('products', 'categories'));
     }
 

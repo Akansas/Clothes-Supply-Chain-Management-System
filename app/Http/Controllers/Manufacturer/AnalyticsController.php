@@ -13,8 +13,8 @@ class AnalyticsController extends Controller
 {
     public function index()
     {
-        // --- Demand Forecasting (only MANIRAGABA BRIAN's delivered orders) ---
-        $orders = \App\Models\ProductionOrder::where('retailer_id', 20)
+        // --- Demand Forecasting (all retailers' delivered orders) ---
+        $orders = \App\Models\ProductionOrder::whereNotNull('retailer_id')
             ->where('status', 'delivered')
             ->whereNotNull('created_at')
             ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')

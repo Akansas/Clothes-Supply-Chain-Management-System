@@ -129,33 +129,6 @@
 
     <!-- Quality and Production -->
     <div class="row mb-4">
-        <!-- Quality Checks by Status -->
-        <div class="col-xl-6 col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Quality Checks by Status</h6>
-                </div>
-                <div class="card-body">
-                    @if($supplyChainData['quality_checks_by_status']->count() > 0)
-                        @foreach($supplyChainData['quality_checks_by_status'] as $qualityStatus)
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <strong>{{ ucfirst($qualityStatus->status) }}</strong>
-                            </div>
-                            <div class="text-right">
-                                <span class="badge badge-{{ $qualityStatus->status == 'passed' ? 'success' : ($qualityStatus->status == 'failed' ? 'danger' : 'warning') }}">
-                                    {{ $qualityStatus->count }}
-                                </span>
-                            </div>
-                        </div>
-                        @endforeach
-                    @else
-                        <p class="text-muted">No quality check data available</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
         <!-- Production Orders by Status -->
         <div class="col-xl-6 col-lg-6">
             <div class="card shadow mb-4">
@@ -204,12 +177,12 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('analytics.dashboard') }}" class="btn btn-outline-info w-100">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-info w-100">
                                 <i class="fas fa-chart-bar mr-2"></i>Analytics
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ route('orders.dashboard') }}" class="btn btn-outline-warning w-100">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-warning w-100">
                                 <i class="fas fa-shopping-cart mr-2"></i>Order Management
                             </a>
                         </div>

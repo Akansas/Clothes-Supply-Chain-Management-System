@@ -13,7 +13,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Manufacturer</label>
-                    <input type="text" class="form-control" value="{{ $product->manufacturer->name ?? 'Unknown' }}" disabled>
+                    <input type="text" class="form-control" value="{{ $product->manufacturer->name ?? 'Not Available' }}" disabled>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Quantity</label>

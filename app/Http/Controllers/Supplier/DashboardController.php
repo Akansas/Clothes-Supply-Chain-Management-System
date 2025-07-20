@@ -31,10 +31,18 @@ class DashboardController extends Controller
             'total_materials' => Product::where('supplier_id', $supplier->id)->count(),
             'active_orders' => Order::where('supplier_id', $supplier->id)
                 ->whereIn('status', ['pending', 'confirmed'])->count(),
-            'completed_deliveries' => Delivery::where('supplier_id', $supplier->id)
+            'completed_deliveries' => Order::where('supplier_id', $supplier->id)
                 ->where('status', 'delivered')->count(),
+            'approved_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'approved')->count(),
+            'cancelled_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'cancelled')->count(),
+            'rejected_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'rejected')->count(),
             'total_revenue' => Order::where('supplier_id', $supplier->id)
                 ->where('status', 'delivered')->sum('total_amount'),
+            'total_cost' => Product::where('supplier_id', $supplier->id)
+                ->sum(DB::raw('price * stock_quantity')),
             'monthly_orders' => Order::where('supplier_id', $supplier->id)
                 ->whereMonth('created_at', now()->month)->count(),
             'pending_deliveries' => Delivery::where('supplier_id', $supplier->id)

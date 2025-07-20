@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Task
+ *
+ * @property int $assigned_count
+ */
 class Task extends Model
 {
     use HasFactory;

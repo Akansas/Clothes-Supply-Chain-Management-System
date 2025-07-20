@@ -52,28 +52,26 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
+        // Inventory collection
+        $inventory = Inventory::where('retail_store_id', $retailStore->id)->with('product')->get();
+        // Low stock items using min_stock_level or 10
+        $lowStockItems = $inventory->filter(function($item) {
+            $minStock = $item->product->min_stock_level ?? 10;
+            return $item->quantity < $minStock;
+        })->take(5);
+        $stats['low_stock_products'] = $lowStockItems->count();
+
         // Recent orders
         $recentOrders = Order::where('retailer_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        // Low stock items
-        $lowStockItems = Inventory::where('retail_store_id', $retailStore->id)
-            ->where('quantity', '<', 10)
-            ->with('product')
-            ->limit(5)
-            ->get();
-
-        // Retailer Analytics
-        // Removed RetailerAnalyticsService and related analytics variables
-
         return view('retailer.dashboard', compact(
             'stats',
             'recentOrders',
             'lowStockItems',
             'retailStore'
-            // Removed: 'salesInsights', 'inventoryIntelligence', 'customerBehavior', 'pricingPromotion', 'omnichannelEngagement', 'actionableAlerts', 'marketTrends'
         ));
     }
 
@@ -192,29 +190,6 @@ class DashboardController extends Controller
     }
 
     /**
-     * Update inventory quantity
-     */
-    public function updateInventory(Request $request, $id)
-    {
-        $user = auth()->user();
-        $retailStore = $user->managedRetailStore;
-        
-        $inventory = Inventory::where('retail_store_id', $retailStore->id)->findOrFail($id);
-        
-        $request->validate([
-            'quantity' => 'required|integer|min:0',
-            'reorder_level' => 'required|integer|min:0',
-        ]);
-
-        $inventory->update([
-            'quantity' => $request->quantity,
-            'reorder_level' => $request->reorder_level,
-        ]);
-
-        return redirect()->route('retailer.inventory')->with('success', 'Inventory updated successfully!');
-    }
-
-    /**
      * Add new product to inventory
      */
     public function addToInventory(Request $request)
@@ -253,9 +228,94 @@ class DashboardController extends Controller
     public function analytics()
     {
         $user = auth()->user();
-        // Removed RetailerAnalyticsService and related analytics variables
+        $retailStore = $user->managedRetailStore;
 
-        return view('retailer.analytics'); // No compact()
+        if (!$retailStore) {
+            return redirect()->route('retailer.profile.create')->with('error', 'Please complete your retail store profile first.');
+        }
+
+        // Order Analytics
+        $orderAnalytics = [
+            'total_orders' => Order::where('retailer_id', $user->id)->count(),
+            'orders_by_status' => Order::where('retailer_id', $user->id)
+                ->selectRaw('status, count(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray(),
+            'monthly_orders' => Order::where('retailer_id', $user->id)
+                ->whereMonth('created_at', now()->month)
+                ->count(),
+            'total_revenue' => Order::where('retailer_id', $user->id)
+                ->where('status', '!=', 'cancelled')
+                ->sum('total_amount'),
+            'avg_order_value' => Order::where('retailer_id', $user->id)
+                ->where('status', '!=', 'cancelled')
+                ->avg('total_amount') ?? 0,
+            'recent_orders' => Order::where('retailer_id', $user->id)
+                ->with(['orderItems.product'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get(),
+        ];
+
+        // Inventory Analytics (use min_stock_level logic for low stock)
+        $inventory = Inventory::where('retail_store_id', $retailStore->id)->with('product')->get();
+        $lowStockItems = $inventory->filter(function($item) {
+            $minStock = $item->product->min_stock_level ?? 10;
+            return $item->quantity < $minStock;
+        });
+        $inventoryAnalytics = [
+            'total_products' => $inventory->count(),
+            'low_stock_products' => $lowStockItems->count(),
+            'out_of_stock' => $inventory->where('quantity', 0)->count(),
+            'total_inventory_value' => $inventory->sum(function($item) {
+                return ($item->quantity * ($item->product->price ?? 0));
+            }),
+            'top_products' => $inventory->sortByDesc('quantity')->take(5),
+            'low_stock_items' => $lowStockItems->take(5),
+        ];
+
+        // Performance Metrics
+        $performanceMetrics = [
+            'order_completion_rate' => $orderAnalytics['total_orders'] > 0 
+                ? round((($orderAnalytics['total_orders'] - ($orderAnalytics['orders_by_status']['cancelled'] ?? 0)) / $orderAnalytics['total_orders']) * 100, 1)
+                : 0,
+            'avg_delivery_time' => Order::where('retailer_id', $user->id)
+                ->whereNotNull('delivered_at')
+                ->whereNotNull('created_at')
+                ->get()
+                ->avg(function($order) {
+                    return $order->created_at->diffInDays($order->delivered_at);
+                }) ?? 0,
+            'customer_satisfaction' => 85, // Placeholder - could be calculated from reviews/ratings
+        ];
+
+        // Monthly Trends
+        $monthlyTrends = Order::where('retailer_id', $user->id)
+            ->whereYear('created_at', now()->year)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count, SUM(total_amount) as revenue')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        // Add debugging information
+        \Log::info('Retailer Analytics Data:', [
+            'user_id' => $user->id,
+            'retail_store_id' => $retailStore->id,
+            'order_analytics' => $orderAnalytics,
+            'inventory_analytics' => $inventoryAnalytics,
+            'performance_metrics' => $performanceMetrics,
+            'monthly_trends' => $monthlyTrends->toArray(),
+        ]);
+
+        return view('retailer.analytics', compact(
+            'orderAnalytics',
+            'inventoryAnalytics', 
+            'performanceMetrics',
+            'monthlyTrends',
+            'retailStore'
+        ));
     }
 
     /**
@@ -408,7 +468,10 @@ class DashboardController extends Controller
         // Find or create product
         $product = \App\Models\Product::firstOrCreate(
             ['name' => $request->product_name],
-            ['is_active' => true]
+            [
+                'is_active' => true,
+                'sku' => strtoupper('SKU-' . uniqid())
+            ]
         );
         // Find or create inventory
         $inventory = \App\Models\Inventory::firstOrNew([
@@ -445,9 +508,15 @@ class DashboardController extends Controller
         $inventory = \App\Models\Inventory::where('retail_store_id', $retailStore->id)->findOrFail($id);
         $request->validate([
             'quantity' => 'required|integer|min:0',
+            'min_stock_level' => 'required|integer|min:0',
         ]);
         $inventory->quantity = $request->quantity;
         $inventory->save();
+        // Update min_stock_level on the product
+        if ($inventory->product) {
+            $inventory->product->min_stock_level = $request->min_stock_level;
+            $inventory->product->save();
+        }
         return redirect()->route('retailer.inventory')->with('success', 'Inventory updated!');
     }
 
