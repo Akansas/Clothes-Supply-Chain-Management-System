@@ -35,6 +35,14 @@
                             <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity', $quantity) }}" min="0" required>
                         </div>
                         <div class="mb-3">
+                            <label for="min_stock_level" class="form-label">Min Stock Level</label>
+                            <input type="number" class="form-control" id="min_stock_level" name="min_stock_level" min="0" value="{{ old('min_stock_level', $product->min_stock_level ?? 500) }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Update</label>
+                            <input type="text" class="form-control" id="reason" name="reason" value="{{ old('reason') }}">
+                        </div>
+                        <div class="mb-3">
                             <label for="image" class="form-label">Product Image</label>
                             <input type="file" class="form-control" id="image" name="image" accept="image/*">
                             @if($product->image)

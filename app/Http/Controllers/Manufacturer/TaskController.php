@@ -170,23 +170,84 @@ class TaskController extends Controller
     // Workforce distribution report
     public function report(Request $request)
     {
-        $shift = $request->input('shift', 'Morning');
-        $date = $request->input('date', Carbon::now()->toDateString());
-        $centers = SupplyCenter::all();
+        $shift = $request->input('shift', '');
+        $date = $request->input('date', \Illuminate\Support\Carbon::now()->toDateString());
         $tasks = Task::with('center')->get();
-        $report = [];
-        foreach ($centers as $center) {
-            $centerTasks = $tasks->where('center_id', $center->id);
-            foreach ($centerTasks as $task) {
-                $assignedWorkers = $task->assigned_count;
-                $report[] = [
-                    'center' => $center->name,
-                    'task' => $task->name,
-                    'skill' => $task->required_skill,
-                    'assigned_workers' => $assignedWorkers,
-                ];
-            }
+        $workers = $shift ? Worker::where('shift', $shift)->get() : Worker::all();
+        $taskSlots = [];
+        foreach ($tasks as $task) {
+            $taskSlots[$task->id] = [
+                'remaining' => $task->quantity,
+                'task' => $task,
+            ];
         }
-        return view('manufacturer.tasks.report', compact('report', 'shift', 'date'));
+        $results = [];
+        foreach ($workers as $worker) {
+            $assignedTask = null;
+            foreach ($taskSlots as $taskId => $slot) {
+                $task = $slot['task'];
+                if (
+                    $slot['remaining'] > 0 &&
+                    $worker->skill === $task->required_skill &&
+                    $worker->shift === ($task->shift ?? $worker->shift)
+                ) {
+                    $assignedTask = $task;
+                    $taskSlots[$taskId]['remaining']--;
+                    break;
+                }
+            }
+            $results[] = [
+                'worker' => $worker->name,
+                'skill' => $worker->skill,
+                'task' => $assignedTask ? $assignedTask->name : 'Unassigned',
+                'shift' => $worker->shift,
+                'center' => $assignedTask && $assignedTask->center ? $assignedTask->center->name : ($assignedTask ? 'N/A' : ''),
+                'status' => $assignedTask ? 'Assigned' : 'Unassigned',
+            ];
+        }
+        return view('manufacturer.tasks.report', compact('results', 'shift', 'date'));
+    }
+
+    // Workforce distribution report PDF export
+    public function reportPdf(Request $request)
+    {
+        $shift = $request->input('shift', '');
+        $date = $request->input('date', \Illuminate\Support\Carbon::now()->toDateString());
+        $tasks = \App\Models\Task::with('center')->get();
+        $workers = $shift ? \App\Models\Worker::where('shift', $shift)->get() : \App\Models\Worker::all();
+        $taskSlots = [];
+        foreach ($tasks as $task) {
+            $taskSlots[$task->id] = [
+                'remaining' => $task->quantity,
+                'task' => $task,
+            ];
+        }
+        $results = [];
+        foreach ($workers as $worker) {
+            $assignedTask = null;
+            foreach ($taskSlots as $taskId => $slot) {
+                $task = $slot['task'];
+                if (
+                    $slot['remaining'] > 0 &&
+                    $worker->skill === $task->required_skill &&
+                    $worker->shift === ($task->shift ?? $worker->shift)
+                ) {
+                    $assignedTask = $task;
+                    $taskSlots[$taskId]['remaining']--;
+                    break;
+                }
+            }
+            $results[] = [
+                'worker' => $worker->name,
+                'skill' => $worker->skill,
+                'task' => $assignedTask ? $assignedTask->name : 'Unassigned',
+                'shift' => $worker->shift,
+                'center' => $assignedTask && $assignedTask->center ? $assignedTask->center->name : ($assignedTask ? 'N/A' : ''),
+                'status' => $assignedTask ? 'Assigned' : 'Unassigned',
+            ];
+        }
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('manufacturer.tasks.report_pdf', compact('results', 'shift', 'date'));
+        return $pdf->download('workforce_auto_assign_report_' . $date . '_' . ($shift ?: 'All') . '.pdf');
     }
 }

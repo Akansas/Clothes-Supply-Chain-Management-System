@@ -65,12 +65,19 @@
                                         <th>Description</th>
                                         <th>Price</th>
                                         <th>Stock</th>
+                                        <th>Min Stock</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($finishedProducts as $product)
-                                    <tr>
+                                    @php
+                                        $stock = $product->inventory->quantity ?? 0;
+                                        $minStock = $product->min_stock_level ?? 500;
+                                        $isLow = $stock < $minStock;
+                                    @endphp
+                                    <tr @if($isLow) style="background-color: #fff3cd;" @endif>
                                         <td>
                                             @if($product->image)
                                                 <img src="{{ asset('storage/' . $product->image) }}" alt="Image" style="max-width: 60px;">
@@ -82,7 +89,15 @@
                                         <td>{{ $product->category ?? '-' }}</td>
                                         <td>{{ $product->description }}</td>
                                         <td>{{ $product->price ? ('$' . number_format($product->price, 2)) : '-' }}</td>
-                                        <td>{{ $product->inventory->quantity ?? 0 }}</td>
+                                        <td>{{ $stock }}</td>
+                                        <td>{{ $minStock }}</td>
+                                        <td>
+                                            @if($isLow)
+                                                <span class="badge bg-warning text-dark">Low</span>
+                                            @else
+                                                <span class="badge bg-success">OK</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <a href="{{ route('manufacturer.products.edit', $product->id) }}" class="btn btn-sm btn-primary">Edit</a>
                                             <form action="{{ route('manufacturer.products.destroy', $product->id) }}" method="POST" style="display:inline-block;">

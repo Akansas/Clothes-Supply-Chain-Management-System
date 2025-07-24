@@ -30,6 +30,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::middleware(['auth'])->prefix('supplier')->name('supplier.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Supplier\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Supplier\ChatController::class, 'send'])->name('chat.send');
+});
+
+Route::middleware(['auth'])->prefix('manufacturer')->name('manufacturer.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Manufacturer\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Manufacturer\ChatController::class, 'send'])->name('chat.send');
+});
+
+Route::middleware(['auth'])->prefix('retailer')->name('retailer.')->group(function () {
+    Route::get('/chat/{partner}', [App\Http\Controllers\Retailer\ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [App\Http\Controllers\Retailer\ChatController::class, 'send'])->name('chat.send');
+});
+
+
 // Custom registration routes
 Route::get('/register', [CustomRegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [CustomRegisterController::class, 'register']);
@@ -176,6 +192,7 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::resource('tasks', App\Http\Controllers\Manufacturer\TaskController::class);
     Route::post('tasks/{task}/assign', [App\Http\Controllers\Manufacturer\TaskController::class, 'assign'])->name('tasks.assign');
     Route::get('workforce-report', [App\Http\Controllers\Manufacturer\TaskController::class, 'report'])->name('workforce.report');
+    Route::get('workforce-report/pdf', [App\Http\Controllers\Manufacturer\TaskController::class, 'reportPdf'])->name('workforce.report.pdf');
     // Inventory Management
     // Raw Material CRUD
     // (Removed legacy/duplicate raw material CRUD routes for manufacturer inventory)
@@ -199,6 +216,9 @@ Route::middleware(['auth', 'role:manufacturer'])->prefix('manufacturer')->group(
     Route::get('inventory/adjustments/create', [App\Http\Controllers\Manufacturer\InventoryController::class, 'showAdjustmentForm'])->name('inventory.adjustments.create');
     Route::post('inventory/adjustments', [App\Http\Controllers\Manufacturer\InventoryController::class, 'storeAdjustment'])->name('inventory.adjustments.store');
     Route::get('inventory/adjustments', [App\Http\Controllers\Manufacturer\InventoryController::class, 'listAdjustments'])->name('inventory.adjustments.index');
+    
+    // Report Downloads
+    Route::get('/reports/download/{type}', [App\Http\Controllers\Manufacturer\ReportController::class, 'download'])->name('manufacturer.reports.download');
 });
 
 // Redirect old workers URLs to new workforce management
@@ -252,8 +272,11 @@ Route::prefix('retailer')->middleware(['auth', 'role:retailer'])->group(function
     Route::get('/retailer/inventory/create', [App\Http\Controllers\Retailer\DashboardController::class, 'createInventory'])->name('retailer.inventory.create');
     Route::post('/retailer/inventory', [App\Http\Controllers\Retailer\DashboardController::class, 'storeInventory'])->name('retailer.inventory.store');
     Route::get('/retailer/inventory/{id}/edit', [App\Http\Controllers\Retailer\DashboardController::class, 'editInventory'])->name('retailer.inventory.edit');
-    Route::put('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'updateInventory'])->name('retailer.inventory.update');
+    Route::put('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'retailerUpdateInventory'])->name('retailer.inventory.update');
     Route::delete('/retailer/inventory/{id}', [App\Http\Controllers\Retailer\DashboardController::class, 'destroyInventory'])->name('retailer.inventory.destroy');
+    
+    // Report Downloads
+    Route::get('/reports/download/{type}', [App\Http\Controllers\Retailer\ReportController::class, 'download'])->name('retailer.reports.download');
 });
 
 // Inventory Management Routes
@@ -306,12 +329,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/supply-chain-monitoring', [App\Http\Controllers\Admin\DashboardController::class, 'supplyChainMonitoring'])->name('admin.supply-chain-monitoring');
     Route::resource('user', UserController::class)->except(['create', 'store']);
     Route::post('/impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'impersonate'])->name('admin.impersonate');
-    Route::post('/stop-impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'stopImpersonate'])->name('admin.stopImpersonate');
+    
+    // Report Downloads
+    Route::get('/reports/download/{type}', [App\Http\Controllers\Admin\ReportController::class, 'download'])->name('admin.reports.download');
 });
 
-Route::get('/admin/stop-impersonate', function () {
-    return redirect('/admin/dashboard');
-});
+// Stop impersonation route - accessible to anyone who is impersonating
+Route::post('/admin/stop-impersonate', [App\Http\Controllers\Admin\DashboardController::class, 'stopImpersonate'])
+    ->name('admin.stopImpersonate')
+    ->middleware('auth');
 
 // Supplier Routes
 Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_supplier'])->group(function () {
@@ -364,6 +390,9 @@ Route::prefix('supplier')->middleware(['auth', 'role:supplier,raw_material_suppl
     Route::get('/supplier/reports', function () {
         return view('supplier.reports.index');
     })->name('supplier.reports')->middleware(['auth', 'role:supplier,raw_material_supplier']);
+    
+    // Report Downloads
+    Route::get('/reports/download/{type}', [App\Http\Controllers\Supplier\ReportController::class, 'download'])->name('supplier.reports.download');
     Route::get('/supplier/payments', function () {
         return view('supplier.payments.index');
     })->name('supplier.payments')->middleware(['auth', 'role:supplier,raw_material_supplier']);
@@ -413,6 +442,8 @@ Route::get('/debug-auth', function () {
 // Supplier Order Resource Route
 Route::resource('supplier/orders', App\Http\Controllers\Supplier\OrderController::class)->names('supplier.orders');
 
+Route::get('/chat', [App\Http\Controllers\ChatController::class, 'dashboard'])->name('chat.index');
+
 Route::get('/chat/dashboard', function () {
     return view('chat.dashboard');
 })->name('chat.dashboard')->middleware(['auth', 'role:admin']);
@@ -436,5 +467,12 @@ Route::middleware(['auth'])->group(function () {
 
 Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
 Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
+
+Route::get('/chat/with/{user}', [App\Http\Controllers\ChatController::class, 'with'])->name('chat.with');
+
+// Temporary debug route - remove after debugging
+Route::get('/debug-suppliers', function() {
+    return view('debug');
+});
 
 

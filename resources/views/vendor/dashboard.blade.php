@@ -24,7 +24,7 @@
           @else
             <span class="btn btn-outline-secondary btn-sm disabled">No Results</span>
           @endif
-          @if($latestApplication->status === 'rejected')
+          @if($latestApplication->status === 'rejected' || ($latestApplication->validation_results && collect(json_decode($latestApplication->validation_results, true))->contains('result', 'fail')))
             <a href="{{ route('vendor.applications.create') }}" class="btn btn-primary mt-3">Apply Again</a>
           @endif
         @else

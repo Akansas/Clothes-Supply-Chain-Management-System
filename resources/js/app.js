@@ -5,7 +5,7 @@
  */
 
 import './bootstrap';
-import { createApp } from 'vue';
+//import { createApp } from 'vue';
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -13,10 +13,10 @@ import { createApp } from 'vue';
  * to use in your application's views. An example is included for you.
  */
 
-import ExampleComponent from './components/ExampleComponent.vue';
-import ManufacturerChat from './components/ManufacturerChat.vue';
-import SupplierChat from './components/SupplierChat.vue';
-import RetailerChat from './components/RetailerChat.vue';
+//import ExampleComponent from './components/ExampleComponent.vue';
+//import ManufacturerChat from './components/ManufacturerChat.vue';
+//import SupplierChat from './components/SupplierChat.vue';
+//import RetailerChat from './components/RetailerChat.vue';
 
 const app = createApp({});
 app.component('example-component', ExampleComponent);
@@ -24,6 +24,11 @@ app.component('manufacturer-chat', ManufacturerChat);
 app.component('supplier-chat', SupplierChat);
 app.component('retailer-chat', RetailerChat);
 app.mount('#app');
+
+
+import Alpine from 'alpinejs'
+window.Alpine = Alpine
+Alpine.start()
 
 /**
  * The following block of code may be used to automatically register your

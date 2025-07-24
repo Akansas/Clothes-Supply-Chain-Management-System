@@ -44,7 +44,7 @@
                         <h5 class="card-title">{{ $product->name }}</h5>
                         <p class="card-text text-muted">{{ Str::limit($product->description, 100) }}</p>
                         <div class="mb-2">
-                            <small class="text-muted">Manufacturer: {{ $product->manufacturer->name ?? 'Unknown' }}</small>
+                            <small class="text-muted">Manufacturer: {{ $product->manufacturer->name ?? 'Not Available' }}</small>
                         </div>
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center mb-2">

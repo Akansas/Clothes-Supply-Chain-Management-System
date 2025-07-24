@@ -10,10 +10,9 @@ class Message extends Model
     use HasFactory;
 
     protected $fillable = [
-        'sender_id',
-        'receiver_id',
-        'message_text',
-        'read_at',
+        'user_id',
+        'body',
+        'conversation_id',
     ];
 
     public function sender()
@@ -24,5 +23,10 @@ class Message extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 }

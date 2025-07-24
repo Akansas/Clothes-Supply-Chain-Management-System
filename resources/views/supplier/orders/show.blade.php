@@ -36,6 +36,7 @@
                         <li><strong>Company:</strong> {{ $order->manufacturer->company_name ?? '-' }}</li>
                         <li><strong>Address:</strong> {{ $order->manufacturer->address ?? '-' }}</li>
                     </ul>
+                    <a href="{{ route('chat.with', ['user' => $order->manufacturer->user_id]) }}" class="btn btn-primary btn-sm mt-2">Message</a>
                 </div>
             </div>
             <div class="row mb-3">

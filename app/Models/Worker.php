@@ -10,7 +10,7 @@ class Worker extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'skill', 'shift', 'status'
+        'name', 'skill', 'shift', 'status', 'manufacturer_id'
     ];
 
     public function assignments()

@@ -96,12 +96,14 @@ class ProductController extends Controller
             'price' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:2048',
             'quantity' => 'required|integer|min:0',
+            'min_stock_level' => 'required|integer|min:0',
         ]);
         $data = [
             'name' => $request->name,
             'description' => $request->description,
             'category' => $request->category,
             'price' => $request->price,
+            'min_stock_level' => $request->min_stock_level,
         ];
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
@@ -117,7 +119,7 @@ class ProductController extends Controller
             ]);
         }
         // Always update or create the inventory record for the product
-        \App\Models\Inventory::updateOrCreate(
+        $inventory = \App\Models\Inventory::updateOrCreate(
             [
                 'product_id' => $product->id,
                 'warehouse_id' => $warehouse->id,
@@ -130,6 +132,17 @@ class ProductController extends Controller
                 'status' => 'active',
             ]
         );
+        $reason = $request->input('reason', '-');
+        // Log the change
+        \App\Models\InventoryChangeLog::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'item_type' => 'finished_product',
+            'old_quantity' => $product->inventory->quantity ?? 0,
+            'new_quantity' => $request->quantity,
+            'note' => $reason,
+            'change_type' => 'update',
+        ]);
         return redirect()->route('manufacturer.dashboard')->with('success', 'Product updated successfully.');
     }
 

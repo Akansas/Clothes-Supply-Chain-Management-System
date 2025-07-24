@@ -20,18 +20,7 @@
                             <h2 class="mb-1 welcome-title">Welcome, {{ isset($user) ? $user->name : ($supplier->contact_person ?? 'Supplier') }}</h2>
                             <p class="mb-0 opacity-75">Raw Material Supplier Dashboard - Supply Chain Management</p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <div class="d-flex justify-content-end">
-                                <div class="me-3">
-                                    <small class="opacity-75">Active Orders</small>
-                                    <h4 class="mb-0">{{ $stats['active_orders'] ?? 0 }}</h4>
-                                </div>
-                                <div>
-                                    <small class="opacity-75">Today's Shipments</small>
-                                    <h4 class="mb-0">{{ $stats['pending_deliveries'] ?? 0 }}</h4>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Removed the Active Orders and Today's Shipments section from the welcome card -->
                     </div>
                 </div>
             </div>
@@ -77,11 +66,11 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">In Transit</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['pending_deliveries'] ?? 0 }}</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Delivered Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['completed_deliveries'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -98,6 +87,68 @@
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New KPI Cards -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Approved Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['approved_orders'] ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-thumbs-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Cancelled Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['cancelled_orders'] ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Rejected Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['rejected_orders'] ?? 0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ban fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Inventory Value</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ number_format($stats['total_cost'] ?? 0, 2) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -162,9 +213,76 @@
         </div>
     </div>
 
+    <!-- Reports Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Daily Reports</h5>
+                    <div>
+                        <a href="{{ route('supplier.reports.download', ['type' => 'pdf']) }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-file-pdf me-1"></i>Download PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Inventory Summary -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-left-success">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success"><i class="fas fa-boxes me-2"></i>Inventory Summary</h6>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <small class="text-muted">Total Materials</small>
+                                            <div class="fw-bold">{{ $stats['total_materials'] ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-left-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary"><i class="fas fa-clipboard-list me-2"></i>Order Summary</h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Pending Orders</small>
+                                            <div class="fw-bold text-warning">{{ $stats['active_orders'] ?? 0 }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Delivered</small>
+                                            <div class="fw-bold text-success">{{ $stats['completed_deliveries'] ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Monthly Revenue</small>
+                                            <div class="fw-bold text-info">${{ number_format($stats['total_revenue'] ?? 0, 2) }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Inventory Value</small>
+                                            <div class="fw-bold text-dark">${{ number_format($stats['total_cost'] ?? 0, 2) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="row mt-4">
-        <div class="col-6 col-md-2 mb-3">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-md-4 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-boxes fa-2x text-success mb-3"></i>
@@ -174,7 +292,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2 mb-3">
+                <div class="col-md-4 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-clipboard-list fa-2x text-primary mb-3"></i>
@@ -184,17 +302,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <i class="fas fa-truck fa-2x text-warning mb-3"></i>
-                    <h6>Delivery Tracking</h6>
-                    <p class="text-muted small">Update delivery statuses</p>
-                    <a href="{{ route('supplier.deliveries.index') }}" class="btn btn-outline-warning btn-sm">Track</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-2 mb-3">
+                <div class="col-md-4 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-comments fa-2x text-secondary mb-3"></i>
@@ -203,38 +311,12 @@
                     <a href="{{ route('chat.index') }}" class="btn btn-outline-secondary btn-sm">Chat</a>
                 </div>
             </div>
-        </div>
-    </div>
-
-    @if(isset($conversations))
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Manufacturer Chat</h5>
-                </div>
-                <div class="card-body">
-                    @foreach($conversations as $conversation)
-                        <h6>Chat with: 
-                            @foreach($conversation->participants as $participant)
-                                @if($participant->id !== $user->id)
-                                    {{ $participant->name }}
-                                @endif
-                            @endforeach
-                        </h6>
-                        @php $editingMessageId = request('edit'); @endphp
-                        @include('chat._chat-partial', ['conversation' => $conversation, 'editingMessageId' => $editingMessageId])
-                    @endforeach
                 </div>
             </div>
         </div>
     </div>
-    @endif
-    <div class="row mb-4">
-        <div class="col-12">
-            <supplier-chat :user-id="{{ auth()->id() }}"></supplier-chat>
-        </div>
-    </div>
+
+    <!-- Remove Chat with Manufacturer section/message at the bottom -->
 </div>
 
 <!-- Modals -->
@@ -396,4 +478,25 @@
     </div>
 </div>
 
+<!-- Alpine Dropdown Chat Button with Partners -->
+<div x-data="{ open: false }" class="relative inline-block text-left">
+    <button @click="open = !open"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Chat with Manufacturers
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div x-show="open" @click.away="open = false"
+         x-transition
+         class="absolute z-50 mt-2 w-72 bg-white shadow-lg rounded-lg border border-gray-200">
+
+        <div class="px-4 py-2 border-b font-semibold text-gray-700">Manufacturers</div>
+        @forelse ($manufacturers as $manufacturer)
+            <a href="{{ route('supplier.chat.index', ['partner' => $manufacturer->id]) }}"
+               class="block px-4 py-2 text-sm text-gray-800 hover:bg-blue-100">
+                {{ $manufacturer->name }}
+            </a>
+        @empty
+            <div class="px-4 py-2 text-sm text-gray-400">No manufacturers</div>
+        @endforelse
 @endsection 

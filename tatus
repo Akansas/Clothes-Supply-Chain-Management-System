@@ -1,0 +1,66 @@
+* [33m035295a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m added ML analytics in manufacturer dashboard
+* [33me527126[m WIP: Save local changes before rebase
+* [33m5a334d8[m updates
+* [33m796b466[m added download pdf buttons to retailer and manufacturer dashboards
+* [33mc1430ee[m Fix manufacturer dashboard stock display, always sync inventory, add fix command, update warehouse fillable, and ignore compiled assets
+* [33mf99a5eb[m Add Analytics quick action to supplier dashboard
+* [33m9cb6865[m Remove all ML/analytics code, services, controllers, and routes. Update .gitignore to exclude build artifacts.
+*   [33mb76cde4[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[32m|[m[33m\[m  
+[32m|[m *   [33me6ec3c8[m Resolve merge conflicts
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m * [33mca5c562[m Redesign analytics sections on dashboard views
+[32m|[m * [35m|[m [33madddeb3[m Integrate ML for customer segmentation and demand prediction across all dashboards
+[32m|[m [35m|[m[35m/[m  
+[32m|[m * [33ma7a8e26[m Add cached Laravel package and service provider files
+[32m|[m *   [33mfedeed7[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[32m|[m [36m|[m[1;31m\[m  
+[32m|[m * [1;31m|[m [33ma35be61[m Add analytics sections to all dashboard views
+[32m|[m * [1;31m|[m   [33m5971ac9[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[32m|[m [1;32m|[m[1;33m\[m [1;31m\[m  
+[32m|[m * [1;33m\[m [1;31m\[m   [33m9bef779[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[32m|[m [1;34m|[m[1;35m\[m [1;33m\[m [1;31m\[m  
+[32m|[m * [1;35m|[m [1;33m|[m [1;31m|[m [33md97fbf3[m Add advanced analytics for admin, manufacturer, retailer, and supplier
+* [1;35m|[m [1;35m|[m [1;33m|[m [1;31m|[m [33mc6286b6[m Revised supplier manufacturer order processing logic
+[1;31m|[m [1;35m|[m[1;31m_[m[1;35m|[m[1;31m_[m[1;33m|[m[1;31m/[m  
+[1;31m|[m[1;31m/[m[1;35m|[m [1;35m|[m [1;33m|[m   
+* [1;35m|[m [1;35m|[m [1;33m|[m [33maa00c13[m updates
+[1;33m|[m [1;35m|[m[1;33m_[m[1;35m|[m[1;33m/[m  
+[1;33m|[m[1;33m/[m[1;35m|[m [1;35m|[m   
+* [1;35m|[m [1;35m|[m   [33m2e85c17[m Resolved merge conflicts after pulling from main.
+[1;36m|[m[1;35m\[m [1;35m\[m [1;35m\[m  
+[1;36m|[m [1;35m|[m [1;35m|[m[1;35m/[m  
+[1;36m|[m [1;35m|[m[1;35m/[m[1;35m|[m   
+[1;36m|[m * [1;35m|[m [33m3590ea0[m updated workforce management
+[1;36m|[m * [1;35m|[m [33m1a9165e[m added workforce distribution management
+[1;36m|[m * [1;35m|[m [33m7eeade6[m removed unsed user roles
+[1;36m|[m * [1;35m|[m [33m7551949[m updated welcoming dashboard
+[1;36m|[m * [1;35m|[m [33m2de3a8d[m updated vendor validation
+[1;36m|[m * [1;35m|[m [33m78eb753[m implemented vendor validation
+[1;36m|[m * [1;35m|[m   [33m1a17fab[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[1;36m|[m [32m|[m[33m\[m [1;35m\[m  
+[1;36m|[m [32m|[m * [1;35m\[m   [33m4486ed5[m scheduled report function
+[1;36m|[m [32m|[m [34m|[m[35m\[m [1;35m\[m  
+[1;36m|[m [32m|[m * [35m|[m [1;35m|[m [33meed52ed[m scheduled report functionality for all stakeholders
+[1;36m|[m [32m|[m [1;35m|[m [35m|[m[1;35m/[m  
+[1;36m|[m [32m|[m [1;35m|[m[1;35m/[m[35m|[m   
+[1;36m|[m * [1;35m|[m [35m|[m [33mf0e38fb[m ..
+[1;36m|[m [35m|[m [1;35m|[m[35m/[m  
+[1;36m|[m [35m|[m[35m/[m[1;35m|[m   
+[1;36m|[m * [1;35m|[m [33m91441e1[m deleted one messages table migration
+[1;36m|[m [1;35m|[m[1;35m/[m  
+[1;36m|[m * [33m8738102[m ..
+* [35m|[m [33m3ace47d[m WIP: Chat feature - supplier/manufacturer messaging
+[35m|[m[35m/[m  
+* [33mf16d4ef[m refreshed the db
+* [33md7081fe[m 1
+* [33m4a00505[m updated retailer dashboard
+* [33m40b057a[m updated manufacturer dashboard
+*   [33md9f2bce[m Merge branch 'main' of https://github.com/Akansas/Clothes-Supply-Chain-Management-System
+[36m|[m[1;31m\[m  
+[36m|[m * [33m6ea0f95[m Delivery Dashboard
+* [1;31m|[m [33m2f3f59d[m updaated supplier and manufacture interaction
+[1;31m|[m[1;31m/[m  
+* [33mf01e0cc[m first commit
+* [33m40254c5[m  We cleaned the repo; from now on, everyone should create their own branch, push it to GitHub, and make a pull request so others can review before merging to main. Remember to keep your main branch updated by running: git checkout main && git pull origin main. This will help us work together without messing up the project.
+* [33mab5e88d[m Here we go

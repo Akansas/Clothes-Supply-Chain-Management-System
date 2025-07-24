@@ -7,6 +7,7 @@ use App\Models\RawMaterialSupplier;
 use App\Models\Product;
 use App\Models\Manufacturer;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Order;
 use App\Models\Delivery;
 use Illuminate\Http\Request;
@@ -31,10 +32,18 @@ class DashboardController extends Controller
             'total_materials' => Product::where('supplier_id', $supplier->id)->count(),
             'active_orders' => Order::where('supplier_id', $supplier->id)
                 ->whereIn('status', ['pending', 'confirmed'])->count(),
-            'completed_deliveries' => Delivery::where('supplier_id', $supplier->id)
+            'completed_deliveries' => Order::where('supplier_id', $supplier->id)
                 ->where('status', 'delivered')->count(),
+            'approved_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'approved')->count(),
+            'cancelled_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'cancelled')->count(),
+            'rejected_orders' => Order::where('supplier_id', $supplier->id)
+                ->where('status', 'rejected')->count(),
             'total_revenue' => Order::where('supplier_id', $supplier->id)
                 ->where('status', 'delivered')->sum('total_amount'),
+            'total_cost' => Product::where('supplier_id', $supplier->id)
+                ->sum(DB::raw('price * stock_quantity')),
             'monthly_orders' => Order::where('supplier_id', $supplier->id)
                 ->whereMonth('created_at', now()->month)->count(),
             'pending_deliveries' => Delivery::where('supplier_id', $supplier->id)
@@ -76,6 +85,13 @@ class DashboardController extends Controller
         // Supplier Analytics
         // Removed SupplierAnalyticsService and related analytics variables
 
+       $manufacturerRole = Role::where('name', 'manufacturer')->first();
+        // Get all manufacturers as users with that role
+       $manufacturers = $manufacturerRole
+        ? User::where('role_id', $manufacturerRole->id)->get()
+        : collect();
+
+
         return view('supplier.dashboard', compact(
             'stats',
             'recentOrders',
@@ -84,7 +100,8 @@ class DashboardController extends Controller
             'supplier',
             'orders',
             'linkedManufacturers',
-            'user'
+            'user',
+            'manufacturers'
             // Removed: 'demandForecasting', 'leadTimeTracking', 'materialCostAnalytics', 'qualityControlAnalysis', 'clientSatisfaction', 'capacityPlanning'
         ));
     }

@@ -257,6 +257,7 @@ class User extends Authenticatable
     /**
      * Get the conversations for this user (all roles).
      */
+    /*
     public function conversations()
     {
         return $this->belongsToMany(Conversation::class, 'conversation_user');
@@ -279,4 +280,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\ProductionOrder::class, 'retailer_id');
     }
+
+    /**
+ * Get the chat messages sent by the user.
+ */
+public function sentMessages()
+{
+    return $this->hasMany(ChatMessage::class, 'sender_id');
+}
+
+/**
+ * Get the chat messages received by the user.
+ */
+public function receivedMessages()
+{
+    return $this->hasMany(ChatMessage::class, 'receiver_id');
+}  
+
+    public function chatConversationsAsManufacturer()
+    {
+        return $this->hasMany(ChatConversation::class, 'manufacturer_id');
+    }
+
+    public function chatConversationsAsSupplier()
+    {
+        return $this->hasMany(ChatConversation::class, 'supplier_id');
+    }
+
+    public function chatConversationsAsRetailer()
+    {
+        return $this->hasMany(ChatConversation::class, 'retailer_id');
+    }
+
 }

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Inventory;
 use App\Models\Manufacturer;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\RawMaterialSupplier;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
@@ -95,10 +96,10 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
         // Fetch conversations where the manufacturer is a participant
-        $conversations = $user->conversations()
-            ->with(['messages.user', 'participants'])
-            ->latest('updated_at')
-            ->get();
+        //$conversations = $user->conversations()
+          //  ->with(['messages.user', 'participants'])
+           // ->latest('updated_at')
+           // ->get();
         // Remove all code related to retailerOrders and retailer production orders management.
 
         // Remove ML integration and customer segmentation/forecasting
@@ -139,12 +140,23 @@ class DashboardController extends Controller
                 return ($order->product && $order->quantity) ? $order->product->price * $order->quantity : 0;
             });
 
+            $supplierRole = Role::where('name', 'raw_material_supplier')->first();
+        $suppliers = $supplierRole ? User::where('role_id', $supplierRole->id)->get() : collect();
+
+
+
+        // Get all retailer users
+        $retailerRole = Role::where('name', 'retailer')->first();
+        $retailers = $retailerRole ? User::where('role_id', $retailerRole->id)->get() : collect();
+
+
+
         return view('manufacturer.dashboard', compact(
             'stats',
             'recentOrders',
             'activeStages',
             'user',
-            'conversations',
+            //'conversations',
             'finishedProducts',
             'rawMaterials',
             'recentPurchaseOrders',
@@ -152,7 +164,9 @@ class DashboardController extends Controller
             'purchaseOrdersStats',
             'retailerOrdersStats',
             'totalCost',
-            'totalRevenue'
+            'totalRevenue',
+            'suppliers',
+            'retailers'
         ));
     }
 

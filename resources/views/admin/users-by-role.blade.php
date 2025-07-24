@@ -25,54 +25,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Users</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $users->where('is_active', true)->count() }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Orders</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $users->sum(function($user) { return $user->orders->count(); }) }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Recent Activity</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $users->where('updated_at', '>=', now()->subDays(7))->count() }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Users Table -->
@@ -90,11 +42,12 @@
                                     <tr>
                                         <th>Name</th>
                                         <th>Email</th>
-                                        <th>Phone</th>
+                                        @if($role->name !== 'manufacturer')
+                                            <th>Phone</th>
+                                        @endif
                                         <th>Status</th>
-                                        <th>Orders</th>
                                         <th>Joined</th>
-                                        <th>Actions</th>
+                                        <th>Impersonate</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -112,30 +65,75 @@
                                             </div>
                                         </td>
                                         <td>{{ $user->email }}</td>
-                                        <td>{{ $user->phone ?? 'N/A' }}</td>
+                                        @if($role->name !== 'manufacturer')
+                                            <td>
+                                                @if($role->name === 'vendor')
+                                                    @if($user->vendor && $user->vendor->phone)
+                                                        <span class="text-success">{{ $user->vendor->phone }}</span>
+                                                    @elseif($user->phone)
+                                                        <span class="text-info">{{ $user->phone }}</span>
+                                                    @else
+                                                        <span class="text-muted">No phone</span>
+                                                    @endif
+                                                @elseif($role->name === 'raw_material_supplier')
+                                                    @if($user->rawMaterialSupplier && $user->rawMaterialSupplier->phone)
+                                                        <span class="text-success">{{ $user->rawMaterialSupplier->phone }}</span>
+                                                    @elseif($user->phone)
+                                                        <span class="text-info">{{ $user->phone }}</span>
+                                                    @else
+                                                        <span class="text-muted">No phone</span>
+                                                    @endif
+                                                @elseif($role->name === 'retailer')
+                                                    @if($user->managedRetailStore && $user->managedRetailStore->phone)
+                                                        <span class="text-success">{{ $user->managedRetailStore->phone }}</span>
+                                                    @elseif($user->phone)
+                                                        <span class="text-info">{{ $user->phone }}</span>
+                                                    @else
+                                                        <span class="text-muted">No phone</span>
+                                                    @endif
+                                                @else
+                                                    {{ $user->phone ?? 'N/A' }}
+                                                @endif
+                                            </td>
+                                        @endif
                                         <td>
-                                            @if($user->is_active)
-                                                <span class="badge badge-success">Active</span>
+                                            @if($role->name === 'vendor')
+                                                @if($user->vendor)
+                                                    @php
+                                                        $latestApplication = $user->vendor->latestApplication;
+                                                        $status = $latestApplication ? $latestApplication->status : 'no_application';
+                                                    @endphp
+                                                                                                    @if($status === 'approved')
+                                                    <span class="badge bg-success text-white">Validated</span>
+                                                @elseif($status === 'pending')
+                                                    <span class="badge bg-warning text-dark">Pending Validation</span>
+                                                @elseif($status === 'validating')
+                                                    <span class="badge bg-info text-white">Validating</span>
+                                                @elseif($status === 'rejected')
+                                                    <span class="badge bg-danger text-white">Rejected</span>
+                                                @else
+                                                    <span class="badge bg-secondary text-white">No Application</span>
+                                                @endif
+                                                @else
+                                                    <span class="badge bg-secondary text-white">No Profile</span>
+                                                @endif
                                             @else
-                                                <span class="badge badge-danger">Inactive</span>
+                                                @if($user->is_active)
+                                                    <span class="badge bg-success text-white">Active</span>
+                                                @else
+                                                    <span class="badge bg-danger text-white">Inactive</span>
+                                                @endif
                                             @endif
                                         </td>
+                                        <td>{{ $user->created_at->format('M d, Y H:i') }}</td>
                                         <td>
-                                            <span class="badge badge-info">{{ $user->orders->count() }}</span>
-                                        </td>
-                                        <td>{{ $user->created_at->format('M d, Y') }}</td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="#" class="btn btn-sm btn-outline-primary" title="View Profile">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Deactivate">
-                                                    <i class="fas fa-ban"></i>
+                                            <form method="POST" action="{{ route('admin.impersonate') }}" style="display: inline;">
+                                                @csrf
+                                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-info" title="Impersonate User">
+                                                    <i class="fas fa-user-secret"></i> Impersonate
                                                 </button>
-                                            </div>
+                                            </form>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -154,40 +152,7 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-tachometer-alt mr-2"></i>Main Dashboard
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('admin.system-overview') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-chart-line mr-2"></i>System Overview
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('admin.supply-chain-monitoring') }}" class="btn btn-outline-info w-100">
-                                <i class="fas fa-network-wired mr-2"></i>Supply Chain Monitor
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="#" class="btn btn-outline-warning w-100">
-                                <i class="fas fa-user-plus mr-2"></i>Add New User
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <style>
@@ -198,6 +163,30 @@
 .text-primary { color: #4e73df !important; }
 .text-success { color: #1cc88a !important; }
 .text-info { color: #36b9cc !important; }
+
+/* Ensure badges are always visible */
+.badge {
+    display: inline-block !important;
+    padding: 0.35em 0.65em !important;
+    font-size: 0.75em !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    vertical-align: baseline !important;
+    border-radius: 0.375rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Bootstrap 5 badge colors */
+.bg-success { background-color: #198754 !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-info { background-color: #0dcaf0 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-secondary { background-color: #6c757d !important; }
+.text-white { color: #fff !important; }
+.text-dark { color: #212529 !important; }
 .text-warning { color: #f6c23e !important; }
 .avatar-sm {
     width: 32px;
