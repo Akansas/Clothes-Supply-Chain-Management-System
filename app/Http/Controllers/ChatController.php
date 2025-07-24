@@ -25,27 +25,31 @@ class ChatController extends Controller
         return view('chat.dashboard', compact('conversations'));
     }
 
-    public function show(Conversation $conversation)
+    public function dashboard()
+    {
+        $user = auth()->user();
+        $conversations = $user->conversations()->with(['participants', 'messages' => function($q) {
+            $q->latest()->limit(1);
+        }])->get();
+        return view('chat.dashboard', compact('conversations'));
+    }
+
+    public function show(\App\Models\Conversation $conversation)
     {
         $this->authorize('view', $conversation);
-        $conversation->load('messages.user', 'participants');
-        $conversation->other_user = $conversation->participants->where('id', '!=', auth()->id())->first();
+        $conversation->load(['messages.user', 'participants']);
         return view('chat.conversation', compact('conversation'));
     }
 
-    public function store(Request $request, Conversation $conversation)
+    public function store(\Illuminate\Http\Request $request, \App\Models\Conversation $conversation)
     {
         $this->authorize('update', $conversation);
-
-        $request->validate([
-            'body' => 'required|string',
-        ]);
-
+        $request->validate(['body' => 'required|string']);
         $conversation->messages()->create([
             'user_id' => auth()->id(),
             'body' => $request->body,
+            'conversation_id' => $conversation->id,
         ]);
-
         return back();
     }
 
@@ -165,5 +169,21 @@ class ChatController extends Controller
         $this->authorize('canChat', [User::class, $other]);
         broadcast(new \App\Events\UserTyping($user, $other))->toOthers();
         return response()->json(['status' => 'typing']);
+    }
+
+    public function with(\App\Models\User $user)
+    {
+        $me = auth()->user();
+        // Find or create a conversation with these two users
+        $conversation = \App\Models\Conversation::whereHas('participants', function($q) use ($me) {
+            $q->where('user_id', $me->id);
+        })->whereHas('participants', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->first();
+        if (!$conversation) {
+            $conversation = \App\Models\Conversation::create();
+            $conversation->participants()->attach([$me->id, $user->id]);
+        }
+        return redirect()->route('chat.show', $conversation);
     }
 }

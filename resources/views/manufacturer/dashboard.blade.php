@@ -526,13 +526,18 @@
 </div>
 
 <!-- Floating Chat with Supplier Card -->
+<<<<<<< HEAD
 <!--<div class="floating-chat-card" style="position: fixed; bottom: 30px; right: 30px; z-index: 1050; width: 70px; padding: 0; background: none; border: none; box-shadow: none;">
+=======
+<div class="floating-chat-card" style="position: fixed; bottom: 30px; right: 30px; z-index: 1050; width: 70px; padding: 0; background: none; border: none; box-shadow: none;">
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
     <div class="card text-center shadow-sm" style="border-radius: 50%; background: #007bff; color: #fff; padding: 0.5rem 0.5rem; border: none;">
         <div class="card-body p-2 d-flex flex-column align-items-center" style="padding: 0.5rem 0.5rem; background: transparent;">
             <i class="fas fa-comments mb-1" style="font-size: 2em; color: #fff;"></i>
             <a href="{{ route('chat.index') }}" class="btn btn-sm mt-1" style="background: #fff; color: #007bff; font-size: 0.85em; padding: 2px 10px; border-radius: 12px; border: none;">Chat</a>
         </div>
     </div>
+<<<<<<< HEAD
 </div>-->
 
 <!-- Floating New Message Button -->
@@ -542,6 +547,17 @@
 
 <!-- New Message Modal -->
 <!--<div class="modal fade" id="newMessageModal" tabindex="-1" aria-labelledby="newMessageModalLabel" aria-hidden="true">
+=======
+</div>
+
+<!-- Floating New Message Button -->
+<button type="button" class="btn btn-primary rounded-circle floating-chat-btn" data-bs-toggle="modal" data-bs-target="#newMessageModal" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; font-size: 1.5em; z-index: 9999; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+    <i class="fas fa-plus"></i>
+</button>
+
+<!-- New Message Modal -->
+<div class="modal fade" id="newMessageModal" tabindex="-1" aria-labelledby="newMessageModalLabel" aria-hidden="true">
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -552,6 +568,7 @@
         <div class="modal-body">
           <label for="contactSelect" class="form-label">Select Contact</label>
           <select class="form-select" id="contactSelect" name="user_id" required>
+<<<<<<< HEAD
             <option value="">Choose...</option>-->
             @php
                // $user = auth()->user();
@@ -564,11 +581,29 @@
                // }
             @endphp
             {{--@foreach($contacts as $contact)
+=======
+            <option value="">Choose...</option>
+            @php
+                $user = auth()->user();
+                if ($user->hasRole('manufacturer')) {
+                    $contacts = \App\Models\User::whereHas('role', function($q) { $q->where('name', 'raw_material_supplier'); })->where('id', '!=', $user->id)->get();
+                } elseif ($user->hasRole('raw_material_supplier')) {
+                    $contacts = \App\Models\User::whereHas('role', function($q) { $q->where('name', 'manufacturer'); })->where('id', '!=', $user->id)->get();
+                } else {
+                    $contacts = collect();
+                }
+            @endphp
+            @foreach($contacts as $contact)
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
                 <option value="{{ $contact->id }}">{{ $contact->name }} ({{ $contact->role->name }})</option>
             @endforeach
           </select>
         </div>
+<<<<<<< HEAD
         <!--<div class="modal-footer">
+=======
+        <div class="modal-footer">
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Start Chat</button>
         </div>
@@ -588,7 +623,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+<<<<<<< HEAD
 </script>-->
 <!-- End Floating Chat Button/Modal -->--}}
 
+=======
+</script>
+<!-- End Floating Chat Button/Modal -->
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
 @endsection 

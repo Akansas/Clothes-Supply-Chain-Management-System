@@ -68,6 +68,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+<<<<<<< HEAD
          // Fetch all manufacturers
          $manufacturerRole = Role::where('name', 'manufacturer')->first();
          $manufacturers = $manufacturerRole
@@ -75,12 +76,18 @@ class DashboardController extends Controller
           : collect();
    
 
+=======
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
         return view('retailer.dashboard', compact(
             'stats',
             'recentOrders',
             'lowStockItems',
+<<<<<<< HEAD
             'retailStore',
             'manufacturers'
+=======
+            'retailStore'
+>>>>>>> 6f55937ec84d76cf83ff2e5a4cd98cbd63576ba5
         ));
     }
 
