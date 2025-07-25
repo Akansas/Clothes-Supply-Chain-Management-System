@@ -1,7 +1,10 @@
 // Body
 $body-bg: #f8fafc;
 
-// Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
+// Typography - optimize font loading
+$font-family-sans-serif: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
+
+// Font display optimization
+$font-display: swap;

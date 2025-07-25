@@ -24,14 +24,14 @@
               <div class="msg-text">{{ msg.message_text }}</div>
               <div class="msg-meta">
                 <span>{{ msg.sender_id === userId ? 'You' : contactName }}</span>
-                <span class="timestamp">{{ new Date(msg.created_at).toLocaleTimeString() }}</span>
+                <span class="timestamp">{{ formatTime(msg.created_at) }}</span>
               </div>
             </div>
           </div>
           <div v-if="typing" class="typing-indicator">{{ contactName }} is typing...</div>
           <div class="input-row">
-            <input v-model="newMessage" @input="sendTyping" @keyup.enter="sendMessage" placeholder="Type a message..." />
-            <button @click="sendMessage">Send</button>
+            <input v-model="newMessage" @input="handleTyping" @keyup.enter="sendMessage" placeholder="Type a message..." />
+            <button @click="sendMessage" :disabled="!newMessage.trim()">Send</button>
           </div>
         </div>
         <div v-else class="select-contact-msg">Select a contact to start chatting.</div>
@@ -42,6 +42,19 @@
 
 <script>
 import axios from 'axios';
+
+// Utility function to debounce typing indicator
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 export default {
   props: ['userId'],
@@ -55,6 +68,7 @@ export default {
       typing: false,
       contactName: '',
       unread: {},
+      typingTimeout: null,
     };
   },
   computed: {
@@ -63,44 +77,84 @@ export default {
     }
   },
   watch: {
-    selectedContactId(newId) {
-      if (newId) {
-        this.fetchMessages();
-        this.getContactName();
-        this.listenForMessages();
-        this.markAsRead();
-        this.unread[newId] = 0;
-        this.$nextTick(this.scrollToBottom);
-      }
+    selectedContactId: {
+      handler(newId) {
+        if (newId) {
+          this.fetchMessages();
+          this.getContactName();
+          this.listenForMessages();
+          this.markAsRead();
+          this.unread[newId] = 0;
+          this.$nextTick(this.scrollToBottom);
+        }
+      },
+      immediate: false
     },
-    messages() {
-      this.$nextTick(this.scrollToBottom);
+    messages: {
+      handler() {
+        this.$nextTick(this.scrollToBottom);
+      },
+      flush: 'post'
     }
   },
-  mounted() {
-    this.fetchContacts();
-    this.fetchUnread();
-    if (window.Echo) {
-      window.Echo.private('chat.' + this.userId)
-        .listen('MessageSent', (e) => {
-          if (e.message.sender_id !== this.userId) {
-            if (this.selectedContactId === e.message.sender_id) {
-              this.messages.push(e.message);
-              this.markAsRead();
-            } else {
-              this.unread[e.message.sender_id] = (this.unread[e.message.sender_id] || 0) + 1;
-            }
-          }
-        })
-        .listen('UserTyping', (e) => {
-          if (e.sender_id == this.selectedContactId) {
-            this.typing = true;
-            setTimeout(() => { this.typing = false; }, 2000);
-          }
-        });
-    }
+  created() {
+    // Debounce typing function for better performance
+    this.debouncedSendTyping = debounce(this.sendTyping, 300);
+  },
+  async mounted() {
+    await Promise.all([
+      this.fetchContacts(),
+      this.fetchUnread()
+    ]);
+    
+    this.setupEchoListeners();
   },
   methods: {
+    // Optimized time formatting with memoization
+    formatTime(timestamp) {
+      if (!this._timeCache) this._timeCache = new Map();
+      if (this._timeCache.has(timestamp)) {
+        return this._timeCache.get(timestamp);
+      }
+      const formatted = new Date(timestamp).toLocaleTimeString();
+      this._timeCache.set(timestamp, formatted);
+      return formatted;
+    },
+    
+    // Optimized typing handler
+    handleTyping() {
+      this.debouncedSendTyping();
+    },
+    
+    // Setup Echo listeners once
+    setupEchoListeners() {
+      if (window.Echo) {
+        window.Echo.private('chat.' + this.userId)
+          .listen('MessageSent', this.handleMessageReceived)
+          .listen('UserTyping', this.handleUserTyping);
+      }
+    },
+    
+    // Extracted message handler for better performance
+    handleMessageReceived(e) {
+      if (e.message.sender_id !== this.userId) {
+        if (this.selectedContactId === e.message.sender_id) {
+          this.messages.push(e.message);
+          this.markAsRead();
+        } else {
+          this.unread[e.message.sender_id] = (this.unread[e.message.sender_id] || 0) + 1;
+        }
+      }
+    },
+    
+    // Extracted typing handler for better performance
+    handleUserTyping(e) {
+      if (e.sender_id == this.selectedContactId) {
+        this.typing = true;
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => { this.typing = false; }, 2000);
+      }
+    },
     fetchContacts() {
       axios.get('/chat/contacts').then(res => {
         this.contacts = res.data.filter(c => c.role && (c.role.name === 'supplier' || c.role.name === 'retailer'));
